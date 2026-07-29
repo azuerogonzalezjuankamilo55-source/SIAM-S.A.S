@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Crear Cuenta{% endblock %}
+{% block auth_content %}
+<div class="card shadow">
+    <div class="card-body p-4">
+        <div class="text-center mb-4">
+            <i class="bi bi-person-plus hero-icon display-3 text-primary"></i>
+            <h3 class="mt-2 fw-bold">Crear Cuenta</h3>
+            <p class="text-muted">Regístrate para gestionar tu taller</p>
+        </div>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                <label class="form-label">Nombre completo</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="nombre" class="form-control" placeholder="Tu nombre" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Correo electrónico</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-2">
+                <i class="bi bi-person-check me-1"></i> Registrarse
+            </button>
+        </form>
+        <p class="text-center mt-3 mb-0 small">
+            ¿Ya tienes cuenta?
+            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Inicia sesión</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+gsap.from('.card', { opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' });
+</script>
+{% endblock %}

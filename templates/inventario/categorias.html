@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Categorías{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Categorías de Inventario</h4>
+    <div>
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <a href="{{ url_for('inventario.crear_categoria') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nueva Categoría
+        </a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Ruta</th>
+                        <th>Categoría padre</th>
+                        <th>Descripción</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in categorias %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td><strong>{{ c.nombre }}</strong></td>
+                        <td><code>{{ c.path }}</code></td>
+                        <td>{{ c.padre.nombre if c.padre else "-" }}</td>
+                        <td>{{ c.descripcion or "-" }}</td>
+                        <td><span class="badge bg-info">{{ c.items|length }}</span></td>
+                        <td>
+                            <a href="{{ url_for('inventario.editar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{{ url_for('inventario.eliminar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar categoría {{ c.nombre }}?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Sin categorías registradas</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

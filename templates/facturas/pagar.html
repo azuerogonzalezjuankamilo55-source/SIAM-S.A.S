@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Pagar {{ factura.numero }}{% endblock %}
+{% block content %}
+<h4 class="mb-4">Registrar Pago - {{ factura.numero }}</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-primary h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-uppercase small">Total</h6>
+                <h2 class="mb-0">${{ "%.2f"|format(factura.total|float) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-success h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-uppercase small">Pagado</h6>
+                <h2 class="mb-0">${{ "%.2f"|format(factura.monto_pagado|float) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-danger h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-uppercase small">Saldo Pendiente</h6>
+                <h2 class="mb-0">${{ "%.2f"|format(factura.saldo_pendiente|float) }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.monto.label.text }}</label>
+                    {{ form.monto(class="form-control", placeholder="0.00", step="0.01") }}
+                    <small class="text-muted">Saldo pendiente: ${{ "%.2f"|format(factura.saldo_pendiente|float) }}</small>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.metodo_pago.label.text }}</label>
+                    {{ form.metodo_pago(class="form-select") }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.referencia.label.text }}</label>
+                    {{ form.referencia(class="form-control") }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.notas.label.text }}</label>
+                    {{ form.notas(class="form-control", rows=2) }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('facturas.ver', id=factura.id) }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const saldoPendiente = {{ factura.saldo_pendiente }};
+document.querySelector('[name="monto"]')?.addEventListener('input', function() {
+    if (parseFloat(this.value) > saldoPendiente) {
+        this.value = saldoPendiente.toFixed(2);
+    }
+});
+</script>
+{% endblock %}

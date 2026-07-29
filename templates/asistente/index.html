@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Asistente IA{% endblock %}
+{% block content %}
+<div class="d-flex flex-column h-100" style="min-height: calc(100vh - 120px);">
+    <h4 class="mb-3"><i class="bi bi-robot me-2"></i>Asistente IA</h4>
+
+    <div class="card flex-grow-1 d-flex flex-column" style="min-height: 0;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-chat-dots me-2"></i>Conversación</span>
+            <button id="btnLimpiar" class="btn btn-sm btn-outline-secondary" title="Limpiar conversación">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div id="chatBox" class="card-body overflow-auto" style="flex: 1; min-height: 0; max-height: 65vh;">
+            {% if historial %}
+            {% for msg in historial %}
+            <div class="d-flex mb-3 {{ 'justify-content-end' if msg.rol == 'usuario' else 'justify-content-start' }}">
+                <div class="px-3 py-2 rounded-3 {{ 'bg-primary text-white' if msg.rol == 'usuario' else 'bg-dark text-light' }}" style="max-width: 80%;">
+                    <div class="small" style="white-space: pre-wrap;">{{ msg.texto }}</div>
+                    <small class="opacity-50 d-block text-end mt-1" style="font-size: .65rem;">{{ msg.hora }}</small>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-robot fs-1 d-block mb-2"></i>
+                <p>¡Pregúntame lo que necesites!</p>
+            </div>
+            {% endif %}
+            <div id="typingIndicator" class="d-none mb-3">
+                <div class="px-3 py-2 rounded-3 bg-dark text-light d-inline-block">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Pensando...
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form id="chatForm" class="d-flex gap-2">
+                <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje..." autofocus>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i>
+                </button>
+            </form>
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-info chat-quick">¿Cuántos clientes hay?</button>
+                <button class="btn btn-sm btn-outline-info chat-quick">Stock bajo</button>
+                <button class="btn btn-sm btn-outline-info chat-quick">Servicios disponibles</button>
+                <button class="btn btn-sm btn-outline-info chat-quick">Ingresos hoy</button>
+                <button class="btn btn-sm btn-outline-info chat-quick">Ayuda</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function() {
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const mensaje = chatInput.value.trim();
+        if (!mensaje) return;
+        chatInput.value = '';
+        chatInput.disabled = true;
+        typingIndicator.classList.remove('d-none');
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        fetch('{{ url_for("assistant.ask") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+            body: JSON.stringify({ mensaje: mensaje })
+        })
+        .then(r => r.json())
+        .then(data => {
+            agregarMensaje('usuario', mensaje);
+            agregarMensaje('asistente', data.respuesta);
+        })
+        .catch(() => {
+            agregarMensaje('asistente', 'Ocurrió un error. Intenta de nuevo.');
+        })
+        .finally(() => {
+            typingIndicator.classList.add('d-none');
+            chatInput.disabled = false;
+            chatInput.focus();
+        });
+    });
+
+    function agregarMensaje(rol, texto) {
+        const ahora = new Date();
+        const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
+        const div = document.createElement('div');
+        div.className = 'd-flex mb-3 ' + (rol === 'usuario' ? 'justify-content-end' : 'justify-content-start');
+        div.innerHTML = `<div class="px-3 py-2 rounded-3 ${rol === 'usuario' ? 'bg-primary text-white' : 'bg-dark text-light'}" style="max-width: 80%;">
+            <div class="small" style="white-space: pre-wrap;">${escapeHtml(texto)}</div>
+            <small class="opacity-50 d-block text-end mt-1" style="font-size: .65rem;">${hora}</small>
+        </div>`;
+        chatBox.insertBefore(div, typingIndicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    document.querySelectorAll('.chat-quick').forEach(btn => {
+        btn.addEventListener('click', function() {
+            chatInput.value = this.textContent;
+            chatForm.dispatchEvent(new Event('submit'));
+        });
+    });
+
+    btnLimpiar.addEventListener('click', function() {
+        fetch('{{ url_for("assistant.clear") }}', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
+        .then(() => {
+            chatBox.querySelectorAll('.d-flex.mb-3').forEach(el => el.remove());
+            chatInput.focus();
+        });
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if vehiculo else "Nuevo" }} Vehículo{% endblock %}
+{% block content %}
+<h4 class="mb-4">{{ "Editar" if vehiculo else "Nuevo" }} Vehículo</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Cliente *</label>
+                    <select name="cliente_id" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        {% for c in clientes %}
+                        <option value="{{ c.id }}" {{ "selected" if vehiculo and vehiculo.cliente_id == c.id else "" }}>{{ c.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Placa *</label>
+                    <input type="text" name="placa" class="form-control" value="{{ vehiculo.placa if vehiculo else '' }}" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Marca *</label>
+                    <input type="text" name="marca" class="form-control" value="{{ vehiculo.marca if vehiculo else '' }}" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Modelo *</label>
+                    <input type="text" name="modelo" class="form-control" value="{{ vehiculo.modelo if vehiculo else '' }}" required>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Año</label>
+                    <input type="number" name="anio" class="form-control" value="{{ vehiculo.anio if vehiculo else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">VIN</label>
+                    <input type="text" name="vin" class="form-control" value="{{ vehiculo.vin if vehiculo else '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Color</label>
+                    <input type="text" name="color" class="form-control" value="{{ vehiculo.color if vehiculo else '' }}">
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

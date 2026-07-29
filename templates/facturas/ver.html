@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Factura {{ factura.numero }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Factura {{ factura.numero }}</h4>
+    <div>
+        <a href="{{ url_for('facturas.pdf', id=factura.id) }}" class="btn btn-primary" target="_blank">
+            <i class="bi bi-file-pdf"></i> Descargar PDF
+        </a>
+        {% if factura.estado != "pagado" and factura.estado != "anulado" %}
+        <a href="{{ url_for('facturas.pagar', id=factura.id) }}" class="btn btn-success">
+            <i class="bi bi-cash"></i> Registrar Pago
+        </a>
+        {% endif %}
+        <a href="{{ url_for('facturas.listar') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Total</h6>
+                <h2 class="text-primary mb-0">${{ "%.2f"|format(factura.total|float) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Pagado</h6>
+                <h2 class="text-success mb-0">${{ "%.2f"|format(factura.monto_pagado|float) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Saldo Pendiente</h6>
+                <h2 class="text-{{ 'danger' if factura.saldo_pendiente > 0 else 'success' }} mb-0">
+                    ${{ "%.2f"|format(factura.saldo_pendiente|float) }}
+                </h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Estado</h6>
+                <h3 class="mb-0">
+                    <span class="badge bg-{{ {
+                        'pendiente': 'warning',
+                        'parcial': 'info',
+                        'pagado': 'success',
+                        'anulado': 'danger'
+                    }[factura.estado_actualizado] }} fs-6">
+                        {{ factura.estado_actualizado|title }}
+                    </span>
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-info-circle"></i> Detalles</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Cliente:</strong> {{ factura.cita.cliente.nombre }}<br>
+                <small>{{ factura.cita.cliente.telefono or '' }}</small>
+            </div>
+            <div class="col-md-3">
+                <strong>Vehículo:</strong> {{ factura.cita.vehiculo.marca }} {{ factura.cita.vehiculo.modelo }}<br>
+                <small>Placa: {{ factura.cita.vehiculo.placa }}</small>
+            </div>
+            <div class="col-md-2">
+                <strong>Método:</strong> {{ factura.metodo_pago or "-" }}<br>
+                <strong>IVA:</strong> {{ factura.iva_porcentaje }}%
+            </div>
+            <div class="col-md-3">
+                <strong>Fecha:</strong> {{ factura.created_at.strftime('%d/%m/%Y %H:%M') }}<br>
+                {% if factura.orden_trabajo %}
+                <strong>OT:</strong> <a href="{{ url_for('ordenes_trabajo.ver', id=factura.orden_trabajo.id) }}">{{ factura.orden_trabajo.numero }}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% if factura.notas %}
+        <div class="mt-2">
+            <strong>Notas:</strong> {{ factura.notas }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h6 class="mb-0">Servicios</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th class="text-end">Precio Unit.</th>
+                        <th class="text-center">Cant.</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in factura.detalles %}
+                    <tr>
+                        <td>{{ d.servicio.nombre }}</td>
+                        <td class="text-end">${{ "%.2f"|format(d.precio_unitario|float) }}</td>
+                        <td class="text-center">{{ d.cantidad }}</td>
+                        <td class="text-end">${{ "%.2f"|format(d.subtotal|float) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><td colspan="3" class="text-end">Subtotal</td><td class="text-end">${{ "%.2f"|format(factura.subtotal|float) }}</td></tr>
+                    <tr><td colspan="3" class="text-end">IVA ({{ factura.iva_porcentaje }}%)</td><td class="text-end">${{ "%.2f"|format(factura.iva|float) }}</td></tr>
+                    {% if factura.descuento > 0 %}
+                    <tr><td colspan="3" class="text-end">Descuento</td><td class="text-end">-${{ "%.2f"|format(factura.descuento|float) }}</td></tr>
+                    {% endif %}
+                    <tr><td colspan="3" class="text-end"><strong>Total</strong></td><td class="text-end"><strong>${{ "%.2f"|format(factura.total|float) }}</strong></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-cash-stack"></i> Historial de Pagos</h6>
+        <span class="badge bg-secondary">{{ factura.pagos|length }} pago(s)</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Método</th>
+                        <th>Referencia</th>
+                        <th>Notas</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in factura.pagos %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.created_at.strftime('%d/%m/%Y %H:%M') if p.created_at else "-" }}</td>
+                        <td><strong>${{ "%.2f"|format(p.monto|float) }}</strong></td>
+                        <td>{{ p.metodo_pago_display }}</td>
+                        <td><code>{{ p.referencia or "-" }}</code></td>
+                        <td>{{ p.notas or "-" }}</td>
+                        <td>
+                            <a href="{{ url_for('facturas.eliminar_pago', pago_id=p.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este pago?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-3">Sin pagos registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

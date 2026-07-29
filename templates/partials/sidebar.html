@@ -1,0 +1,82 @@
+<nav class="sidebar d-flex flex-column p-3" aria-label="Navegación principal">
+    <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand text-decoration-none mb-4">
+        <i class="bi bi-gear-wide-connected fs-4 me-2" aria-hidden="true"></i>
+        <span class="fw-bold">SIAM</span>
+    </a>
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link">
+                <i class="bi bi-speedometer2 me-2" aria-hidden="true"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('assistant.index') }}" class="nav-link">
+                <i class="bi bi-robot me-2" aria-hidden="true"></i> Asistente IA
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('clientes.listar') }}" class="nav-link">
+                <i class="bi bi-people me-2" aria-hidden="true"></i> Clientes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('vehiculos.listar') }}" class="nav-link">
+                <i class="bi bi-truck me-2" aria-hidden="true"></i> Vehículos
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('servicios.listar') }}" class="nav-link">
+                <i class="bi bi-wrench me-2" aria-hidden="true"></i> Servicios
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('mecanicos.listar') }}" class="nav-link">
+                <i class="bi bi-person-gear me-2" aria-hidden="true"></i> Mecánicos
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('citas.listar') }}" class="nav-link">
+                <i class="bi bi-calendar-check me-2" aria-hidden="true"></i> Citas
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('ordenes_trabajo.listar') }}" class="nav-link">
+                <i class="bi bi-tools me-2" aria-hidden="true"></i> Órdenes de Trabajo
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('facturas.listar') }}" class="nav-link">
+                <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i> Facturas
+            </a>
+            <ul class="nav flex-column ms-3 mt-1 small">
+                <li class="nav-item">
+                    <a href="{{ url_for('facturas.configuracion') }}" class="nav-link py-0">
+                        <i class="bi bi-gear me-1"></i> Configuración
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('inventario.listar') }}" class="nav-link">
+                <i class="bi bi-box-seam me-2" aria-hidden="true"></i> Inventario
+            </a>
+            <ul class="nav flex-column ms-3 mt-1 small">
+                <li class="nav-item">
+                    <a href="{{ url_for('inventario.listar_categorias') }}" class="nav-link py-0">
+                        <i class="bi bi-tags me-1"></i> Categorías
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('inventario.alertas') }}" class="nav-link py-0">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Alertas
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <div class="mt-auto">
+        <a href="{{ url_for('auth.logout') }}" class="nav-link">
+            <i class="bi bi-box-arrow-left me-2" aria-hidden="true"></i> Cerrar sesión
+        </a>
+    </div>
+</nav>

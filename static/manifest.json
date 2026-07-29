@@ -1,0 +1,21 @@
+{
+  "name": "SIAM - Sistema Integral Automotriz",
+  "short_name": "SIAM",
+  "description": "Sistema de gestión para talleres mecánicos. Administra clientes, vehículos, servicios, citas, facturas e inventario.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#212529",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

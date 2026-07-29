@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: siam
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 4 --timeout 120 --access-logfile - --error-logfile - --log-level info
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        value: https://siam.onrender.com
+    healthCheckPath: /health

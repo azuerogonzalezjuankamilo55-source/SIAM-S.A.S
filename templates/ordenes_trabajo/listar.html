@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Órdenes de Trabajo{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Órdenes de Trabajo</h4>
+    <a href="{{ url_for('ordenes_trabajo.crear') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nueva OT
+    </a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>N° Orden</th>
+                        <th>Cliente</th>
+                        <th>Vehículo</th>
+                        <th>Mecánico</th>
+                        <th>Ingreso</th>
+                        <th>Entrega Est.</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ot in ordenes %}
+                    <tr>
+                        <td>{{ ot.id }}</td>
+                        <td class="fw-bold">{{ ot.numero }}</td>
+                        <td>{{ ot.cliente.nombre }}</td>
+                        <td>{{ ot.vehiculo.placa }} - {{ ot.vehiculo.marca }} {{ ot.vehiculo.modelo }}</td>
+                        <td>{{ ot.mecanico.nombre if ot.mecanico else "Sin asignar" }}</td>
+                        <td>{{ ot.fecha_ingreso }}</td>
+                        <td>{{ ot.fecha_estimada_entrega if ot.fecha_estimada_entrega else "-" }}</td>
+                        <td>
+                            <span class="badge bg-{{ {
+                                'recibido': 'secondary',
+                                'diagnostico': 'info',
+                                'esperando_repuestos': 'warning',
+                                'en_reparacion': 'primary',
+                                'listo_entrega': 'success',
+                                'entregado': 'dark',
+                            }[ot.estado] }}">
+                                {{ ot.estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('ordenes_trabajo.ver', id=ot.id) }}" class="btn btn-outline-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if ot.estado != "entregado" %}
+                                <a href="{{ url_for('ordenes_trabajo.editar', id=ot.id) }}" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Eliminar orden {{ ot.numero }}?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted">No hay órdenes de trabajo registradas</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

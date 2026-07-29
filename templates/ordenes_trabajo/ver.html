@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}OT {{ orden.numero }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Orden de Trabajo {{ orden.numero }}</h4>
+    <div class="btn-group">
+        <a href="{{ url_for('ordenes_trabajo.editar', id=orden.id) }}" class="btn btn-outline-warning">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información de la Orden</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="text-muted small">Cliente</label>
+                        <p class="fw-bold mb-0">{{ orden.cliente.nombre }}</p>
+                        {% if orden.cliente.telefono %}<small class="text-muted">{{ orden.cliente.telefono }}</small>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Vehículo</label>
+                        <p class="fw-bold mb-0">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
+                        <small class="text-muted">{{ orden.vehiculo.placa }}{% if orden.vehiculo.anio %} · {{ orden.vehiculo.anio }}{% endif %}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Mecánico Asignado</label>
+                        <p class="fw-bold mb-0">{{ orden.mecanico.nombre if orden.mecanico else "Sin asignar" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Fecha de Ingreso</label>
+                        <p class="fw-bold mb-0">{{ orden.fecha_ingreso }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Fecha Estimada de Entrega</label>
+                        <p class="fw-bold mb-0">{{ orden.fecha_estimada_entrega if orden.fecha_estimada_entrega else "No definida" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Estado Actual</label>
+                        <p class="mb-0">
+                            <span class="badge fs-6 bg-{{ {
+                                'recibido': 'secondary',
+                                'diagnostico': 'info',
+                                'esperando_repuestos': 'warning',
+                                'en_reparacion': 'primary',
+                                'listo_entrega': 'success',
+                                'entregado': 'dark',
+                            }[orden.estado] }}">
+                                {{ orden.estado_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% if orden.diagnostico_inicial %}
+                <hr>
+                <label class="text-muted small">Diagnóstico Inicial</label>
+                <p class="mb-0" style="white-space: pre-wrap;">{{ orden.diagnostico_inicial }}</p>
+                {% endif %}
+                {% if orden.observaciones %}
+                <hr>
+                <label class="text-muted small">Observaciones</label>
+                <p class="mb-0" style="white-space: pre-wrap;">{{ orden.observaciones }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if orden.estado in ("listo_entrega", "entregado") and not orden.facturas %}
+        <div class="card mb-3 border-success">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-receipt"></i> Facturación</h6>
+            </div>
+            <div class="card-body text-center">
+                <p class="mb-2">Generar factura para esta orden de trabajo</p>
+                <a href="{{ url_for('facturas.crear_desde_ot', ot_id=orden.id) }}" class="btn btn-success w-100">
+                    <i class="bi bi-file-earmark-text"></i> Generar Factura
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        {% if orden.facturas %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Facturas Asociadas</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for f in orden.facturas %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('facturas.ver', id=f.id) }}">{{ f.numero }}</a>
+                        <span class="badge bg-{{ {
+                            'pendiente': 'warning',
+                            'parcial': 'info',
+                            'pagado': 'success',
+                            'anulado': 'danger'
+                        }[f.estado_actualizado] }}">{{ f.estado_actualizado|title }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if orden.estado != "entregado" %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Cambiar Estado</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ordenes_trabajo.cambiar_estado', id=orden.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-2">
+                        <select name="estado" class="form-select" required>
+                            {% for e in estados %}
+                            <option value="{{ e }}" {{ "selected" if orden.estado == e else "" }}>{{ e|replace("_", " ")|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="observacion" class="form-control" rows="2" placeholder="Observación (opcional)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Historial de Cambios</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for h in orden.historial %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="badge bg-{{ {
+                                    'recibido': 'secondary',
+                                    'diagnostico': 'info',
+                                    'esperando_repuestos': 'warning',
+                                    'en_reparacion': 'primary',
+                                    'listo_entrega': 'success',
+                                    'entregado': 'dark',
+                                }[h.estado_nuevo] }} small">
+                                    {{ h.estado_nuevo|replace("_", " ")|title }}
+                                </span>
+                                {% if h.estado_anterior %}
+                                <small class="text-muted">(desde {{ h.estado_anterior|replace("_", " ")|title }})</small>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted text-nowrap ms-2">{{ h.created_at.strftime("%d/%m/%Y %H:%M") if h.created_at else "" }}</small>
+                        </div>
+                        {% if h.observacion %}
+                        <small class="d-block mt-1 text-muted">{{ h.observacion }}</small>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted text-center">Sin historial</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

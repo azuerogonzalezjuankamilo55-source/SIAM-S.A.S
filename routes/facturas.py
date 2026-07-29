@@ -1,0 +1,227 @@
+import logging
+import os
+from typing import Any
+from decimal import Decimal
+
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_file
+from flask_login import login_required, current_user
+
+from models.cita import Cita
+from models.servicio import Servicio
+from models.factura import Factura
+from models.orden_trabajo import OrdenTrabajo
+from models.configuracion_taller import ConfiguracionTaller
+from models.pago_factura import PagoFactura
+from database.db import db
+from services.factura_service import FacturaService, FacturaInput
+from forms import FacturaForm, PagoForm, TallerConfigForm
+from exceptions import BusinessRuleException, NotFoundException
+
+logger = logging.getLogger("siam.routes.facturas")
+facturas_bp = Blueprint("facturas", __name__, url_prefix="/facturas")
+
+
+@facturas_bp.route("/")
+@login_required
+def listar() -> Any:
+    estado = request.args.get("estado")
+    q = Factura.query
+    if estado:
+        q = q.filter(Factura.estado == estado)
+    facturas = q.order_by(Factura.created_at.desc()).all()
+    return render_template("facturas/listar.html", facturas=facturas)
+
+
+@facturas_bp.route("/crear/<int:cita_id>", methods=["GET", "POST"])
+@login_required
+def crear(cita_id: int) -> Any:
+    cita = Cita.query.get_or_404(cita_id)
+    servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
+
+    if request.method == "POST":
+        try:
+            input_data = FacturaInput(
+                cita_id=cita_id,
+                servicio_ids=[int(s) for s in request.form.getlist("servicio_id")],
+                precios=[Decimal(p or "0") for p in request.form.getlist("precio_unitario")],
+                cantidades=[int(c or "1") for c in request.form.getlist("cantidad")],
+                descuento=Decimal(request.form.get("descuento") or "0"),
+                metodo_pago=request.form.get("metodo_pago", "Efectivo"),
+                notas=request.form.get("notas", ""),
+                orden_trabajo_id=None,
+            )
+            FacturaService.generar(input_data)
+            logger.info("Factura creada para cita %s", cita_id)
+            flash("Factura generada exitosamente", "success")
+            return redirect(url_for("facturas.listar"))
+        except (BusinessRuleException, NotFoundException) as e:
+            flash(str(e), "danger")
+            logger.warning("Error al crear factura: %s", e)
+
+    return render_template("facturas/form.html", cita=cita, servicios=servicios,
+                           config=ConfiguracionTaller.get_config())
+
+
+@facturas_bp.route("/crear-desde-ot/<int:ot_id>", methods=["GET", "POST"])
+@login_required
+def crear_desde_ot(ot_id: int) -> Any:
+    ot = OrdenTrabajo.query.get_or_404(ot_id)
+    servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
+
+    if ot.cliente.citas:
+        cita = ot.cliente.citas[0] if ot.cliente.citas else None
+    else:
+        cita = None
+
+    if not cita:
+        flash("La OT no tiene una cita asociada. Cree una cita primero.", "warning")
+        return redirect(url_for("ordenes_trabajo.ver", id=ot_id))
+
+    if request.method == "POST":
+        try:
+            input_data = FacturaInput(
+                cita_id=cita.id,
+                servicio_ids=[int(s) for s in request.form.getlist("servicio_id")],
+                precios=[Decimal(p or "0") for p in request.form.getlist("precio_unitario")],
+                cantidades=[int(c or "1") for c in request.form.getlist("cantidad")],
+                descuento=Decimal(request.form.get("descuento") or "0"),
+                metodo_pago=request.form.get("metodo_pago", "Efectivo"),
+                notas=request.form.get("notas", ""),
+                orden_trabajo_id=ot_id,
+            )
+            FacturaService.generar(input_data)
+            logger.info("Factura creada desde OT %s", ot_id)
+            flash("Factura generada desde la orden de trabajo", "success")
+            return redirect(url_for("facturas.listar"))
+        except (BusinessRuleException, NotFoundException) as e:
+            flash(str(e), "danger")
+            logger.warning("Error al crear factura desde OT: %s", e)
+
+    return render_template("facturas/form.html", cita=cita, servicios=servicios, ot=ot,
+                           config=ConfiguracionTaller.get_config())
+
+
+@facturas_bp.route("/ver/<int:id>")
+@login_required
+def ver(id: int) -> Any:
+    factura = Factura.query.get_or_404(id)
+    config = ConfiguracionTaller.get_config()
+    return render_template("facturas/ver.html", factura=factura, config=config)
+
+
+@facturas_bp.route("/pdf/<int:id>")
+@login_required
+def pdf(id: int) -> Any:
+    try:
+        from weasyprint import HTML
+    except ImportError:
+        flash("PDF no disponible: weasyprint no está instalado", "danger")
+        return redirect(url_for("facturas.ver", id=id))
+
+    factura = Factura.query.get_or_404(id)
+    config = ConfiguracionTaller.get_config()
+    html_str = render_template("facturas/pdf.html", factura=factura, config=config)
+    try:
+        pdf_bytes = HTML(string=html_str, base_url=request.host_url).write_pdf()
+    except Exception:
+        flash("Error generando PDF. Verifique la impresión desde el navegador.", "warning")
+        return redirect(url_for("facturas.ver", id=id))
+
+    import io
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=f"factura_{factura.numero}.pdf",
+    )
+
+
+@facturas_bp.route("/pagar/<int:id>", methods=["GET", "POST"])
+@login_required
+def pagar(id: int) -> Any:
+    factura = Factura.query.get_or_404(id)
+    if factura.estado == "anulado":
+        flash("No se puede pagar una factura anulada", "danger")
+        return redirect(url_for("facturas.ver", id=id))
+
+    form = PagoForm()
+    if form.validate_on_submit():
+        try:
+            FacturaService.registrar_pago(
+                factura_id=id,
+                monto=form.monto.data,
+                metodo_pago=form.metodo_pago.data,
+                usuario_id=current_user.id,
+                referencia=form.referencia.data or "",
+                notas=form.notas.data or "",
+            )
+            logger.info("Pago registrado en factura %s", factura.numero)
+            flash("Pago registrado exitosamente", "success")
+            return redirect(url_for("facturas.ver", id=id))
+        except (BusinessRuleException, NotFoundException) as e:
+            flash(str(e), "danger")
+
+    return render_template("facturas/pagar.html", factura=factura, form=form)
+
+
+@facturas_bp.route("/anular/<int:id>")
+@login_required
+def anular(id: int) -> Any:
+    factura = Factura.query.get_or_404(id)
+    if factura.monto_pagado > 0:
+        flash("No se puede anular: tiene pagos registrados", "danger")
+        return redirect(url_for("facturas.ver", id=id))
+    factura.estado = "anulado"
+    db.session.commit()
+    logger.info("Factura %s anulada", factura.numero)
+    flash("Factura anulada", "success")
+    return redirect(url_for("facturas.listar"))
+
+
+@facturas_bp.route("/configuracion", methods=["GET", "POST"])
+@login_required
+def configuracion() -> Any:
+    config = ConfiguracionTaller.get_config()
+    form = TallerConfigForm(obj=config)
+    if form.validate_on_submit():
+        config.nombre_taller = form.nombre_taller.data
+        config.nit = form.nit.data
+        config.direccion = form.direccion.data
+        config.telefono = form.telefono.data
+        config.email = form.email.data
+        config.regimen = form.regimen.data
+        config.prefijo_factura = form.prefijo_factura.data
+        config.resolucion_dian = form.resolucion_dian.data
+        config.iva_porcentaje = form.iva_porcentaje.data
+
+        if form.logo.data and hasattr(form.logo.data, "filename") and form.logo.data.filename:
+            upload_dir = os.path.join(current_app.root_path, "static", "uploads")
+            os.makedirs(upload_dir, exist_ok=True)
+            ext = form.logo.data.filename.rsplit(".", 1)[-1].lower()
+            filename = f"logo_taller.{ext}"
+            form.logo.data.save(os.path.join(upload_dir, filename))
+            config.logo_path = f"/static/uploads/{filename}"
+
+        db.session.commit()
+        logger.info("Configuración del taller actualizada")
+        flash("Configuración guardada", "success")
+        return redirect(url_for("facturas.configuracion"))
+
+    return render_template("facturas/configuracion.html", form=form, config=config)
+
+
+@facturas_bp.route("/eliminar-pago/<int:pago_id>")
+@login_required
+def eliminar_pago(pago_id: int) -> Any:
+    pago = PagoFactura.query.get_or_404(pago_id)
+    factura_id = pago.factura_id
+    db.session.delete(pago)
+    factura = Factura.query.get(factura_id)
+    if factura.monto_pagado <= 0:
+        factura.estado = "pendiente"
+    elif factura.monto_pagado < factura.total:
+        factura.estado = "parcial"
+    db.session.commit()
+    logger.info("Pago %s eliminado", pago_id)
+    flash("Pago eliminado", "success")
+    return redirect(url_for("facturas.ver", id=factura_id))

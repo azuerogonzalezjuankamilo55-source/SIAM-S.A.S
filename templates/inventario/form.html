@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if item else "Nuevo" }} Producto{% endblock %}
+{% block content %}
+<h4 class="mb-4">{{ "Editar" if item else "Nuevo" }} Producto</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.nombre.label.text }}</label>
+                    {{ form.nombre(class="form-control") }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ form.sku.label.text }}</label>
+                    {{ form.sku(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.codigo_barras.label.text }}</label>
+                    {{ form.codigo_barras(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.categoria_id.label.text }}</label>
+                    {{ form.categoria_id(class="form-select") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.ubicacion.label.text }}</label>
+                    {{ form.ubicacion(class="form-control", placeholder="Ej: A-1-3") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.proveedor.label.text }}</label>
+                    {{ form.proveedor(class="form-control") }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ form.cantidad.label.text }}</label>
+                    {{ form.cantidad(class="form-control") }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ form.stock_minimo.label.text }}</label>
+                    {{ form.stock_minimo(class="form-control") }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{{ form.stock_critico.label.text }}</label>
+                    {{ form.stock_critico(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.precio_compra.label.text }}</label>
+                    {{ form.precio_compra(class="form-control") }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.precio_venta.label.text }}</label>
+                    {{ form.precio_venta(class="form-control") }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.descripcion.label.text }}</label>
+                    {{ form.descripcion(class="form-control", rows=2) }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('inventario.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

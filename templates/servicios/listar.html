@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Servicios{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Servicios</h4>
+    <a href="{{ url_for('servicios.crear') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nuevo Servicio
+    </a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio Est.</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in servicios %}
+                    <tr>
+                        <td>{{ s.id }}</td>
+                        <td>{{ s.nombre }}</td>
+                        <td>{{ s.categoria or "-" }}</td>
+                        <td>${{ "%.2f"|format(s.precio_estimado|float) if s.precio_estimado else "-" }}</td>
+                        <td>{{ s.duracion_estimada or "-" }} min</td>
+                        <td>
+                            <span class="badge bg-{{ "success" if s.activo else "secondary" }}">
+                                {{ "Activo" if s.activo else "Inactivo" }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('servicios.editar', id=s.id) }}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{{ url_for('servicios.eliminar', id=s.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted">No hay servicios registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

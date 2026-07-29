@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if cat else "Nueva" }} Categoría{% endblock %}
+{% block content %}
+<h4 class="mb-4">{{ "Editar" if cat else "Nueva" }} Categoría</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.nombre.label.text }}</label>
+                    {{ form.nombre(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.padre_id.label.text }}</label>
+                    {{ form.padre_id(class="form-select") }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.descripcion.label.text }}</label>
+                    {{ form.descripcion(class="form-control", rows=2) }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('inventario.listar_categorias') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Factura {{ factura.numero }}</title>
+<style>
+    @page { margin: 2cm 1.5cm; size: A4; }
+    body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; margin: 0; padding: 0; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1a73e8; padding-bottom: 15px; margin-bottom: 20px; }
+    .logo { max-height: 80px; max-width: 200px; }
+    .header-right { text-align: right; }
+    .header-right h1 { color: #1a73e8; margin: 0; font-size: 22pt; }
+    .header-right h2 { color: #666; margin: 5px 0 0; font-size: 12pt; font-weight: normal; }
+    .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .info-box { width: 48%; }
+    .info-box h3 { font-size: 9pt; color: #666; text-transform: uppercase; margin: 0 0 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+    .info-box p { margin: 2px 0; font-size: 9pt; }
+    .info-box .highlight { font-size: 11pt; font-weight: bold; color: #1a73e8; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    table thead th { background: #1a73e8; color: #fff; padding: 6px 8px; text-align: left; font-size: 9pt; }
+    table thead th.right { text-align: right; }
+    table thead th.center { text-align: center; }
+    table tbody td { padding: 5px 8px; border-bottom: 1px solid #eee; font-size: 9pt; }
+    table tbody td.right { text-align: right; }
+    table tbody td.center { text-align: center; }
+    table tfoot td { padding: 4px 8px; font-size: 9pt; }
+    .totals { margin-left: auto; width: 300px; }
+    .totals table { margin-bottom: 0; }
+    .totals td { padding: 3px 8px; }
+    .totals .grand-total { font-size: 12pt; font-weight: bold; color: #1a73e8; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #999; border-top: 1px solid #ddd; padding-top: 5px; }
+    .dian-info { font-size: 7.5pt; color: #999; margin-top: 15px; text-align: center; }
+    .estado-badge { display: inline-block; padding: 3px 10px; border-radius: 3px; font-size: 8pt; font-weight: bold; }
+    .estado-pendiente { background: #fff3cd; color: #856404; }
+    .estado-pagado { background: #d4edda; color: #155724; }
+    .estado-parcial { background: #cce5ff; color: #004085; }
+    .estado-anulado { background: #f8d7da; color: #721c24; }
+    .notas { margin-top: 15px; padding: 8px; border: 1px solid #eee; border-radius: 4px; font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        {% if config.logo_path %}<img src="{{ config.logo_path }}" class="logo" alt="Logo">{% endif %}
+        <h2 style="margin:5px 0 2px;color:#333;">{{ config.nombre_taller }}</h2>
+        <p style="font-size:9pt;margin:0;color:#666;">
+            {{ config.nit if config.nit else "" }}<br>
+            {{ config.direccion if config.direccion else "" }}<br>
+            {{ config.telefono if config.telefono else "" }}<br>
+            {{ config.email if config.email else "" }}
+        </p>
+    </div>
+    <div class="header-right">
+        <h1>FACTURA</h1>
+        <h2>{{ factura.numero }}</h2>
+        <p style="margin-top:5px;">
+            <span class="estado-badge estado-{{ factura.estado_actualizado }}">{{ factura.estado_actualizado|upper }}</span>
+        </p>
+        <p style="font-size:9pt;color:#666;margin-top:5px;">
+            {{ factura.created_at.strftime('%d/%m/%Y %H:%M') if factura.created_at else "" }}
+        </p>
+    </div>
+</div>
+
+<div class="info-section">
+    <div class="info-box">
+        <h3>Cliente</h3>
+        <p class="highlight">{{ factura.cita.cliente.nombre }}</p>
+        <p>{{ factura.cita.cliente.direccion or "" }}</p>
+        <p>{{ factura.cita.cliente.telefono or "" }}</p>
+        <p>{{ factura.cita.cliente.email or "" }}</p>
+        {% if factura.cita.cliente.cedula %}<p>CC: {{ factura.cita.cliente.cedula }}</p>{% endif %}
+    </div>
+    <div class="info-box" style="text-align:right;">
+        <h3>Vehículo / OT</h3>
+        <p class="highlight">{{ factura.cita.vehiculo.marca }} {{ factura.cita.vehiculo.modelo }}</p>
+        <p>Placa: {{ factura.cita.vehiculo.placa }}</p>
+        {% if factura.cita.vehiculo.anio %}<p>Año: {{ factura.cita.vehiculo.anio }}</p>{% endif %}
+        {% if factura.orden_trabajo %}<p>OT: {{ factura.orden_trabajo.numero }}</p>{% endif %}
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width:50%;">Servicio</th>
+            <th class="right" style="width:18%;">Precio Unit.</th>
+            <th class="center" style="width:10%;">Cant.</th>
+            <th class="right" style="width:22%;">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in factura.detalles %}
+        <tr>
+            <td>{{ d.servicio.nombre }}</td>
+            <td class="right">${{ "%.2f"|format(d.precio_unitario|float) }}</td>
+            <td class="center">{{ d.cantidad }}</td>
+            <td class="right">${{ "%.2f"|format(d.subtotal|float) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="totals">
+    <table>
+        <tr><td>Subtotal</td><td class="right">${{ "%.2f"|format(factura.subtotal|float) }}</td></tr>
+        <tr><td>IVA ({{ factura.iva_porcentaje }}%)</td><td class="right">${{ "%.2f"|format(factura.iva|float) }}</td></tr>
+        {% if factura.descuento > 0 %}
+        <tr><td>Descuento</td><td class="right">-${{ "%.2f"|format(factura.descuento|float) }}</td></tr>
+        {% endif %}
+        <tr style="border-top:2px solid #1a73e8;">
+            <td class="grand-total">TOTAL</td>
+            <td class="right grand-total">${{ "%.2f"|format(factura.total|float) }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if factura.pagos %}
+<div style="margin-top:15px;">
+    <h3 style="font-size:9pt;color:#666;text-transform:uppercase;border-bottom:1px solid #ddd;padding-bottom:3px;">Pagos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Referencia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in factura.pagos %}
+            <tr>
+                <td>{{ p.created_at.strftime('%d/%m/%Y') if p.created_at else "" }}</td>
+                <td class="right">${{ "%.2f"|format(p.monto|float) }}</td>
+                <td>{{ p.metodo_pago_display }}</td>
+                <td>{{ p.referencia or "" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if factura.notas %}
+<div class="notas">
+    <strong>Notas:</strong> {{ factura.notas }}
+</div>
+{% endif %}
+
+<div class="dian-info">
+    {% if config.resolucion_dian %}
+    Resolución DIAN: {{ config.resolucion_dian }} |
+    {% endif %}
+    {{ config.nombre_taller }} - NIT {{ config.nit if config.nit else "---" }} |
+    Régimen {{ config.regimen }} |
+    Factura generada el {{ factura.created_at.strftime('%d/%m/%Y %H:%M') if factura.created_at else "" }}
+</div>
+
+<div class="footer">
+    {{ config.nombre_taller }} · {{ config.direccion if config.direccion else "" }} · {{ config.telefono if config.telefono else "" }}
+    · Pág {{ 1 }}
+</div>
+
+</body>
+</html>

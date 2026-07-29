@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Alertas de Inventario{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Alertas de Inventario</h4>
+    <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+{% if sin_stock %}
+<div class="card border-danger mb-3">
+    <div class="card-header bg-danger text-white d-flex justify-content-between">
+        <span><i class="bi bi-x-circle"></i> Sin Stock ({{ sin_stock|length }})</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead><tr><th>Producto</th><th>SKU</th><th>Stock</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for i in sin_stock %}
+                    <tr>
+                        <td><a href="{{ url_for('inventario.ver', id=i.id) }}">{{ i.nombre }}</a></td>
+                        <td><code>{{ i.sku or "-" }}</code></td>
+                        <td><span class="badge bg-danger">0</span></td>
+                        <td><a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-sm btn-success">Registrar entrada</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if stock_critico %}
+<div class="card border-warning mb-3">
+    <div class="card-header bg-warning text-dark d-flex justify-content-between">
+        <span><i class="bi bi-exclamation-triangle"></i> Stock Crítico ({{ stock_critico|length }})</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead><tr><th>Producto</th><th>SKU</th><th>Stock</th><th>Stock Crítico</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for i in stock_critico %}
+                    <tr>
+                        <td><a href="{{ url_for('inventario.ver', id=i.id) }}">{{ i.nombre }}</a></td>
+                        <td><code>{{ i.sku or "-" }}</code></td>
+                        <td><span class="badge bg-warning text-dark">{{ i.cantidad }}</span></td>
+                        <td>{{ i.stock_critico }}</td>
+                        <td><a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-sm btn-success">Registrar entrada</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header bg-warning text-dark d-flex justify-content-between">
+        <span><i class="bi bi-exclamation-diamond"></i> Stock Bajo ({{ stock_bajo|length }})</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead><tr><th>Producto</th><th>SKU</th><th>Stock</th><th>Stock Mínimo</th><th>Diferencia</th><th>Acción</th></tr></thead>
+                <tbody>
+                    {% for i in stock_bajo %}
+                    <tr>
+                        <td><a href="{{ url_for('inventario.ver', id=i.id) }}">{{ i.nombre }}</a></td>
+                        <td><code>{{ i.sku or "-" }}</code></td>
+                        <td><span class="badge bg-{{ 'danger' if i.cantidad == 0 else 'warning' }} text-dark">{{ i.cantidad }}</span></td>
+                        <td>{{ i.stock_minimo }}</td>
+                        <td class="text-danger">-{{ i.stock_minimo - i.cantidad }}</td>
+                        <td><a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-sm btn-success">Registrar entrada</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-3">No hay productos con stock bajo</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

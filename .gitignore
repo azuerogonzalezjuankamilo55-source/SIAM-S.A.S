@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+*.env.local
+
+# Database
+*.db
+*.sqlite3
+
+# Flask
+instance/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+migrations/versions/

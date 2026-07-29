@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Facturas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Facturas</h4>
+    <div>
+        <a href="{{ url_for('facturas.configuracion') }}" class="btn btn-outline-info me-2">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label small mb-0">Estado</label>
+                <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Todas</option>
+                    <option value="pendiente" {{ "selected" if request.args.get("estado") == "pendiente" else "" }}>Pendiente</option>
+                    <option value="parcial" {{ "selected" if request.args.get("estado") == "parcial" else "" }}>Pago Parcial</option>
+                    <option value="pagado" {{ "selected" if request.args.get("estado") == "pagado" else "" }}>Pagado</option>
+                    <option value="anulado" {{ "selected" if request.args.get("estado") == "anulado" else "" }}>Anulado</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('facturas.listar') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Número</th>
+                        <th>Cliente / OT</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Saldo</th>
+                        <th>Método</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in facturas %}
+                    {% set saldo = f.saldo_pendiente %}
+                    <tr class="{{ 'table-success' if f.estado == 'pagado' else 'table-danger' if f.estado == 'anulado' else 'table-warning' if saldo > 0 and f.monto_pagado > 0 else '' }}">
+                        <td>{{ f.id }}</td>
+                        <td><strong>{{ f.numero }}</strong></td>
+                        <td>
+                            {{ f.cita.cliente.nombre }}
+                            {% if f.orden_trabajo %}
+                            <br><small class="text-muted">OT: <a href="{{ url_for('ordenes_trabajo.ver', id=f.orden_trabajo.id) }}">{{ f.orden_trabajo.numero }}</a></small>
+                            {% endif %}
+                        </td>
+                        <td><strong>${{ "%.2f"|format(f.total|float) }}</strong></td>
+                        <td>${{ "%.2f"|format(f.monto_pagado|float) }}</td>
+                        <td>
+                            {% if saldo > 0 %}
+                            <span class="text-danger">${{ "%.2f"|format(saldo|float) }}</span>
+                            {% else %}
+                            <span class="text-success">$0.00</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ f.metodo_pago or "-" }}</td>
+                        <td>
+                            <span class="badge bg-{{ {
+                                'pendiente': 'warning',
+                                'parcial': 'info',
+                                'pagado': 'success',
+                                'anulado': 'danger'
+                            }[f.estado_actualizado] }}">
+                                {{ f.estado_actualizado|title }}
+                            </span>
+                        </td>
+                        <td>{{ f.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('facturas.ver', id=f.id) }}" class="btn btn-outline-info" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('facturas.pdf', id=f.id) }}" class="btn btn-outline-secondary" title="PDF" target="_blank">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                {% if f.estado != "pagado" and f.estado != "anulado" %}
+                                <a href="{{ url_for('facturas.pagar', id=f.id) }}" class="btn btn-outline-success" title="Pagar">
+                                    <i class="bi bi-cash"></i>
+                                </a>
+                                {% endif %}
+                                {% if f.estado == "pendiente" and f.monto_pagado == 0 %}
+                                <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-outline-danger" title="Anular" onclick="return confirm('¿Anular factura {{ f.numero }}?')">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="10" class="text-center text-muted py-4">No hay facturas</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

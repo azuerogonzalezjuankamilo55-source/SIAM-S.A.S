@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ item.nombre }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">{{ item.nombre }}</h4>
+    <div>
+        <a href="{{ url_for('inventario.movimiento', id=item.id) }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left-right"></i> Registrar Movimiento
+        </a>
+        <a href="{{ url_for('inventario.editar', id=item.id) }}" class="btn btn-outline-warning">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Stock Actual</h6>
+                <h2 class="text-success mb-0 {% if item.stock_critico_alcanzado %}text-danger{% elif item.stock_bajo %}text-warning{% endif %}">
+                    {{ item.cantidad }}
+                </h2>
+                {% if item.stock_critico_alcanzado %}
+                <span class="badge bg-danger">Stock crítico</span>
+                {% elif item.stock_bajo %}
+                <span class="badge bg-warning text-dark">Stock bajo</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Stock Mínimo</h6>
+                <h3 class="mb-0">{{ item.stock_minimo }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Stock Crítico</h6>
+                <h3 class="mb-0">{{ item.stock_critico }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted small">Ganancia Estimada</h6>
+                <h3 class="mb-0 text-info">
+                    {% if item.ganancia_estimada %}
+                    ${{ "%.2f"|format(item.ganancia_estimada|float) }}
+                    {% else %}-{% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="mb-0">Detalles del Producto</h6></div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr><th>SKU</th><td><code>{{ item.sku or "-" }}</code></td></tr>
+                    <tr><th>Código de barras</th><td><code>{{ item.codigo_barras or "-" }}</code></td></tr>
+                    <tr><th>Categoría</th><td>{{ item.categoria_nombre or "-" }}</td></tr>
+                    <tr><th>Ubicación</th><td>{{ item.ubicacion or "-" }}</td></tr>
+                    <tr><th>Proveedor</th><td>{{ item.proveedor or "-" }}</td></tr>
+                    <tr><th>Costo</th><td>${{ "%.2f"|format(item.precio_compra|float) if item.precio_compra else "-" }}</td></tr>
+                    <tr><th>Precio venta</th><td>${{ "%.2f"|format(item.precio_venta|float) if item.precio_venta else "-" }}</td></tr>
+                    <tr><th>Activo</th><td>{{ "Sí" if item.activo else "No" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="mb-0">Descripción</h6></div>
+            <div class="card-body">
+                <p class="mb-0">{{ item.descripcion or "Sin descripción" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Historial de Movimientos</h6>
+        <span class="badge bg-secondary">{{ movimientos|length }} registro(s)</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Saldo Anterior</th>
+                        <th>Saldo Posterior</th>
+                        <th>Motivo</th>
+                        <th>Referencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in movimientos %}
+                    <tr>
+                        <td>{{ m.id }}</td>
+                        <td>{{ m.created_at.strftime('%d/%m/%Y %H:%M') if m.created_at else "-" }}</td>
+                        <td><span class="badge bg-{{ m.tipo_clase }}">{{ m.tipo_display }}</span></td>
+                        <td>{{ m.cantidad }}</td>
+                        <td>{{ m.saldo_anterior }}</td>
+                        <td><strong>{{ m.saldo_posterior }}</strong></td>
+                        <td>{{ m.motivo or "-" }}</td>
+                        <td><code>{{ m.referencia or "-" }}</code></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" class="text-center text-muted py-3">Sin movimientos registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

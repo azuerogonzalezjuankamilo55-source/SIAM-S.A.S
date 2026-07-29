@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if servicio else "Nuevo" }} Servicio{% endblock %}
+{% block content %}
+<h4 class="mb-4">{{ "Editar" if servicio else "Nuevo" }} Servicio</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" name="nombre" class="form-control" value="{{ servicio.nombre if servicio else '' }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoría</label>
+                    <select name="categoria" class="form-select">
+                        <option value="">Seleccione...</option>
+                        <option value="Mecánica" {{ "selected" if servicio and servicio.categoria == "Mecánica" else "" }}>Mecánica</option>
+                        <option value="Eléctrica" {{ "selected" if servicio and servicio.categoria == "Eléctrica" else "" }}>Eléctrica</option>
+                        <option value="Llantas" {{ "selected" if servicio and servicio.categoria == "Llantas" else "" }}>Llantas</option>
+                        <option value="Alineación" {{ "selected" if servicio and servicio.categoria == "Alineación" else "" }}>Alineación</option>
+                        <option value="Diagnóstico" {{ "selected" if servicio and servicio.categoria == "Diagnóstico" else "" }}>Diagnóstico</option>
+                        <option value="Mantenimiento" {{ "selected" if servicio and servicio.categoria == "Mantenimiento" else "" }}>Mantenimiento</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Precio Est.</label>
+                    <input type="number" step="0.01" name="precio_estimado" class="form-control" value="{{ servicio.precio_estimado if servicio else '' }}">
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Duración</label>
+                    <input type="number" name="duracion_estimada" class="form-control" value="{{ servicio.duracion_estimada if servicio else '' }}" placeholder="min">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="3">{{ servicio.descripcion if servicio else '' }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{{ url_for('servicios.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
