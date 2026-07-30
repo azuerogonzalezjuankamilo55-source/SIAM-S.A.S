@@ -19,7 +19,6 @@ migrate = Migrate()
 csrf = CSRFProtect()
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri="memory://",
     strategy="moving-window",
 )
 
@@ -58,7 +57,18 @@ def create_app(config_name: str | None = None) -> Flask:
 
     @app.route("/health")
     def health() -> Any:
-        return {"status": "healthy", "app": "SIAM", "version": "2.0.0"}, 200
+        try:
+            db.session.execute(db.text("SELECT 1"))
+            db.session.commit()
+            db_ok = True
+        except Exception:
+            db_ok = False
+        return {
+            "status": "healthy" if db_ok else "degraded",
+            "app": "SIAM",
+            "version": "2.0.0",
+            "database": "connected" if db_ok else "unreachable",
+        }, 200 if db_ok else 503
 
     return app
 
@@ -70,7 +80,7 @@ def configure_security_headers(app: Flask) -> None:
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Permissions-Policy"] = "geolocation=(self), microphone=(), camera=()"
         response.headers["X-Powered-By"] = "SIAM"
         if not app.debug:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"

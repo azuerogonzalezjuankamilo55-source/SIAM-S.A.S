@@ -62,9 +62,9 @@ class ProductionConfig(Config):
         "RATELIMIT_STORAGE_URI", "memory://"
     )
     SQLALCHEMY_ENGINE_OPTIONS: dict = {
-        "pool_size": int(os.getenv("DB_POOL_SIZE", "3")),
-        "max_overflow": int(os.getenv("DB_POOL_OVERFLOW", "5")),
-        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "300")),
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "2")),
+        "max_overflow": int(os.getenv("DB_POOL_OVERFLOW", "2")),
+        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "1800")),
         "pool_pre_ping": True,
     }
 

@@ -27,13 +27,4 @@ def json_error(message: str = "No se pudo guardar. Intenta nuevamente.", status:
     return jsonify({"success": False, "error": message}), status
 
 
-def flash_or_json(request_obj, message: str, category: str = "success") -> None:
-    from flask import flash
-    flash(message, category)
 
-
-def handle_form_error(request_obj, logger_instance, error_msg: str = "No se pudo guardar. Intenta nuevamente."):
-    import traceback
-    from flask import flash
-    logger_instance.error(error_msg, exc_info=True)
-    flash(error_msg, "danger")

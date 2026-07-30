@@ -80,7 +80,7 @@ def editar(id: int) -> Any:
     return render_template("citas/form.html", form=form, cita=cita, clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos)
 
 
-@citas_bp.route("/eliminar/<int:id>")
+@citas_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
 def eliminar(id: int) -> Any:
     try:
@@ -99,7 +99,7 @@ def eliminar(id: int) -> Any:
     return redirect(url_for("citas.listar"))
 
 
-@citas_bp.route("/cambiar-estado/<int:id>/<estado>")
+@citas_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
 def cambiar_estado(id: int, estado: str) -> Any:
     try:

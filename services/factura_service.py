@@ -98,7 +98,12 @@ class FacturaService:
 
         db.session.add(factura)
         cita.estado = "completado"
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Error al generar factura: %s", e, exc_info=True)
+            raise
 
         logger.info("Factura %s generada: total=%s", numero, total)
         return factura
@@ -129,7 +134,13 @@ class FacturaService:
         else:
             factura.estado = "parcial"
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Error al registrar pago: %s", e, exc_info=True)
+            raise
+
         logger.info("Pago registrado: factura=%s monto=%s metodo=%s", factura.numero, monto, metodo_pago)
         return pago
 

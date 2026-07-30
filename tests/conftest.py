@@ -1,10 +1,12 @@
 import pytest
 from app import create_app
 from database.db import db as _db
+from flask import session
+from flask_login import logout_user
 from sqlalchemy import text
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def app():
     app = create_app("testing")
     with app.app_context():
@@ -28,8 +30,12 @@ def client(app):
 def _clean_db(app):
     yield
     with app.app_context():
+        with app.test_request_context():
+            logout_user()
+            session.clear()
         _db.session.execute(text("PRAGMA foreign_keys = OFF"))
         for table in _db.metadata.sorted_tables:
             _db.session.execute(table.delete())
         _db.session.execute(text("PRAGMA foreign_keys = ON"))
         _db.session.commit()
+        _db.session.remove()

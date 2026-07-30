@@ -62,7 +62,7 @@ def crear() -> Any:
                 usuario_id=current_user.id,
                 motivo="Inventario inicial",
             )
-            db.session.commit()
+            safe_commit()
             logger.info("Producto creado: %s (SKU=%s)", item.nombre, item.sku)
             if request.is_json:
                 return json_success(message="Producto agregado al inventario.")
@@ -100,7 +100,7 @@ def editar(id: int) -> Any:
                     usuario_id=current_user.id,
                     motivo="Ajuste por edición de producto",
                 )
-            db.session.commit()
+            safe_commit()
             logger.info("Producto actualizado: %s", item.nombre)
             if request.is_json:
                 return json_success(message="Producto actualizado.")
@@ -129,7 +129,7 @@ def eliminar(id: int) -> Any:
     item = Inventario.query.get_or_404(id)
     try:
         db.session.delete(item)
-        db.session.commit()
+        safe_commit()
         logger.info("Producto eliminado: %s", item.nombre)
         if request.is_json:
             return json_success(message="Producto eliminado.")
@@ -159,7 +159,7 @@ def movimiento(id: int) -> Any:
                 motivo=form.motivo.data,
                 referencia=form.referencia.data,
             )
-            db.session.commit()
+            safe_commit()
             logger.info("Movimiento registrado: %s x%d en %s", tipo, cantidad, item.nombre)
             if request.is_json:
                 return json_success(message=f"{'Entrada' if tipo == 'entrada' else 'Salida' if tipo == 'salida' else 'Ajuste'} registrada.")
@@ -221,7 +221,7 @@ def crear_categoria() -> Any:
                 padre_id=form.padre_id.data or None,
             )
             db.session.add(cat)
-            db.session.commit()
+            safe_commit()
             logger.info("Categoría creada: %s", cat.nombre)
             if request.is_json:
                 return json_success(message="Categoría creada.")
@@ -245,7 +245,7 @@ def editar_categoria(id: int) -> Any:
             cat.nombre = form.nombre.data
             cat.descripcion = form.descripcion.data
             cat.padre_id = form.padre_id.data or None
-            db.session.commit()
+            safe_commit()
             logger.info("Categoría actualizada: %s", cat.nombre)
             if request.is_json:
                 return json_success(message="Categoría actualizada.")
@@ -283,7 +283,7 @@ def eliminar_categoria(id: int) -> Any:
             {CategoriaInventario.padre_id: None}
         )
         db.session.delete(cat)
-        db.session.commit()
+        safe_commit()
         logger.info("Categoría eliminada: %s", cat.nombre)
         if request.is_json:
             return json_success(message="Categoría eliminada.")

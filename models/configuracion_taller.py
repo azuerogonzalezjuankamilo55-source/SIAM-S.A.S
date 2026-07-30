@@ -27,7 +27,11 @@ class ConfiguracionTaller(db.Model):
         if not config:
             config = cls()
             db.session.add(config)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                raise RuntimeError("No se pudo crear la configuración del taller") from e
         return config
 
     @property

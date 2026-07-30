@@ -6,6 +6,7 @@ from decimal import Decimal
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_file
 from flask_login import login_required, current_user
 from flask_wtf.csrf import validate_csrf
+from decorators import admin_required
 
 from models.cita import Cita
 from models.servicio import Servicio
@@ -42,7 +43,7 @@ def crear(cita_id: int) -> Any:
 
     if request.method == "POST":
         try:
-            csrf_token = request.form.get("csrf_token")
+            csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
             if csrf_token:
                 validate_csrf(csrf_token)
             input_data = FacturaInput(
@@ -220,7 +221,7 @@ def anular(id: int) -> Any:
         return redirect(url_for("facturas.ver", id=id))
     try:
         factura.estado = "anulado"
-        db.session.commit()
+        safe_commit()
         logger.info("Factura %s anulada", factura.numero)
         if request.is_json:
             return json_success(message="Factura anulada.")
@@ -236,6 +237,7 @@ def anular(id: int) -> Any:
 
 @facturas_bp.route("/configuracion", methods=["GET", "POST"])
 @login_required
+@admin_required
 def configuracion() -> Any:
     config = ConfiguracionTaller.get_config()
     form = TallerConfigForm(obj=config)
@@ -251,15 +253,19 @@ def configuracion() -> Any:
         config.iva_porcentaje = form.iva_porcentaje.data
 
         if form.logo.data and hasattr(form.logo.data, "filename") and form.logo.data.filename:
+            ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "svg", "webp"}
+            ext = form.logo.data.filename.rsplit(".", 1)[-1].lower()
+            if ext not in ALLOWED_EXTENSIONS:
+                flash("Formato de logo no permitido. Usa PNG, JPG, SVG o WebP.", "danger")
+                return redirect(url_for("facturas.configuracion"))
             upload_dir = os.path.join(current_app.root_path, "static", "uploads")
             os.makedirs(upload_dir, exist_ok=True)
-            ext = form.logo.data.filename.rsplit(".", 1)[-1].lower()
             filename = f"logo_taller.{ext}"
             form.logo.data.save(os.path.join(upload_dir, filename))
             config.logo_path = f"/static/uploads/{filename}"
 
         try:
-            db.session.commit()
+            safe_commit()
             logger.info("Configuración del taller actualizada")
             if request.is_json:
                 return json_success(message="Configuración guardada.")
@@ -294,7 +300,7 @@ def eliminar_pago(pago_id: int) -> Any:
             factura.estado = "pendiente"
         elif factura.monto_pagado < factura.total:
             factura.estado = "parcial"
-        db.session.commit()
+        safe_commit()
         logger.info("Pago %s eliminado", pago_id)
         if request.is_json:
             return json_success(message="Pago eliminado.")
