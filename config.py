@@ -5,10 +5,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def _normalize_db_uri(uri: str) -> str:
-    if uri and uri.startswith("postgres://"):
-        return uri.replace("postgres://", "postgresql://", 1)
+def _normalize_db_uri(uri: str | None) -> str | None:
+    if not uri:
+        return uri
+    uri = uri.strip().strip("\"'")
+    if uri.startswith("postgres://"):
+        uri = "postgresql://" + uri[len("postgres://") :]
     return uri
+
+
+def validate_database_url(uri: str) -> None:
+    from sqlalchemy.engine.url import make_url
+
+    try:
+        make_url(uri)
+    except Exception:
+        raise ValueError("Invalid DATABASE_URL format")
 
 
 class Config:
@@ -18,10 +30,7 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     SQLALCHEMY_ENGINE_OPTIONS: dict = {
-        "pool_size": 10,
-        "pool_recycle": 300,
         "pool_pre_ping": True,
-        "max_overflow": 20,
     }
     WTF_CSRF_ENABLED: bool = True
     WTF_CSRF_TIME_LIMIT: int | None = 3600
@@ -52,6 +61,12 @@ class ProductionConfig(Config):
     RATELIMIT_STORAGE_URI: str = os.getenv(
         "RATELIMIT_STORAGE_URI", "memory://"
     )
+    SQLALCHEMY_ENGINE_OPTIONS: dict = {
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "3")),
+        "max_overflow": int(os.getenv("DB_POOL_OVERFLOW", "5")),
+        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "300")),
+        "pool_pre_ping": True,
+    }
 
     @classmethod
     def validate(cls) -> None:
@@ -64,6 +79,9 @@ class ProductionConfig(Config):
             raise ValueError(
                 f"Production requires env vars: {', '.join(missing)}"
             )
+        uri = _normalize_db_uri(os.getenv("DATABASE_URL"))
+        if uri:
+            validate_database_url(uri)
 
 
 class TestingConfig(Config):

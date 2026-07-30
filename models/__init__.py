@@ -12,3 +12,4 @@ from models.categoria_inventario import CategoriaInventario
 from models.movimiento_inventario import MovimientoInventario
 from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
+from models.asistencia import AsistenciaEmergencia

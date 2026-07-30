@@ -1,13 +1,15 @@
 import logging
 from typing import Any
 
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required
+from flask_wtf.csrf import validate_csrf
 
 from models.vehiculo import Vehiculo
 from models.cliente import Cliente
 from database.db import db
 from forms import VehiculoForm
+from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.vehiculos")
 vehiculos_bp = Blueprint("vehiculos", __name__, url_prefix="/vehiculos")
@@ -36,10 +38,19 @@ def crear() -> Any:
             color=form.color.data,
         )
         db.session.add(vehiculo)
-        db.session.commit()
-        logger.info("Vehículo registrado: %s %s", vehiculo.marca, vehiculo.placa)
-        flash("Vehículo registrado", "success")
-        return redirect(url_for("vehiculos.listar"))
+        try:
+            safe_commit()
+            logger.info("Vehículo registrado: %s %s", vehiculo.marca, vehiculo.placa)
+            if request.is_json:
+                return jsonify({"success": True, "message": "Vehículo registrado"})
+            flash("Vehículo registrado", "success")
+            return redirect(url_for("vehiculos.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(str(e))
+            flash(str(e), "danger")
+            return render_template("vehiculos/form.html", form=form, clientes=clientes)
     return render_template("vehiculos/form.html", form=form, clientes=clientes)
 
 
@@ -51,19 +62,46 @@ def editar(id: int) -> Any:
     clientes = Cliente.query.order_by(Cliente.nombre).all()
     if form.validate_on_submit():
         form.populate_obj(vehiculo)
-        db.session.commit()
-        logger.info("Vehículo actualizado: %s", vehiculo.placa)
-        flash("Vehículo actualizado", "success")
-        return redirect(url_for("vehiculos.listar"))
+        try:
+            safe_commit()
+            logger.info("Vehículo actualizado: %s", vehiculo.placa)
+            if request.is_json:
+                return jsonify({"success": True, "message": "Vehículo actualizado"})
+            flash("Vehículo actualizado", "success")
+            return redirect(url_for("vehiculos.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(str(e))
+            flash(str(e), "danger")
+            return render_template("vehiculos/form.html", form=form, vehiculo=vehiculo, clientes=clientes)
     return render_template("vehiculos/form.html", form=form, vehiculo=vehiculo, clientes=clientes)
 
 
-@vehiculos_bp.route("/eliminar/<int:id>")
+@vehiculos_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
 def eliminar(id: int) -> Any:
+    try:
+        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+        if csrf_token:
+            validate_csrf(csrf_token)
+    except Exception:
+        if request.is_json:
+            return jsonify({"error": "CSRF inválido"}), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
+        return redirect(url_for("vehiculos.listar"))
     vehiculo = Vehiculo.query.get_or_404(id)
     db.session.delete(vehiculo)
-    db.session.commit()
-    logger.info("Vehículo eliminado: %s", vehiculo.placa)
-    flash("Vehículo eliminado", "success")
-    return redirect(url_for("vehiculos.listar"))
+    try:
+        safe_commit()
+        logger.info("Vehículo eliminado: %s", vehiculo.placa)
+        if request.is_json:
+            return jsonify({"success": True})
+        flash("Vehículo eliminado", "success")
+        return redirect(url_for("vehiculos.listar"))
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("vehiculos.listar"))

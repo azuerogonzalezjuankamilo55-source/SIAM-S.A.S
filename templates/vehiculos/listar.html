@@ -35,7 +35,7 @@
                             <a href="{{ url_for('vehiculos.editar', id=v.id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{{ url_for('vehiculos.eliminar', id=v.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar?')">
+                            <a href="{{ url_for('vehiculos.eliminar', id=v.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar vehículo?">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

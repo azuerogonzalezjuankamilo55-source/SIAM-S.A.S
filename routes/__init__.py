@@ -9,3 +9,5 @@ from routes.facturas import facturas_bp
 from routes.inventario import inventario_bp
 from routes.ordenes_trabajo import ordenes_trabajo_bp
 from routes.assistant import assistant_bp
+from routes.sedes import sedes_bp
+from routes.api import api_bp

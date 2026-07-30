@@ -10,6 +10,7 @@ from models.cliente import Cliente
 from models.vehiculo import Vehiculo
 from models.mecanico import Mecanico
 from database.db import db
+from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
 
 logger = logging.getLogger("siam.routes.ordenes_trabajo")
@@ -57,23 +58,31 @@ def crear() -> Any:
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
     mecanicos = Mecanico.query.filter_by(activo=True).order_by(Mecanico.nombre).all()
     if form.validate_on_submit():
-        orden = OrdenTrabajo(
-            numero=_generar_numero(),
-            cliente_id=form.cliente_id.data,
-            vehiculo_id=form.vehiculo_id.data,
-            mecanico_id=form.mecanico_id.data or None,
-            fecha_ingreso=form.fecha_ingreso.data,
-            fecha_estimada_entrega=form.fecha_estimada_entrega.data,
-            diagnostico_inicial=form.diagnostico_inicial.data,
-            observaciones=form.observaciones.data,
-        )
-        db.session.add(orden)
-        db.session.flush()
-        _registrar_historial(orden, None, "Orden de trabajo creada")
-        db.session.commit()
-        logger.info("OT creada: %s", orden.numero)
-        flash(f"Orden {orden.numero} creada exitosamente", "success")
-        return redirect(url_for("ordenes_trabajo.listar"))
+        try:
+            orden = OrdenTrabajo(
+                numero=_generar_numero(),
+                cliente_id=form.cliente_id.data,
+                vehiculo_id=form.vehiculo_id.data,
+                mecanico_id=form.mecanico_id.data or None,
+                fecha_ingreso=form.fecha_ingreso.data,
+                fecha_estimada_entrega=form.fecha_estimada_entrega.data,
+                diagnostico_inicial=form.diagnostico_inicial.data,
+                observaciones=form.observaciones.data,
+            )
+            db.session.add(orden)
+            db.session.flush()
+            _registrar_historial(orden, None, "Orden de trabajo creada")
+            safe_commit()
+            logger.info("OT creada: %s", orden.numero)
+            if request.is_json:
+                return json_success(message="Creada correctamente.")
+            flash(f"Orden {orden.numero} creada exitosamente", "success")
+            return redirect(url_for("ordenes_trabajo.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
     return render_template(
         "ordenes_trabajo/form.html", form=form, orden=None,
         clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos,
@@ -96,25 +105,50 @@ def editar(id: int) -> Any:
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
     mecanicos = Mecanico.query.filter_by(activo=True).order_by(Mecanico.nombre).all()
     if form.validate_on_submit():
-        form.populate_obj(orden)
-        db.session.commit()
-        logger.info("OT actualizada: %s", orden.numero)
-        flash(f"Orden {orden.numero} actualizada", "success")
-        return redirect(url_for("ordenes_trabajo.listar"))
+        try:
+            form.populate_obj(orden)
+            safe_commit()
+            logger.info("OT actualizada: %s", orden.numero)
+            if request.is_json:
+                return json_success(message="Actualizada correctamente.")
+            flash(f"Orden {orden.numero} actualizada", "success")
+            return redirect(url_for("ordenes_trabajo.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
     return render_template(
         "ordenes_trabajo/form.html", form=form, orden=orden,
         clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos,
     )
 
 
-@ordenes_trabajo_bp.route("/eliminar/<int:id>")
+@ordenes_trabajo_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
 def eliminar(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
-    db.session.delete(orden)
-    db.session.commit()
-    logger.info("OT eliminada: %s", orden.numero)
-    flash(f"Orden {orden.numero} eliminada", "success")
+    try:
+        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+        if csrf_token:
+            validate_csrf(csrf_token)
+    except Exception:
+        if request.is_json:
+            return json_error(message="CSRF inválido"), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
+        return redirect(url_for("ordenes_trabajo.listar"))
+    try:
+        orden = OrdenTrabajo.query.get_or_404(id)
+        db.session.delete(orden)
+        safe_commit("No se pudo eliminar.")
+        logger.info("OT eliminada: %s", orden.numero)
+        if request.is_json:
+            return json_success(message="Eliminada correctamente.")
+        flash(f"Orden {orden.numero} eliminada", "success")
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
     return redirect(url_for("ordenes_trabajo.listar"))
 
 
@@ -126,15 +160,25 @@ def cambiar_estado(id: int) -> Any:
     observacion = request.form.get("observacion", "")
 
     if estado_nuevo not in ESTADOS_OT:
+        if request.is_json:
+            return json_error(message="Estado inválido")
         flash("Estado inválido", "danger")
         return redirect(url_for("ordenes_trabajo.ver", id=id))
 
-    estado_anterior = orden.estado
-    orden.estado = estado_nuevo
-    _registrar_historial(orden, estado_anterior, observacion)
-    db.session.commit()
-    logger.info("OT %s: %s -> %s", orden.numero, estado_anterior, estado_nuevo)
-    flash(f"Orden {orden.numero} cambiada a: {orden.estado_display}", "success")
+    try:
+        estado_anterior = orden.estado
+        orden.estado = estado_nuevo
+        _registrar_historial(orden, estado_anterior, observacion)
+        safe_commit()
+        logger.info("OT %s: %s -> %s", orden.numero, estado_anterior, estado_nuevo)
+        if request.is_json:
+            return json_success(message=f"Estado cambiado a: {orden.estado_display}")
+        flash(f"Orden {orden.numero} cambiada a: {orden.estado_display}", "success")
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
     return redirect(url_for("ordenes_trabajo.ver", id=id))
 
 

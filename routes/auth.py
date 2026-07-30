@@ -1,27 +1,23 @@
 import logging
 from typing import Any
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 from models import Usuario
 from database.db import db
 from forms import LoginForm, RegisterForm
+from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.auth")
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-limiter = Limiter(key_func=get_remote_address)
-
 
 @auth_bp.route("/login", methods=["GET", "POST"])
-@limiter.limit("10/minute")
 def login() -> Any:
     form = LoginForm()
     if form.validate_on_submit():
-        correo = form.correo.data
+        correo = form.correo.data.strip().lower()
         password = form.password.data
         usuario: Usuario | None = Usuario.query.filter_by(correo=correo).first()
         if usuario and usuario.check_password(password):
@@ -44,18 +40,29 @@ def logout() -> Any:
 def register() -> Any:
     form = RegisterForm()
     if form.validate_on_submit():
-        correo = form.correo.data
+        correo = form.correo.data.strip().lower()
         if Usuario.query.filter_by(correo=correo).first():
+            if request.is_json:
+                return jsonify({"success": False, "error": "El correo ya está registrado"}), 400
             flash("El correo ya está registrado", "danger")
             return render_template("auth/register.html", form=form)
         usuario = Usuario(
-            nombre=form.nombre.data,
+            nombre=form.nombre.data.strip(),
             correo=correo,
         )
         usuario.set_password(form.password.data)
         db.session.add(usuario)
-        db.session.commit()
-        logger.info("Nuevo usuario registrado: %s", correo)
-        flash("Registro exitoso. Inicia sesión.", "success")
-        return redirect(url_for("auth.login"))
+        try:
+            safe_commit()
+            logger.info("Nuevo usuario registrado: %s", correo)
+            if request.is_json:
+                return jsonify({"success": True, "message": "Registro exitoso. Inicia sesión."})
+            flash("Registro exitoso. Inicia sesión.", "success")
+            return redirect(url_for("auth.login"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(str(e))
+            flash(str(e), "danger")
+            return render_template("auth/register.html", form=form)
     return render_template("auth/register.html", form=form)

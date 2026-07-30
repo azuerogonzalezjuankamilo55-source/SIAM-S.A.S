@@ -9,6 +9,7 @@ from models.cliente import Cliente
 from models.vehiculo import Vehiculo
 from models.mecanico import Mecanico
 from database.db import db
+from database.commit import safe_commit, json_success, json_error
 from forms import CitaForm
 
 logger = logging.getLogger("siam.routes.citas")
@@ -30,19 +31,27 @@ def crear() -> Any:
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
     mecanicos = Mecanico.query.filter_by(activo=True).order_by(Mecanico.nombre).all()
     if form.validate_on_submit():
-        cita = Cita(
-            cliente_id=form.cliente_id.data,
-            vehiculo_id=form.vehiculo_id.data,
-            mecanico_id=form.mecanico_id.data or None,
-            fecha=form.fecha.data,
-            hora=form.hora.data,
-            descripcion=form.descripcion.data,
-        )
-        db.session.add(cita)
-        db.session.commit()
-        logger.info("Cita creada: #%s para cliente %s", cita.id, cita.cliente_id)
-        flash("Cita agendada", "success")
-        return redirect(url_for("citas.listar"))
+        try:
+            cita = Cita(
+                cliente_id=form.cliente_id.data,
+                vehiculo_id=form.vehiculo_id.data,
+                mecanico_id=form.mecanico_id.data or None,
+                fecha=form.fecha.data,
+                hora=form.hora.data,
+                descripcion=form.descripcion.data,
+            )
+            db.session.add(cita)
+            safe_commit()
+            logger.info("Cita creada: #%s para cliente %s", cita.id, cita.cliente_id)
+            if request.is_json:
+                return json_success(message="Creada correctamente.")
+            flash("Cita agendada", "success")
+            return redirect(url_for("citas.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
     return render_template("citas/form.html", form=form, clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos)
 
 
@@ -55,34 +64,56 @@ def editar(id: int) -> Any:
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
     mecanicos = Mecanico.query.filter_by(activo=True).order_by(Mecanico.nombre).all()
     if form.validate_on_submit():
-        form.populate_obj(cita)
-        db.session.commit()
-        logger.info("Cita actualizada: #%s", cita.id)
-        flash("Cita actualizada", "success")
-        return redirect(url_for("citas.listar"))
+        try:
+            form.populate_obj(cita)
+            safe_commit()
+            logger.info("Cita actualizada: #%s", cita.id)
+            if request.is_json:
+                return json_success(message="Actualizada correctamente.")
+            flash("Cita actualizada", "success")
+            return redirect(url_for("citas.listar"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
     return render_template("citas/form.html", form=form, cita=cita, clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos)
 
 
 @citas_bp.route("/eliminar/<int:id>")
 @login_required
 def eliminar(id: int) -> Any:
-    cita = Cita.query.get_or_404(id)
-    db.session.delete(cita)
-    db.session.commit()
-    logger.info("Cita eliminada: #%s", id)
-    flash("Cita eliminada", "success")
+    try:
+        cita = Cita.query.get_or_404(id)
+        db.session.delete(cita)
+        safe_commit("No se pudo eliminar.")
+        logger.info("Cita eliminada: #%s", id)
+        if request.is_json:
+            return json_success(message="Eliminada correctamente.")
+        flash("Cita eliminada", "success")
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
     return redirect(url_for("citas.listar"))
 
 
 @citas_bp.route("/cambiar-estado/<int:id>/<estado>")
 @login_required
 def cambiar_estado(id: int, estado: str) -> Any:
-    cita = Cita.query.get_or_404(id)
-    estados_validos = ("pendiente", "en_proceso", "completado", "cancelado")
-    if estado in estados_validos:
-        cita.estado = estado
-        db.session.commit()
-        logger.info("Cita #%s cambió a estado: %s", id, estado)
+    try:
+        cita = Cita.query.get_or_404(id)
+        estados_validos = ("pendiente", "en_proceso", "completado", "cancelado")
+        if estado in estados_validos:
+            cita.estado = estado
+            safe_commit()
+            logger.info("Cita #%s cambió a estado: %s", id, estado)
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
     return redirect(url_for("citas.listar"))
 
 

@@ -1,130 +1,108 @@
 {% extends "base.html" %}
 {% block title %}Asistente IA{% endblock %}
+{% block extra_head %}
+<style>
+#chatContainer { height: calc(100vh - 200px); min-height: 500px; display: flex; flex-direction: column; }
+#chatMessages { flex: 1; overflow-y: auto; padding: 1rem; scroll-behavior: smooth; }
+.chat-bubble { word-wrap: break-word; white-space: pre-wrap; }
+.chat-message.user .chat-bubble { border-bottom-right-radius: 4px !important; }
+.chat-message.assistant .chat-bubble { border-bottom-left-radius: 4px !important; }
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing-dots span { width: 8px; height: 8px; background: var(--bs-secondary); border-radius: 50%; animation: typing 1.4s infinite ease-in-out; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+#chatInput { resize: none; max-height: 120px; }
+.chat-actions .btn { transition: all 0.2s; }
+.chat-actions .btn:hover { transform: translateY(-1px); }
+</style>
+{% endblock %}
 {% block content %}
-<div class="d-flex flex-column h-100" style="min-height: calc(100vh - 120px);">
-    <h4 class="mb-3"><i class="bi bi-robot me-2"></i>Asistente IA</h4>
-
-    <div class="card flex-grow-1 d-flex flex-column" style="min-height: 0;">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-chat-dots me-2"></i>Conversación</span>
-            <button id="btnLimpiar" class="btn btn-sm btn-outline-secondary" title="Limpiar conversación">
-                <i class="bi bi-trash"></i>
-            </button>
+<div id="chatContainer" class="card" data-aos="fade-up">
+    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-robot fs-5"></i>
+            <div>
+                <h6 class="mb-0">Asistente SIAM</h6>
+                <small class="text-white-50">Online</small>
+            </div>
         </div>
-        <div id="chatBox" class="card-body overflow-auto" style="flex: 1; min-height: 0; max-height: 65vh;">
-            {% if historial %}
-            {% for msg in historial %}
-            <div class="d-flex mb-3 {{ 'justify-content-end' if msg.rol == 'usuario' else 'justify-content-start' }}">
-                <div class="px-3 py-2 rounded-3 {{ 'bg-primary text-white' if msg.rol == 'usuario' else 'bg-dark text-light' }}" style="max-width: 80%;">
-                    <div class="small" style="white-space: pre-wrap;">{{ msg.texto }}</div>
-                    <small class="opacity-50 d-block text-end mt-1" style="font-size: .65rem;">{{ msg.hora }}</small>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="text-center text-muted py-5">
-                <i class="bi bi-robot fs-1 d-block mb-2"></i>
-                <p>¡Pregúntame lo que necesites!</p>
-            </div>
-            {% endif %}
-            <div id="typingIndicator" class="d-none mb-3">
-                <div class="px-3 py-2 rounded-3 bg-dark text-light d-inline-block">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                    Pensando...
+        <button class="btn btn-sm btn-outline-light" onclick="clearChat()" title="Limpiar conversación">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+    <div id="chatMessages" class="card-body bg-dark bg-opacity-25">
+        {% if historial %}
+        {% for msg in historial %}
+        <div class="chat-message chat-{{ msg.rol }} mb-3">
+            <div class="d-flex {{ 'justify-content-end' if msg.rol == 'usuario' else 'justify-content-start' }}">
+                <div class="chat-bubble rounded-3 p-3 {{ 'bg-primary text-white' if msg.rol == 'usuario' else 'bg-dark border' }}" style="max-width: 80%;">
+                    <div class="chat-text">{{ msg.texto.replace('\n', '<br>') | safe }}</div>
+                    {% if msg.hora %}
+                    <div class="chat-time small {{ 'text-white-50' if msg.rol == 'usuario' else 'text-secondary' }} mt-1">{{ msg.hora }}</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <form id="chatForm" class="d-flex gap-2">
-                <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje..." autofocus>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-send"></i>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="card-footer border-top">
+        <form id="chatForm" class="d-flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="flex-grow-1 position-relative">
+                <textarea id="chatInput" class="form-control" rows="1" placeholder="Escribe tu mensaje..." style="padding-right: 40px;"></textarea>
+                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute end-0 bottom-0 me-1 mb-1" onclick="document.getElementById('chatInput').value='';" title="Limpiar">
+                    <i class="bi bi-x"></i>
                 </button>
-            </form>
-            <div class="mt-2 d-flex gap-2 flex-wrap">
-                <button class="btn btn-sm btn-outline-info chat-quick">¿Cuántos clientes hay?</button>
-                <button class="btn btn-sm btn-outline-info chat-quick">Stock bajo</button>
-                <button class="btn btn-sm btn-outline-info chat-quick">Servicios disponibles</button>
-                <button class="btn btn-sm btn-outline-info chat-quick">Ingresos hoy</button>
-                <button class="btn btn-sm btn-outline-info chat-quick">Ayuda</button>
             </div>
-        </div>
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-send me-1"></i> Enviar
+            </button>
+        </form>
+        <small class="text-secondary mt-1 d-block">Presiona Enter para enviar, Shift+Enter para nueva línea</small>
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
-(function() {
-    const chatBox = document.getElementById('chatBox');
-    const chatForm = document.getElementById('chatForm');
-    const chatInput = document.getElementById('chatInput');
-    const typingIndicator = document.getElementById('typingIndicator');
-    const btnLimpiar = document.getElementById('btnLimpiar');
+document.addEventListener('DOMContentLoaded', function() {
+    initChat();
+    scrollChat();
 
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const mensaje = chatInput.value.trim();
-        if (!mensaje) return;
-        chatInput.value = '';
-        chatInput.disabled = true;
-        typingIndicator.classList.remove('d-none');
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        fetch('{{ url_for("assistant.ask") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
-            body: JSON.stringify({ mensaje: mensaje })
-        })
-        .then(r => r.json())
-        .then(data => {
-            agregarMensaje('usuario', mensaje);
-            agregarMensaje('asistente', data.respuesta);
-        })
-        .catch(() => {
-            agregarMensaje('asistente', 'Ocurrió un error. Intenta de nuevo.');
-        })
-        .finally(() => {
-            typingIndicator.classList.add('d-none');
-            chatInput.disabled = false;
-            chatInput.focus();
+    var input = document.getElementById('chatInput');
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
         });
-    });
 
-    function agregarMensaje(rol, texto) {
-        const ahora = new Date();
-        const hora = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-        const div = document.createElement('div');
-        div.className = 'd-flex mb-3 ' + (rol === 'usuario' ? 'justify-content-end' : 'justify-content-start');
-        div.innerHTML = `<div class="px-3 py-2 rounded-3 ${rol === 'usuario' ? 'bg-primary text-white' : 'bg-dark text-light'}" style="max-width: 80%;">
-            <div class="small" style="white-space: pre-wrap;">${escapeHtml(texto)}</div>
-            <small class="opacity-50 d-block text-end mt-1" style="font-size: .65rem;">${hora}</small>
-        </div>`;
-        chatBox.insertBefore(div, typingIndicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
     }
+});
 
-    function escapeHtml(text) {
-        const d = document.createElement('div');
-        d.textContent = text;
-        return d.innerHTML;
-    }
-
-    document.querySelectorAll('.chat-quick').forEach(btn => {
-        btn.addEventListener('click', function() {
-            chatInput.value = this.textContent;
-            chatForm.dispatchEvent(new Event('submit'));
-        });
+function clearChat() {
+    if (!confirm('¿Limpiar la conversación?')) return;
+    fetch('/asistente/clear', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            var container = document.getElementById('chatMessages');
+            if (container) container.innerHTML = '';
+            addChatMessage('assistant', '¡Hola! Soy el asistente de SIAM. ¿En qué puedo ayudarte?');
+        }
     });
-
-    btnLimpiar.addEventListener('click', function() {
-        fetch('{{ url_for("assistant.clear") }}', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token() }}' } })
-        .then(() => {
-            chatBox.querySelectorAll('.d-flex.mb-3').forEach(el => el.remove());
-            chatInput.focus();
-        });
-    });
-})();
+}
 </script>
 {% endblock %}

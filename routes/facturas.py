@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_file
 from flask_login import login_required, current_user
+from flask_wtf.csrf import validate_csrf
 
 from models.cita import Cita
 from models.servicio import Servicio
@@ -14,8 +15,9 @@ from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
 from database.db import db
 from services.factura_service import FacturaService, FacturaInput
-from forms import FacturaForm, PagoForm, TallerConfigForm
+from forms import PagoForm, TallerConfigForm
 from exceptions import BusinessRuleException, NotFoundException
+from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.facturas")
 facturas_bp = Blueprint("facturas", __name__, url_prefix="/facturas")
@@ -40,6 +42,9 @@ def crear(cita_id: int) -> Any:
 
     if request.method == "POST":
         try:
+            csrf_token = request.form.get("csrf_token")
+            if csrf_token:
+                validate_csrf(csrf_token)
             input_data = FacturaInput(
                 cita_id=cita_id,
                 servicio_ids=[int(s) for s in request.form.getlist("servicio_id")],
@@ -52,11 +57,22 @@ def crear(cita_id: int) -> Any:
             )
             FacturaService.generar(input_data)
             logger.info("Factura creada para cita %s", cita_id)
+            if request.is_json:
+                return json_success(message="Factura generada exitosamente.")
             flash("Factura generada exitosamente", "success")
             return redirect(url_for("facturas.listar"))
         except (BusinessRuleException, NotFoundException) as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
             flash(str(e), "danger")
             logger.warning("Error al crear factura: %s", e)
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
+            logger.error("Error inesperado al crear factura: %s", e)
 
     return render_template("facturas/form.html", cita=cita, servicios=servicios,
                            config=ConfiguracionTaller.get_config())
@@ -91,11 +107,22 @@ def crear_desde_ot(ot_id: int) -> Any:
             )
             FacturaService.generar(input_data)
             logger.info("Factura creada desde OT %s", ot_id)
+            if request.is_json:
+                return json_success(message="Factura generada desde la orden de trabajo.")
             flash("Factura generada desde la orden de trabajo", "success")
             return redirect(url_for("facturas.listar"))
         except (BusinessRuleException, NotFoundException) as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
             flash(str(e), "danger")
             logger.warning("Error al crear factura desde OT: %s", e)
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
+            logger.error("Error inesperado al crear factura desde OT: %s", e)
 
     return render_template("facturas/form.html", cita=cita, servicios=servicios, ot=ot,
                            config=ConfiguracionTaller.get_config())
@@ -156,26 +183,55 @@ def pagar(id: int) -> Any:
                 notas=form.notas.data or "",
             )
             logger.info("Pago registrado en factura %s", factura.numero)
+            if request.is_json:
+                return json_success(message="Pago registrado exitosamente.")
             flash("Pago registrado exitosamente", "success")
             return redirect(url_for("facturas.ver", id=id))
         except (BusinessRuleException, NotFoundException) as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
             flash(str(e), "danger")
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
+            logger.error("Error inesperado al registrar pago: %s", e)
 
     return render_template("facturas/pagar.html", factura=factura, form=form)
 
 
-@facturas_bp.route("/anular/<int:id>")
+@facturas_bp.route("/anular/<int:id>", methods=["POST"])
 @login_required
 def anular(id: int) -> Any:
+    try:
+        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+        if csrf_token:
+            validate_csrf(csrf_token)
+    except Exception:
+        flash("Error de validación. Intenta de nuevo.", "danger")
+        return redirect(url_for("facturas.ver", id=id))
     factura = Factura.query.get_or_404(id)
     if factura.monto_pagado > 0:
+        if request.is_json:
+            return json_error(message="No se puede anular: tiene pagos registrados")
         flash("No se puede anular: tiene pagos registrados", "danger")
         return redirect(url_for("facturas.ver", id=id))
-    factura.estado = "anulado"
-    db.session.commit()
-    logger.info("Factura %s anulada", factura.numero)
-    flash("Factura anulada", "success")
-    return redirect(url_for("facturas.listar"))
+    try:
+        factura.estado = "anulado"
+        db.session.commit()
+        logger.info("Factura %s anulada", factura.numero)
+        if request.is_json:
+            return json_success(message="Factura anulada.")
+        flash("Factura anulada", "success")
+        return redirect(url_for("facturas.listar"))
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("facturas.ver", id=id))
 
 
 @facturas_bp.route("/configuracion", methods=["GET", "POST"])
@@ -202,26 +258,51 @@ def configuracion() -> Any:
             form.logo.data.save(os.path.join(upload_dir, filename))
             config.logo_path = f"/static/uploads/{filename}"
 
-        db.session.commit()
-        logger.info("Configuración del taller actualizada")
-        flash("Configuración guardada", "success")
-        return redirect(url_for("facturas.configuracion"))
+        try:
+            db.session.commit()
+            logger.info("Configuración del taller actualizada")
+            if request.is_json:
+                return json_success(message="Configuración guardada.")
+            flash("Configuración guardada", "success")
+            return redirect(url_for("facturas.configuracion"))
+        except Exception as e:
+            db.session.rollback()
+            if request.is_json:
+                return json_error(message=str(e))
+            flash(str(e), "danger")
+            return redirect(url_for("facturas.configuracion"))
 
     return render_template("facturas/configuracion.html", form=form, config=config)
 
 
-@facturas_bp.route("/eliminar-pago/<int:pago_id>")
+@facturas_bp.route("/eliminar-pago/<int:pago_id>", methods=["POST"])
 @login_required
 def eliminar_pago(pago_id: int) -> Any:
+    try:
+        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+        if csrf_token:
+            validate_csrf(csrf_token)
+    except Exception:
+        flash("Error de validación. Intenta de nuevo.", "danger")
+        return redirect(url_for("facturas.listar"))
     pago = PagoFactura.query.get_or_404(pago_id)
     factura_id = pago.factura_id
-    db.session.delete(pago)
-    factura = Factura.query.get(factura_id)
-    if factura.monto_pagado <= 0:
-        factura.estado = "pendiente"
-    elif factura.monto_pagado < factura.total:
-        factura.estado = "parcial"
-    db.session.commit()
-    logger.info("Pago %s eliminado", pago_id)
-    flash("Pago eliminado", "success")
-    return redirect(url_for("facturas.ver", id=factura_id))
+    try:
+        db.session.delete(pago)
+        factura = Factura.query.get(factura_id)
+        if factura.monto_pagado <= 0:
+            factura.estado = "pendiente"
+        elif factura.monto_pagado < factura.total:
+            factura.estado = "parcial"
+        db.session.commit()
+        logger.info("Pago %s eliminado", pago_id)
+        if request.is_json:
+            return json_success(message="Pago eliminado.")
+        flash("Pago eliminado", "success")
+        return redirect(url_for("facturas.ver", id=factura_id))
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("facturas.ver", id=factura_id))

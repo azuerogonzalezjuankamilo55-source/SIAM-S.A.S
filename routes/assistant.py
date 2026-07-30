@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required
 
 from services.assistant_service import AssistantService
+from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.assistant")
 assistant_bp = Blueprint("assistant", __name__, url_prefix="/asistente")
@@ -29,19 +30,23 @@ def ask():
 
     logger.info("Consulta al asistente: %s", mensaje)
 
-    if "chat_history" not in session:
-        session["chat_history"] = []
+    try:
+        if "chat_history" not in session:
+            session["chat_history"] = []
 
-    hora = datetime.now().strftime("%H:%M")
-    session["chat_history"].append({"rol": "usuario", "texto": mensaje, "hora": hora})
+        hora = datetime.now().strftime("%H:%M")
+        session["chat_history"].append({"rol": "usuario", "texto": mensaje, "hora": hora})
 
-    respuesta = AssistantService.process_message(mensaje)
-    session["chat_history"].append({"rol": "asistente", "texto": respuesta["text"], "hora": datetime.now().strftime("%H:%M")})
+        respuesta = AssistantService.process_message(mensaje)
+        session["chat_history"].append({"rol": "asistente", "texto": respuesta["text"], "hora": datetime.now().strftime("%H:%M")})
 
-    if len(session["chat_history"]) > 50:
-        session["chat_history"] = session["chat_history"][-50:]
+        if len(session["chat_history"]) > 50:
+            session["chat_history"] = session["chat_history"][-50:]
 
-    session.modified = True
+        session.modified = True
+    except Exception as e:
+        logger.error("Error en asistente: %s", e)
+        return jsonify({"error": "Error procesando la consulta"}), 500
 
     return jsonify({
         "respuesta": respuesta["text"],
@@ -53,5 +58,10 @@ def ask():
 @assistant_bp.route("/clear", methods=["POST"])
 @login_required
 def clear():
-    session.pop("chat_history", None)
+    try:
+        session.pop("chat_history", None)
+        session.modified = True
+    except Exception as e:
+        logger.error("Error al limpiar sesión del asistente: %s", e)
+        return jsonify({"ok": False, "error": str(e)}), 500
     return jsonify({"ok": True})

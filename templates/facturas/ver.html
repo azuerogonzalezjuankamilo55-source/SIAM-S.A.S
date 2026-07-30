@@ -164,7 +164,7 @@
                         <td><code>{{ p.referencia or "-" }}</code></td>
                         <td>{{ p.notas or "-" }}</td>
                         <td>
-                            <a href="{{ url_for('facturas.eliminar_pago', pago_id=p.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este pago?')">
+                            <a href="{{ url_for('facturas.eliminar_pago', pago_id=p.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar este pago?">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

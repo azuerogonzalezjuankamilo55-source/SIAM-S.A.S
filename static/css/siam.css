@@ -1,10 +1,12 @@
 :root {
     --sidebar-width: 250px;
+    --transition-speed: 0.3s;
 }
 
 body {
     overflow-x: hidden;
     background-color: var(--bs-dark-bg-subtle);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 .sidebar {
@@ -14,7 +16,7 @@ body {
     border-right: 1px solid var(--bs-border-color);
     position: sticky;
     top: 0;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-speed) ease;
     z-index: 1000;
 }
 
@@ -55,6 +57,15 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+.stat-card {
+    transition: all var(--transition-speed) ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
 .table th {
     font-weight: 600;
     font-size: 0.85rem;
@@ -65,6 +76,19 @@ body {
 
 .badge {
     font-weight: 500;
+}
+
+.login-page {
+    background: linear-gradient(135deg, var(--bs-dark) 0%, #1a1a2e 100%);
+}
+
+.hero-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 @media (max-width: 768px) {
@@ -93,15 +117,65 @@ body {
     }
 }
 
-.login-page {
-    background: linear-gradient(135deg, var(--bs-dark) 0%, #1a1a2e 100%);
+.btn {
+    transition: all 0.2s ease;
 }
 
-.hero-icon {
-    animation: float 3s ease-in-out infinite;
+.btn:hover {
+    transform: translateY(-1px);
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bs-dark) 25%, var(--bs-gray-700) 50%, var(--bs-dark) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    height: 1rem;
+    margin-bottom: 0.5rem;
+    width: 80%;
+}
+
+.skeleton-card {
+    height: 100px;
+    border-radius: 8px;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+a {
+    transition: color 0.2s ease;
+}
+
+.navbar {
+    transition: background-color var(--transition-speed) ease;
 }

@@ -89,7 +89,7 @@
                                 <a href="{{ url_for('inventario.editar', id=i.id) }}" class="btn btn-outline-warning" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ url_for('inventario.eliminar', id=i.id) }}" class="btn btn-outline-danger" title="Eliminar" onclick="return confirm('¿Eliminar {{ i.nombre }}?')">
+                                <a href="{{ url_for('inventario.eliminar', id=i.id) }}" class="btn btn-outline-danger" title="Eliminar" data-confirm="¿Eliminar {{ i.nombre }}?">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>

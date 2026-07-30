@@ -116,7 +116,7 @@
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('ordenes_trabajo.cambiar_estado', id=orden.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
                     <div class="mb-2">
                         <select name="estado" class="form-select" required>
                             {% for e in estados %}

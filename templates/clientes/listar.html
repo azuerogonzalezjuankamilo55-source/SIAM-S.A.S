@@ -33,7 +33,7 @@
                             <a href="{{ url_for('clientes.editar', id=c.id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{{ url_for('clientes.eliminar', id=c.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este cliente?')">
+                            <a href="{{ url_for('clientes.eliminar', id=c.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar este cliente?">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

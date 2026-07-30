@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Any
 
-from flask import Flask, redirect, url_for, render_template, jsonify, send_from_directory
+from flask import Flask, redirect, url_for, render_template, send_from_directory
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
@@ -71,6 +71,7 @@ def configure_security_headers(app: Flask) -> None:
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["X-Powered-By"] = "SIAM"
         if not app.debug:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
             response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com; img-src 'self' data:; font-src 'self' cdn.jsdelivr.net; connect-src 'self'"
@@ -119,6 +120,8 @@ def register_blueprints(app: Flask) -> None:
         inventario_bp,
         ordenes_trabajo_bp,
         assistant_bp,
+        sedes_bp,
+        api_bp,
     )
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -131,6 +134,8 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(inventario_bp)
     app.register_blueprint(ordenes_trabajo_bp)
     app.register_blueprint(assistant_bp)
+    app.register_blueprint(sedes_bp)
+    app.register_blueprint(api_bp)
 
 
 def register_error_handlers(app: Flask) -> None:

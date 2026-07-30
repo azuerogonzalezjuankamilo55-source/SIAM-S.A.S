@@ -40,7 +40,7 @@
                             <a href="{{ url_for('inventario.editar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{{ url_for('inventario.eliminar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar categoría {{ c.nombre }}?')">
+                            <a href="{{ url_for('inventario.eliminar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar categoría {{ c.nombre }}?">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

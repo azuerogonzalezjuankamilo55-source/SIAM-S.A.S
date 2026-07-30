@@ -28,6 +28,6 @@ class RegisterForm(FlaskForm):
     )
     password = PasswordField(
         "Contraseña",
-        validators=[DataRequired(), Length(min=4, max=128)],
+        validators=[DataRequired(), Length(min=8, max=128)],
     )
     submit = SubmitField("Registrarse")

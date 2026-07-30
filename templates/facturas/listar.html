@@ -95,7 +95,7 @@
                                 </a>
                                 {% endif %}
                                 {% if f.estado == "pendiente" and f.monto_pagado == 0 %}
-                                <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-outline-danger" title="Anular" onclick="return confirm('¿Anular factura {{ f.numero }}?')">
+                                <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-outline-danger" title="Anular" data-confirm="¿Anular factura {{ f.numero }}?">
                                     <i class="bi bi-x-circle"></i>
                                 </a>
                                 {% endif %}

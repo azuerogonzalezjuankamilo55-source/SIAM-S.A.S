@@ -55,7 +55,7 @@
                                 <a href="{{ url_for('ordenes_trabajo.editar', id=ot.id) }}" class="btn btn-outline-warning">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Eliminar orden {{ ot.numero }}?')">
+                                <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-outline-danger" data-confirm="¿Eliminar orden {{ ot.numero }}?">
                                     <i class="bi bi-trash"></i>
                                 </a>
                                 {% endif %}
