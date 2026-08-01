@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reporte SIAM</title>
+<style>
+    @page { size: A4 landscape; margin: 1.5cm; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #212529; }
+    h1 { font-size: 18px; margin: 0; color: #0d6efd; }
+    h2 { font-size: 13px; margin: 14px 0 6px; border-bottom: 2px solid #0d6efd; padding-bottom: 3px; }
+    .subtitulo { color: #6c757d; margin: 2px 0 0; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    th, td { border: 1px solid #dee2e6; padding: 4px 6px; text-align: left; }
+    th { background: #e9ecef; }
+    td.num, th.num { text-align: right; }
+    .kpis { width: 100%; margin-bottom: 14px; }
+    .kpis td { border: none; text-align: center; background: #f8f9fa; }
+    .kpis .valor { font-size: 16px; font-weight: bold; color: #198754; }
+    .footer { margin-top: 16px; color: #6c757d; font-size: 9px; }
+</style>
+</head>
+<body>
+    <h1>SIAM - Reporte de indicadores</h1>
+    <p class="subtitulo">Período: {{ desde.isoformat() }} a {{ hasta.isoformat() }} - Generado el {{ data.ingresos_por_dia and "hoy" or "hoy" }}</p>
+
+    <table class="kpis">
+        <tr>
+            <td><div>Ingresos</div><div class="valor">${{ "{:,.0f}".format(data.ingresos) }}</div></td>
+            <td><div>Facturas</div><div class="valor">{{ data.facturas_periodo }}</div></td>
+            <td><div>Ticket promedio</div><div class="valor">${{ "{:,.0f}".format(data.ticket_promedio) }}</div></td>
+            <td><div>Cartera</div><div class="valor">${{ "{:,.0f}".format(data.cartera) }}</div></td>
+            <td><div>Valor inventario</div><div class="valor">${{ "{:,.0f}".format(data.valor_inventario) }}</div></td>
+        </tr>
+    </table>
+
+    <h2>Ingresos por día</h2>
+    <table>
+        <thead><tr><th>Fecha</th><th class="num">Ingresos</th></tr></thead>
+        <tbody>
+            {% for dia, total in data.ingresos_por_dia %}
+            <tr><td>{{ dia }}</td><td class="num">${{ "{:,.0f}".format(total) }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Ingresos por método de pago</h2>
+    <table>
+        <thead><tr><th>Método</th><th class="num">Ingresos</th></tr></thead>
+        <tbody>
+            {% for metodo, total in data.ingresos_por_metodo %}
+            <tr><td>{{ metodo }}</td><td class="num">${{ "{:,.0f}".format(total) }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Facturación por cliente</h2>
+    <table>
+        <thead><tr><th>Cliente</th><th class="num">Facturas</th><th class="num">Total</th></tr></thead>
+        <tbody>
+            {% for f in data.facturacion_clientes %}
+            <tr><td>{{ f.cliente }}</td><td class="num">{{ f.facturas }}</td><td class="num">${{ "{:,.0f}".format(f.total) }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Servicios más vendidos</h2>
+    <table>
+        <thead><tr><th>Servicio</th><th class="num">Cantidad</th><th class="num">Total</th></tr></thead>
+        <tbody>
+            {% for s in data.servicios_vendidos %}
+            <tr><td>{{ s.servicio }}</td><td class="num">{{ s.cantidad }}</td><td class="num">${{ "{:,.0f}".format(s.total) }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Órdenes por estado y productividad</h2>
+    <table>
+        <thead><tr><th>Estado</th><th class="num">Total</th><th>Mecánico</th><th class="num">OTs entregadas</th></tr></thead>
+        <tbody>
+            {% for estado, total in data.ots_por_estado %}
+            <tr>
+                <td>{{ estado|replace('_', ' ')|capitalize }}</td><td class="num">{{ total }}</td>
+                {% if loop.index0 < data.productividad_mecanicos|length %}
+                <td>{{ data.productividad_mecanicos[loop.index0].mecanico }}</td>
+                <td class="num">{{ data.productividad_mecanicos[loop.index0].ots }}</td>
+                {% else %}
+                <td></td><td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Movimientos de inventario</h2>
+    <table>
+        <thead><tr><th>Entradas</th><th>Salidas</th><th>Ajustes</th><th>Bajas</th></tr></thead>
+        <tbody>
+            <tr>
+                <td class="num">{{ data.movimientos_inventario.entradas }}</td>
+                <td class="num">{{ data.movimientos_inventario.salidas }}</td>
+                <td class="num">{{ data.movimientos_inventario.ajustes }}</td>
+                <td class="num">{{ data.movimientos_inventario.bajas }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="footer">SIAM v2.0 - Reporte generado automáticamente.</p>
+</body>
+</html>

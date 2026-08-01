@@ -17,6 +17,7 @@ class Servicio(db.Model):
     precio_estimado: Decimal | None = db.Column(db.Numeric(10, 2))
     duracion_estimada: int | None = db.Column(db.Integer, comment="Minutos")
     categoria: str | None = db.Column(db.String(50))
+    imagen_path: str | None = db.Column(db.String(300))
     activo: bool = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 

@@ -35,4 +35,8 @@ def api_stats() -> Any:
         "inventario_bajo": data.inventario_bajo,
         "ingresos_hoy": data.ingresos_hoy,
         "ingresos_mes": data.ingresos_mes,
+        "por_cobrar": data.por_cobrar,
+        "ticket_promedio": data.ticket_promedio,
+        "ot_retrasadas": data.ot_retrasadas_count,
+        "tasa_completacion_citas": round(data.tasa_completacion_citas, 1),
     })

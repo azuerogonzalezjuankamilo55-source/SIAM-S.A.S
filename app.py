@@ -132,6 +132,10 @@ def register_blueprints(app: Flask) -> None:
         assistant_bp,
         sedes_bp,
         api_bp,
+        portal_bp,
+        ia_bp,
+        recordatorios_bp,
+        reportes_bp,
     )
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -146,6 +150,10 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(assistant_bp)
     app.register_blueprint(sedes_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(portal_bp)
+    app.register_blueprint(ia_bp)
+    app.register_blueprint(recordatorios_bp)
+    app.register_blueprint(reportes_bp)
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -196,6 +204,9 @@ def register_seo_routes(app: Flask) -> None:
 
 
 def register_template_processors(app: Flask) -> None:
+    from services.image_service import ImageService
+    from flask import g
+
     @app.context_processor
     def inject_globals():
         return {
@@ -204,6 +215,22 @@ def register_template_processors(app: Flask) -> None:
             "app_url": os.getenv("APP_URL", "https://siam.onrender.com"),
             "current_year": __import__("datetime").datetime.now().year,
         }
+
+    @app.context_processor
+    def inject_taller_config():
+        config = getattr(g, "_taller_config", None)
+        if config is None:
+            try:
+                from models.configuracion_taller import ConfiguracionTaller
+                config = ConfiguracionTaller.query.first()
+            except Exception:
+                config = None
+            g._taller_config = config
+        return {"taller_config": config}
+
+    @app.template_filter("img_thumb")
+    def img_thumb_filter(ruta_publica: str | None) -> str | None:
+        return ImageService.thumb_url(ruta_publica)
 
 
 @login_manager.user_loader

@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from typing import Any
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
@@ -7,10 +8,12 @@ from flask_wtf.csrf import validate_csrf
 
 from models.inventario import Inventario
 from models.categoria_inventario import CategoriaInventario
-from models.movimiento_inventario import MovimientoInventario
+from models.movimiento_inventario import MovimientoInventario, TIPOS_MOVIMIENTO
+from models.recordatorio import Recordatorio
 from database.db import db
 from forms import InventarioForm, MovimientoInventarioForm, CategoriaInventarioForm
 from database.commit import safe_commit, json_success, json_error
+from services.inventario_service import InventarioService
 
 logger = logging.getLogger("siam.routes.inventario")
 inventario_bp = Blueprint("inventario", __name__, url_prefix="/inventario")
@@ -21,8 +24,11 @@ inventario_bp = Blueprint("inventario", __name__, url_prefix="/inventario")
 def listar() -> Any:
     categoria_id = request.args.get("categoria_id", type=int)
     stock_bajo = request.args.get("stock_bajo", type=bool)
+    incluir_bajas = request.args.get("incluir_bajas") == "1"
     q = Inventario.query
 
+    if not incluir_bajas:
+        q = q.filter(Inventario.activo.is_(True))
     if categoria_id:
         q = q.filter(Inventario.categoria_id == categoria_id)
     if stock_bajo:
@@ -30,7 +36,13 @@ def listar() -> Any:
 
     items = q.order_by(Inventario.nombre).all()
     categorias = CategoriaInventario.query.order_by(CategoriaInventario.nombre).all()
-    return render_template("inventario/listar.html", items=items, categorias=categorias)
+    valorizacion = InventarioService.valorizacion()
+    return render_template(
+        "inventario/listar.html",
+        items=items,
+        categorias=categorias,
+        valorizacion=valorizacion,
+    )
 
 
 @inventario_bp.route("/crear", methods=["GET", "POST"])
@@ -114,33 +126,79 @@ def editar(id: int) -> Any:
     return render_template("inventario/form.html", form=form, item=item)
 
 
-@inventario_bp.route("/eliminar/<int:id>", methods=["POST"])
+@inventario_bp.route("/baja/<int:id>", methods=["POST"])
 @login_required
-def eliminar(id: int) -> Any:
-    try:
-        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
-        if csrf_token:
-            validate_csrf(csrf_token)
-    except Exception:
-        if request.is_json:
-            return jsonify({"error": "CSRF inválido"}), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
-        return redirect(url_for("inventario.listar"))
+def baja(id: int) -> Any:
     item = Inventario.query.get_or_404(id)
+    motivo = request.form.get("motivo") or ""
     try:
-        db.session.delete(item)
-        safe_commit()
-        logger.info("Producto eliminado: %s", item.nombre)
+        InventarioService.dar_baja(item, motivo, current_user.id)
+        logger.info("Producto dado de baja: %s", item.nombre)
         if request.is_json:
-            return json_success(message="Producto eliminado.")
-        flash("Producto eliminado", "success")
-        return redirect(url_for("inventario.listar"))
+            return json_success(message="Producto dado de baja.")
+        flash("Producto dado de baja", "success")
+        return redirect(url_for("inventario.ver", id=item.id))
     except Exception as e:
         db.session.rollback()
         if request.is_json:
             return json_error(message=str(e))
         flash(str(e), "danger")
-        return redirect(url_for("inventario.listar"))
+        return redirect(url_for("inventario.ver", id=item.id))
+
+
+@inventario_bp.route("/restaurar/<int:id>", methods=["POST"])
+@login_required
+def restaurar(id: int) -> Any:
+    item = Inventario.query.get_or_404(id)
+    try:
+        InventarioService.restaurar(item, current_user.id)
+        logger.info("Producto restaurado: %s", item.nombre)
+        if request.is_json:
+            return json_success(message="Producto restaurado.")
+        flash("Producto restaurado", "success")
+        return redirect(url_for("inventario.ver", id=item.id))
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("inventario.ver", id=item.id))
+
+
+@inventario_bp.route("/kardex")
+@login_required
+def kardex() -> Any:
+    inventario_id = request.args.get("inventario_id", type=int)
+    tipo = request.args.get("tipo") or ""
+    fecha_desde_raw = request.args.get("fecha_desde") or ""
+    fecha_hasta_raw = request.args.get("fecha_hasta") or ""
+    if tipo not in TIPOS_MOVIMIENTO:
+        tipo = ""
+    try:
+        fecha_desde = date.fromisoformat(fecha_desde_raw) if fecha_desde_raw else None
+    except ValueError:
+        fecha_desde = None
+    try:
+        fecha_hasta = date.fromisoformat(fecha_hasta_raw) if fecha_hasta_raw else None
+    except ValueError:
+        fecha_hasta = None
+
+    movimientos = InventarioService.get_kardex(
+        inventario_id=inventario_id,
+        tipo=tipo or None,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta,
+    )
+    productos = Inventario.query.filter_by(activo=True).order_by(Inventario.nombre).all()
+    return render_template(
+        "inventario/kardex.html",
+        movimientos=movimientos,
+        productos=productos,
+        filtro_inventario=inventario_id,
+        filtro_tipo=tipo,
+        filtro_desde=fecha_desde_raw,
+        filtro_hasta=fecha_hasta_raw,
+    )
 
 
 @inventario_bp.route("/movimiento/<int:id>", methods=["GET", "POST"])
@@ -152,7 +210,8 @@ def movimiento(id: int) -> Any:
         try:
             tipo = form.tipo.data
             cantidad = form.cantidad.data
-            item.registrar_movimiento(
+            InventarioService.registrar_movimiento(
+                item=item,
                 tipo=tipo,
                 cantidad=cantidad,
                 usuario_id=current_user.id,
@@ -190,16 +249,39 @@ def alertas() -> Any:
     )
     sin_stock = (
         Inventario.query
-        .filter(Inventario.cantidad == 0)
+        .filter(Inventario.cantidad == 0, Inventario.activo.is_(True))
         .order_by(Inventario.nombre)
         .all()
+    )
+    reposiciones_pendientes = (
+        Recordatorio.query
+        .filter_by(tipo="reposicion", estado="pendiente")
+        .count()
     )
     return render_template(
         "inventario/alertas.html",
         stock_bajo=stock_bajo,
         stock_critico=stock_critico,
         sin_stock=sin_stock,
+        reposiciones_pendientes=reposiciones_pendientes,
     )
+
+
+@inventario_bp.route("/alertas/generar-recordatorios", methods=["POST"])
+@login_required
+def generar_alertas() -> Any:
+    try:
+        creados = InventarioService.generar_alertas_reposicion()
+    except Exception as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("inventario.alertas"))
+    if request.is_json:
+        return json_success(message=f"{creados} alertas de reposición generadas.")
+    flash(f"{creados} alertas de reposición generadas.", "success" if creados else "info")
+    return redirect(url_for("inventario.alertas"))
 
 
 @inventario_bp.route("/categorias")

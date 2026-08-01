@@ -3,9 +3,18 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Alertas de Inventario</h4>
-    <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Volver
-    </a>
+    <div>
+        <form method="POST" action="{{ url_for('inventario.generar_alertas') }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+            <button class="btn btn-warning me-2">
+                <i class="bi bi-bell"></i> Generar recordatorios de reposición
+            </button>
+        </form>
+        <span class="badge bg-warning text-dark me-2">Reposiciones pendientes: {{ reposiciones_pendientes }}</span>
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
 </div>
 
 {% if sin_stock %}

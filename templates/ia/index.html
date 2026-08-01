@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}IA 2.0 — Inteligencia{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-stars me-2 text-primary"></i>IA 2.0 — Diagnóstico Inteligente</h4>
+</div>
+
+<div class="card mb-3 border-primary">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-cpu fs-2 me-3 text-primary"></i>
+            <div>
+                <strong>Resumen del taller</strong>
+                <p class="mb-0 text-muted">{{ resumen }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><strong><i class="bi bi-search"></i> Diagnóstico por síntomas</strong></div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ia.diagnosticar') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    <div class="mb-3">
+                        <label class="form-label">Vehículo (opcional)</label>
+                        <select name="vehiculo_id" class="form-select">
+                            <option value="">— Sin especificar —</option>
+                            {% for v in vehiculos %}
+                            <option value="{{ v.id }}" {% if vehiculo_id == v.id %}selected{% endif %}>
+                                {{ v.placa }} · {{ v.marca }} {{ v.modelo }} ({{ v.cliente.nombre }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Describe el síntoma *</label>
+                        <textarea name="sintomas" class="form-control" rows="3" required
+                                  placeholder="Ej: el motor hace un ruido y pierde fuerza, o vibra al frenar">{{ sintomas or "" }}</textarea>
+                    </div>
+                    <button class="btn btn-primary"><i class="bi bi-stars"></i> Diagnosticar</button>
+                </form>
+                <hr>
+                <small class="text-muted">Ejemplos: <em>"ruido en el motor"</em>, <em>"vibra al frenar"</em>,
+                    <em>"no prende"</em>, <em>"se calienta"</em>, <em>"gotea aceite"</em>.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><strong><i class="bi bi-clipboard2-pulse"></i> Recomendaciones de mantenimiento</strong></div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('ia.mantenimiento', vehiculo_id=0) }}" id="form-mant">
+                    <div class="input-group">
+                        <select class="form-select" id="sel-vehiculo" required>
+                            <option value="">— Seleccionar vehículo —</option>
+                            {% for v in vehiculos %}
+                            <option value="{{ v.id }}">{{ v.placa }} · {{ v.marca }} {{ v.modelo }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-success" type="submit"><i class="bi bi-calendar-check"></i> Ver</button>
+                    </div>
+                </form>
+                <script>
+                    document.getElementById('form-mant').addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        var id = document.getElementById('sel-vehiculo').value;
+                        if (id) window.location.href = "/ia/mantenimiento/" + id;
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if resultado %}
+<div class="card mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong><i class="bi bi-clipboard-pulse me-1"></i> Resultado del diagnóstico</strong>
+        <span class="badge bg-{{ 'danger' if resultado.urgencia == 'alta' else 'warning' if resultado.urgencia == 'media' else 'success' }}">
+            Prioridad {{ resultado.urgencia|upper }}
+        </span>
+    </div>
+    <div class="card-body">
+        {% if resultado.vehiculo %}
+        <p class="mb-2">
+            <strong>Vehículo:</strong> {{ resultado.vehiculo.marca }} {{ resultado.vehiculo.modelo }}
+            ({{ resultado.vehiculo.placa }})
+        </p>
+        {% endif %}
+        <label class="text-muted small">Probables causas</label>
+        <ul class="mb-3">
+            {% for c in resultado.causas %}
+            <li>{{ c }}</li>
+            {% endfor %}
+        </ul>
+        {% if resultado.servicios_sugeridos %}
+        <label class="text-muted small">Servicios sugeridos en el taller</label>
+        <ul class="list-group list-group-flush mb-3">
+            {% for s in resultado.servicios_sugeridos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                {{ s.nombre }}
+                {% if s.precio %}<span class="badge bg-primary">${{ "{:,.0f}".format(s.precio) }}</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <div class="alert alert-{{ 'danger' if resultado.urgencia == 'alta' else 'warning' if resultado.urgencia == 'media' else 'info' }} mb-0">
+            {{ resultado.consejo }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

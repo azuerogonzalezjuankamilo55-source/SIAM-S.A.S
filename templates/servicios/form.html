@@ -4,7 +4,7 @@
 <h4 class="mb-4">{{ "Editar" if servicio else "Nuevo" }} Servicio</h4>
 <div class="card">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="row g-3">
                 <div class="col-md-6">
@@ -35,6 +35,17 @@
                     <label class="form-label">Descripción</label>
                     <textarea name="descripcion" class="form-control" rows="3">{{ servicio.descripcion if servicio else '' }}</textarea>
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Imagen del servicio</label>
+                    <input type="file" name="imagen" class="form-control" accept="image/jpeg,image/png,image/webp">
+                    <small class="text-muted">Opcional · JPG, PNG o WebP · Máx. 5 MB</small>
+                </div>
+                {% if servicio and servicio.imagen_path %}
+                <div class="col-md-6">
+                    <label class="form-label">Imagen actual</label><br>
+                    <img src="{{ servicio.imagen_path }}" alt="Imagen" class="img-servicio">
+                </div>
+                {% endif %}
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Guardar</button>

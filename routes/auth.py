@@ -4,7 +4,7 @@ from typing import Any
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required
 
-from models import Usuario
+from models import Usuario, Cliente
 from database.db import db
 from forms import LoginForm, RegisterForm
 from database.commit import safe_commit, json_success, json_error
@@ -21,8 +21,13 @@ def login() -> Any:
         password = form.password.data
         usuario: Usuario | None = Usuario.query.filter_by(correo=correo).first()
         if usuario and usuario.check_password(password):
+            if not usuario.activo:
+                flash("Tu cuenta está desactivada. Contacta al administrador.", "danger")
+                return render_template("auth/login.html", form=form)
             login_user(usuario)
             logger.info("Login exitoso: %s", correo)
+            if usuario.es_cliente:
+                return redirect(url_for("portal.index"))
             return redirect(url_for("dashboard.index"))
         logger.warning("Intento de login fallido: %s", correo)
         flash("Credenciales inválidas", "danger")
@@ -46,15 +51,26 @@ def register() -> Any:
                 return jsonify({"success": False, "error": "El correo ya está registrado"}), 400
             flash("El correo ya está registrado", "danger")
             return render_template("auth/register.html", form=form)
+        cliente = Cliente.query.filter(db.func.lower(Cliente.correo) == correo).first()
         usuario = Usuario(
             nombre=form.nombre.data.strip(),
             correo=correo,
+            rol="cliente",
+            cliente_id=cliente.id if cliente else None,
         )
         usuario.set_password(form.password.data)
+        if not cliente and correo:
+            nuevo_cliente = Cliente(
+                nombre=form.nombre.data.strip(),
+                correo=correo,
+            )
+            db.session.add(nuevo_cliente)
+            db.session.flush()
+            usuario.cliente_id = nuevo_cliente.id
         db.session.add(usuario)
         try:
             safe_commit()
-            logger.info("Nuevo usuario registrado: %s", correo)
+            logger.info("Nuevo usuario cliente registrado: %s", correo)
             if request.is_json:
                 return jsonify({"success": True, "message": "Registro exitoso. Inicia sesión."})
             flash("Registro exitoso. Inicia sesión.", "success")

@@ -8,6 +8,7 @@ from forms.factura_forms import FacturaForm, PagoForm, LogoForm
 from forms.inventario_forms import InventarioForm, MovimientoInventarioForm, CategoriaInventarioForm
 from forms.orden_trabajo_forms import OrdenTrabajoForm, CambiarEstadoForm
 from forms.taller_forms import TallerConfigForm
+from forms.portal_forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm
 
 __all__ = [
     "LoginForm",
@@ -26,4 +27,7 @@ __all__ = [
     "OrdenTrabajoForm",
     "CambiarEstadoForm",
     "TallerConfigForm",
+    "SolicitarCitaForm",
+    "PerfilForm",
+    "CambiarPasswordForm",
 ]

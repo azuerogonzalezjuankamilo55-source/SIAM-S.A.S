@@ -4,27 +4,66 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">{{ item.nombre }}</h4>
     <div>
+        {% if not item.es_baja %}
         <a href="{{ url_for('inventario.movimiento', id=item.id) }}" class="btn btn-primary">
             <i class="bi bi-arrow-left-right"></i> Registrar Movimiento
         </a>
         <a href="{{ url_for('inventario.editar', id=item.id) }}" class="btn btn-outline-warning">
             <i class="bi bi-pencil"></i> Editar
         </a>
+        <button class="btn btn-outline-danger" onclick="document.getElementById('bajaModal').showModal()">
+            <i class="bi bi-archive"></i> Dar de baja
+        </button>
+        {% else %}
+        <form method="POST" action="{{ url_for('inventario.restaurar', id=item.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+            <button class="btn btn-success"><i class="bi bi-arrow-counterclockwise"></i> Restaurar</button>
+        </form>
+        {% endif %}
         <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>
 </div>
 
+{% if item.es_baja %}
+<div class="alert alert-secondary d-flex justify-content-between align-items-center">
+    <div>
+        <strong><i class="bi bi-archive"></i> Producto dado de baja</strong>
+        <div class="small">
+            {% if item.motivo_baja %}Motivo: {{ item.motivo_baja }}<br>{% endif %}
+            {% if item.fecha_baja %}Fecha: {{ item.fecha_baja.strftime('%d/%m/%Y %H:%M') }}{% endif %}
+            {% if item.usuario_baja %} · Por: {{ item.usuario_baja.nombre }}{% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<dialog id="bajaModal" class="p-3 rounded-3 border">
+    <form method="POST" action="{{ url_for('inventario.baja', id=item.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+        <h6 class="mb-2">Dar de baja: {{ item.nombre }}</h6>
+        <textarea name="motivo" class="form-control mb-2" rows="3"
+                  placeholder="Motivo de la baja (obligatorio)" required></textarea>
+        <div class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+                    onclick="document.getElementById('bajaModal').close()">Cancelar</button>
+            <button class="btn btn-sm btn-danger">Confirmar baja</button>
+        </div>
+    </form>
+</dialog>
+
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="card border-success h-100">
             <div class="card-body text-center">
                 <h6 class="card-title text-muted small">Stock Actual</h6>
-                <h2 class="text-success mb-0 {% if item.stock_critico_alcanzado %}text-danger{% elif item.stock_bajo %}text-warning{% endif %}">
+                <h2 class="text-success mb-0 {% if item.es_baja %}text-secondary{% elif item.stock_critico_alcanzado %}text-danger{% elif item.stock_bajo %}text-warning{% endif %}">
                     {{ item.cantidad }}
                 </h2>
-                {% if item.stock_critico_alcanzado %}
+                {% if item.es_baja %}
+                <span class="badge bg-secondary">Baja</span>
+                {% elif item.stock_critico_alcanzado %}
                 <span class="badge bg-danger">Stock crítico</span>
                 {% elif item.stock_bajo %}
                 <span class="badge bg-warning text-dark">Stock bajo</span>
@@ -51,10 +90,10 @@
     <div class="col-md-3">
         <div class="card h-100">
             <div class="card-body text-center">
-                <h6 class="card-title text-muted small">Ganancia Estimada</h6>
+                <h6 class="card-title text-muted small">Costo Promedio</h6>
                 <h3 class="mb-0 text-info">
-                    {% if item.ganancia_estimada %}
-                    ${{ "%.2f"|format(item.ganancia_estimada|float) }}
+                    {% if item.costo_promedio %}
+                    ${{ "%.2f"|format(item.costo_promedio|float) }}
                     {% else %}-{% endif %}
                 </h3>
             </div>

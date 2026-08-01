@@ -79,7 +79,11 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
+                {% if taller_config and taller_config.logo_path %}
+                <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img me-2">
+                {% else %}
                 <i class="bi bi-gear-wide-connected text-primary me-2"></i>SIAM
+                {% endif %}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLanding">
                 <span class="navbar-toggler-icon"></span>
@@ -120,7 +124,7 @@
                         SIAM es el sistema integral que automatiza la administración de tu taller: clientes, vehículos, servicios, citas, facturación e inventario. Todo en un solo lugar.
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-lg px-4 landing-cta border-0 shadow">
                             <i class="bi bi-rocket-takeoff me-2"></i>Comenzar Gratis
                         </a>
                         <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">
@@ -134,26 +138,64 @@
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
-                    <div class="text-center">
-                        <div class="row g-2 justify-content-center">
-                            <div class="col-4">
-                                <div class="card bg-dark border-secondary text-center p-3">
-                                    <h3 class="text-primary mb-0">+50</h3>
-                                    <small class="text-secondary">Talleres</small>
+                    <div class="position-relative text-center">
+                        <div class="card bg-dark border-secondary screenshot-card shadow-lg">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center gap-2 border-bottom border-secondary pb-3 mb-3">
+                                    <span class="badge bg-danger bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
+                                    <span class="badge bg-warning bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
+                                    <span class="badge bg-success bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
+                                    <small class="text-secondary ms-2"><i class="bi bi-lock me-1"></i>app.siam.com</small>
+                                </div>
+                                <div class="text-start">
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#0d6efd,#0a58ca);">
+                                                <i class="bi bi-people fs-3 text-white"></i>
+                                                <h6 class="text-white mb-0 mt-1">Clientes</h6>
+                                                <small class="text-white-50">+120</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#198754,#146c43);">
+                                                <i class="bi bi-truck fs-3 text-white"></i>
+                                                <h6 class="text-white mb-0 mt-1">Vehículos</h6>
+                                                <small class="text-white-50">+340</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#fd7e14,#d96b0a);">
+                                                <i class="bi bi-wrench-adjustable fs-3 text-white"></i>
+                                                <h6 class="text-white mb-0 mt-1">Servicios</h6>
+                                                <small class="text-white-50">+58</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#6f42c1,#553098);">
+                                                <i class="bi bi-cash-stack fs-3 text-white"></i>
+                                                <h6 class="text-white mb-0 mt-1">Facturado</h6>
+                                                <small class="text-white-50">$12.5M</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="border-top border-secondary pt-3">
+                                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                                            <span><i class="bi bi-calendar-check text-info me-1"></i>Órdenes activas</span>
+                                            <span class="badge bg-info text-dark">14</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between small text-secondary">
+                                            <span><i class="bi bi-exclamation-triangle text-warning me-1"></i>Stock bajo</span>
+                                            <span class="badge bg-warning text-dark">3</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="card bg-dark border-secondary text-center p-3">
-                                    <h3 class="text-success mb-0">+1000</h3>
-                                    <small class="text-secondary">Vehículos</small>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="card bg-dark border-secondary text-center p-3">
-                                    <h3 class="text-warning mb-0">99.9%</h3>
-                                    <small class="text-secondary">Uptime</small>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="landing-icon-bubble position-absolute top-0 start-0" style="animation: float 3s ease-in-out infinite;">
+                            <i class="bi bi-tools text-warning"></i>
+                        </div>
+                        <div class="landing-icon-bubble position-absolute bottom-0 end-0" style="animation: float 3.5s ease-in-out infinite 0.4s;">
+                            <i class="bi bi-gear-wide-connected text-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -367,7 +409,11 @@
             <div class="row g-3 align-items-center">
                 <div class="col-md-4">
                     <a class="fw-bold text-decoration-none text-light" href="/">
+                        {% if taller_config and taller_config.logo_path %}
+                        <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img mb-1">
+                        {% else %}
                         <i class="bi bi-gear-wide-connected text-primary me-1"></i> SIAM
+                        {% endif %}
                     </a>
                     <p class="text-secondary small mt-2 mb-0">Sistema Integral Automotriz</p>
                 </div>

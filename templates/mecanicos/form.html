@@ -4,7 +4,7 @@
 <h4 class="mb-4">{{ "Editar" if mecanico else "Nuevo" }} Mecánico</h4>
 <div class="card">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="row g-3">
                 <div class="col-md-6">
@@ -23,6 +23,17 @@
                     <label class="form-label">Especialidad</label>
                     <input type="text" name="especialidad" class="form-control" value="{{ mecanico.especialidad if mecanico else '' }}">
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Foto</label>
+                    <input type="file" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp">
+                    <small class="text-muted">Opcional · JPG, PNG o WebP · Máx. 5 MB</small>
+                </div>
+                {% if mecanico and mecanico.foto_path %}
+                <div class="col-md-6">
+                    <label class="form-label">Foto actual</label><br>
+                    <img src="{{ mecanico.foto_path }}" alt="Foto" class="avatar avatar-lg">
+                </div>
+                {% endif %}
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Guardar</button>

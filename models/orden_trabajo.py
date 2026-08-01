@@ -8,6 +8,9 @@ if TYPE_CHECKING:
     from models.vehiculo import Vehiculo
     from models.mecanico import Mecanico
     from models.orden_trabajo_historial import OrdenTrabajoHistorial
+    from models.orden_trabajo_item import OrdenTrabajoItem
+    from models.orden_trabajo_foto import OrdenTrabajoFoto
+    from models.orden_trabajo_repuesto import OrdenTrabajoRepuesto
 
 
 ESTADOS_OT = [
@@ -34,6 +37,13 @@ class OrdenTrabajo(db.Model):
     diagnostico_inicial: str | None = db.Column(db.Text)
     observaciones: str | None = db.Column(db.Text)
     estado: str = db.Column(db.String(30), nullable=False, default="recibido")
+    kms_ingreso: int | None = db.Column(db.Integer)
+    nivel_combustible_ingreso: str | None = db.Column(db.String(20))
+    kms_salida: int | None = db.Column(db.Integer)
+    nivel_combustible_salida: str | None = db.Column(db.String(20))
+    fecha_entrega = db.Column(db.Date, nullable=True)
+    firma_mecanico_path: str | None = db.Column(db.String(300))
+    firma_cliente_path: str | None = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
@@ -44,6 +54,19 @@ class OrdenTrabajo(db.Model):
     historial: list["OrdenTrabajoHistorial"] = db.relationship(
         "OrdenTrabajoHistorial", backref="orden", lazy="select",
         cascade="all, delete-orphan", order_by="OrdenTrabajoHistorial.created_at.desc()"
+    )
+
+    items: list["OrdenTrabajoItem"] = db.relationship(
+        "OrdenTrabajoItem", lazy="select",
+        cascade="all, delete-orphan", order_by="OrdenTrabajoItem.posicion"
+    )
+    fotos: list["OrdenTrabajoFoto"] = db.relationship(
+        "OrdenTrabajoFoto", lazy="select",
+        cascade="all, delete-orphan", order_by="OrdenTrabajoFoto.created_at.desc()"
+    )
+    repuestos: list["OrdenTrabajoRepuesto"] = db.relationship(
+        "OrdenTrabajoRepuesto", lazy="select",
+        cascade="all, delete-orphan"
     )
 
     @property
@@ -57,6 +80,19 @@ class OrdenTrabajo(db.Model):
             "entregado": "Entregado",
         }
         return labels.get(self.estado, self.estado)
+
+    @property
+    def items_completados(self) -> int:
+        return sum(1 for i in self.items if i.completado)
+
+    @property
+    def tiempo_total_minutos(self) -> int:
+        return sum((i.tiempo_minutos or 0) for i in self.items)
+
+    @property
+    def total_repuestos(self) -> Decimal:
+        from decimal import Decimal as D
+        return sum((r.subtotal for r in self.repuestos), D("0")).quantize(D("0.01"))
 
     def __repr__(self) -> str:
         return f"<OrdenTrabajo {self.numero}:{self.estado}>"

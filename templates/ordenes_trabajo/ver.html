@@ -69,6 +69,176 @@
                 <label class="text-muted small">Observaciones</label>
                 <p class="mb-0" style="white-space: pre-wrap;">{{ orden.observaciones }}</p>
                 {% endif %}
+                <hr>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="text-muted small">Kilometraje Ingreso</label>
+                        <p class="fw-bold mb-0">{{ orden.kms_ingreso if orden.kms_ingreso is not none else "—" }} km</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Combustible Ingreso</label>
+                        <p class="fw-bold mb-0">{{ orden.nivel_combustible_ingreso or "—" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small">Total Repuestos</label>
+                        <p class="fw-bold mb-0">${{ "{:,.0f}".format(orden.total_repuestos) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-list-check"></i> Checklist de Trabajo</h6>
+                <span class="badge bg-primary">{{ orden.items_completados }}/{{ orden.items|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if orden.items %}
+                <div class="progress mb-3" style="height: 6px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ (orden.items_completados * 100 / orden.items|length) if orden.items else 0 }}%"></div>
+                </div>
+                <ul class="list-group list-group-flush mb-3 p-0">
+                    {% for i in orden.items %}
+                    <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                        <form method="POST" action="{{ url_for('ordenes_trabajo.toggle_item', item_id=i.id) }}" class="m-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                            <button type="submit" class="btn btn-sm {{ 'btn-success' if i.completado else 'btn-outline-secondary' }} rounded-circle">
+                                <i class="bi {{ 'bi-check-lg' if i.completado else 'bi-circle' }}"></i>
+                            </button>
+                        </form>
+                        <div class="flex-grow-1">
+                            <span class="{{ 'text-decoration-line-through text-muted' if i.completado else '' }}">{{ i.descripcion }}</span>
+                            {% if i.tiempo_minutos %}
+                            <small class="text-muted ms-2"><i class="bi bi-clock"></i> {{ i.tiempo_minutos }} min</small>
+                            {% endif %}
+                        </div>
+                        <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_item', item_id=i.id) }}" class="m-0"
+                              onsubmit="return confirm('¿Eliminar tarea?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="text-muted small mb-2">Tiempo total estimado: {{ orden.tiempo_total_minutos }} min</div>
+                {% else %}
+                <p class="text-muted text-center mb-3">Sin tareas registradas</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('ordenes_trabajo.agregar_item', id=orden.id) }}" class="row g-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    <div class="col-7">
+                        <input type="text" name="descripcion" class="form-control" placeholder="Nueva tarea..." required>
+                    </div>
+                    <div class="col-3">
+                        <input type="number" name="tiempo_minutos" class="form-control" placeholder="Min (opc)" min="0">
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-box-seam"></i> Repuestos Utilizados</h6>
+            </div>
+            <div class="card-body">
+                {% if orden.repuestos %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Repuesto</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-end">P. Unit.</th>
+                                <th class="text-end">Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in orden.repuestos %}
+                            <tr>
+                                <td>
+                                    {{ r.inventario.nombre }}
+                                    {% if r.nota %}<small class="d-block text-muted">{{ r.nota }}</small>{% endif %}
+                                </td>
+                                <td class="text-center">{{ r.cantidad }}</td>
+                                <td class="text-end">${{ "{:,.0f}".format(r.precio_unitario) }}</td>
+                                <td class="text-end">${{ "{:,.0f}".format(r.subtotal) }}</td>
+                                <td class="text-end">
+                                    <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_repuesto', repuesto_id=r.id) }}"
+                                          onsubmit="return confirm('¿Quitar repuesto y devolver stock?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-3">Sin repuestos registrados</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('ordenes_trabajo.agregar_repuesto', id=orden.id) }}" class="row g-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    <div class="col-5">
+                        <select name="inventario_id" class="form-select" required>
+                            <option value="">— Seleccionar repuesto —</option>
+                            {% for i in inventario %}
+                            <option value="{{ i.id }}">{{ i.nombre }} (stock: {{ i.cantidad }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <input type="number" name="cantidad" class="form-control" value="1" min="1" required>
+                    </div>
+                    <div class="col-3">
+                        <input type="number" name="precio_unitario" class="form-control" placeholder="Precio" min="0" step="0.01" required>
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-camera"></i> Fotos del Trabajo</h6>
+            </div>
+            <div class="card-body">
+                {% if orden.fotos %}
+                <div class="galeria mb-3">
+                    {% for f in orden.fotos %}
+                    <div class="gal-item">
+                        <img src="{{ f.path | img_thumb }}" class="w-100" style="height:110px;object-fit:cover;" alt="Foto OT"
+                             loading="lazy" onclick="openLightboxOT('{{ f.path }}', '{{ f.descripcion or "" }}')">
+                        {% if f.descripcion %}<small class="d-block text-muted text-truncate px-1">{{ f.descripcion }}</small>{% endif %}
+                        <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_foto', foto_id=f.id) }}" class="position-absolute top-0 end-0 m-1" onsubmit="return confirm('¿Eliminar esta foto?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                            <button class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i></button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-3">Sin fotos</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('ordenes_trabajo.agregar_foto', id=orden.id) }}" enctype="multipart/form-data" class="row g-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    <div class="col-7">
+                        <input type="file" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp" required id="otFotoInput">
+                    </div>
+                    <div class="col-3">
+                        <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opc)">
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-primary w-100"><i class="bi bi-upload"></i></button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -109,6 +279,86 @@
             </div>
         </div>
         {% endif %}
+        {% if orden.estado != "entregado" %}
+        <div class="card mb-3 border-success">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-check2-circle"></i> Entrega del Vehículo</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ordenes_trabajo.entregar', id=orden.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    <div class="mb-2">
+                        <label class="form-label small">Kilometraje de Salida</label>
+                        <input type="number" name="kms_salida" class="form-control" min="0" value="{{ orden.kms_ingreso or '' }}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Nivel de Combustible</label>
+                        <select name="nivel_combustible_salida" class="form-select">
+                            {% for n in niveles_combustible %}
+                            <option value="{{ n }}" {% if orden.nivel_combustible_ingreso == n %}selected{% endif %}>{{ n }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-box-arrow-right"></i> Marcar Entregado
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-box-arrow-right"></i> Datos de Entrega</h6>
+            </div>
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Fecha entrega</span>
+                    <strong>{{ orden.fecha_entrega or "—" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Kms salida</span>
+                    <strong>{{ orden.kms_salida if orden.kms_salida is not none else "—" }} km</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Combustible</span>
+                    <strong>{{ orden.nivel_combustible_salida or "—" }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-pen"></i> Firmas</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label small">Firma del Mecánico</label>
+                    {% if orden.firma_mecanico_path %}
+                    <img src="{{ orden.firma_mecanico_path }}" class="img-thumbnail mb-2" style="max-height: 80px;" alt="Firma mecánico">
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('ordenes_trabajo.subir_firma', id=orden.id) }}" enctype="multipart/form-data" class="d-flex gap-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                        <input type="hidden" name="tipo" value="mecanico">
+                        <input type="file" name="firma" class="form-control form-control-sm" accept="image/*" required>
+                        <button class="btn btn-sm btn-outline-primary text-nowrap">Subir</button>
+                    </form>
+                </div>
+                <div>
+                    <label class="form-label small">Firma del Cliente</label>
+                    {% if orden.firma_cliente_path %}
+                    <img src="{{ orden.firma_cliente_path }}" class="img-thumbnail mb-2" style="max-height: 80px;" alt="Firma cliente">
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('ordenes_trabajo.subir_firma', id=orden.id) }}" enctype="multipart/form-data" class="d-flex gap-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                        <input type="hidden" name="tipo" value="cliente">
+                        <input type="file" name="firma" class="form-control form-control-sm" accept="image/*" required>
+                        <button class="btn btn-sm btn-outline-primary text-nowrap">Subir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {% if orden.estado != "entregado" %}
         <div class="card mb-3">
             <div class="card-header">
@@ -173,4 +423,23 @@
         </div>
     </div>
 </div>
+
+<div class="lightbox" id="lightboxOT" onclick="this.classList.remove('open')">
+    <button type="button" class="btn-close btn-close-white" aria-label="Cerrar"></button>
+    <img id="lightboxImgOT" src="" alt="Foto ampliada">
+    <p id="lightboxCaptionOT" class="text-light text-center mt-2"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openLightboxOT(src, caption) {
+    document.getElementById('lightboxImgOT').src = src;
+    document.getElementById('lightboxCaptionOT').textContent = caption || '';
+    document.getElementById('lightboxOT').classList.add('open');
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.getElementById('lightboxOT').classList.remove('open');
+});
+</script>
 {% endblock %}

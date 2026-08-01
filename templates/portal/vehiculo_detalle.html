@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Vehículo {{ vehiculo.placa }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">{{ vehiculo.marca }} {{ vehiculo.modelo }} <span class="badge bg-primary">{{ vehiculo.placa }}</span></h4>
+    <a href="{{ url_for('portal.vehiculos') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3"><strong>Marca:</strong> {{ vehiculo.marca }}</div>
+            <div class="col-md-3"><strong>Modelo:</strong> {{ vehiculo.modelo }}</div>
+            <div class="col-md-3"><strong>Año:</strong> {{ vehiculo.anio or "—" }}</div>
+            <div class="col-md-3"><strong>Color:</strong> {{ vehiculo.color or "—" }}</div>
+            {% if vehiculo.vin %}
+            <div class="col-md-3"><strong>VIN:</strong> {{ vehiculo.vin }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><strong>Historial de citas</strong></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in citas %}
+                    <tr>
+                        <td>{{ c.fecha }}</td>
+                        <td>{{ c.hora }}</td>
+                        <td>
+                            <span class="badge bg-{{ {
+                                'pendiente': 'warning',
+                                'en_proceso': 'info',
+                                'completado': 'success',
+                                'cancelado': 'danger'
+                            }[c.estado] }}">
+                                {{ c.estado|replace("_", " ")|title }}
+                            </span>
+                        </td>
+                        <td>{{ c.descripcion or "—" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted">Sin citas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

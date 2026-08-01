@@ -9,9 +9,25 @@ from models.servicio import Servicio
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import ServicioForm
+from exceptions import BusinessRuleException
+from services.image_service import ImageService, ImageError
 
 logger = logging.getLogger("siam.routes.servicios")
 servicios_bp = Blueprint("servicios", __name__, url_prefix="/servicios")
+
+
+def _procesar_imagen(form, servicio) -> None:
+    archivo = getattr(form, "imagen", None)
+    if not archivo or not archivo.data or not getattr(archivo.data, "filename", ""):
+        return
+    try:
+        nueva = ImageService.guardar(archivo.data, "servicios")
+    except ImageError as e:
+        raise BusinessRuleException(str(e))
+    vieja = servicio.imagen_path
+    servicio.imagen_path = nueva
+    if vieja:
+        ImageService.eliminar(vieja)
 
 
 @servicios_bp.route("/")
@@ -34,6 +50,7 @@ def crear() -> Any:
                 duracion_estimada=form.duracion_estimada.data,
                 categoria=form.categoria.data,
             )
+            _procesar_imagen(form, servicio)
             db.session.add(servicio)
             safe_commit()
             logger.info("Servicio creado: %s", servicio.nombre)
@@ -57,6 +74,7 @@ def editar(id: int) -> Any:
     if form.validate_on_submit():
         try:
             form.populate_obj(servicio)
+            _procesar_imagen(form, servicio)
             safe_commit()
             logger.info("Servicio actualizado: %s", servicio.nombre)
             if request.is_json:

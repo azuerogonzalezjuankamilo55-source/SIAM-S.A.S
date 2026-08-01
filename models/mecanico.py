@@ -15,6 +15,7 @@ class Mecanico(db.Model):
     telefono: str | None = db.Column(db.String(20))
     correo: str | None = db.Column(db.String(120))
     especialidad: str | None = db.Column(db.String(100))
+    foto_path: str | None = db.Column(db.String(300))
     activo: bool = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 

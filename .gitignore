@@ -26,6 +26,10 @@ env/
 # Flask
 instance/
 
+# Uploads (contenido subido por usuarios)
+uploads/
+static/uploads/
+
 # OS
 .DS_Store
 Thumbs.db

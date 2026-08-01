@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Historial de {{ vehiculo.placa }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Historial del vehículo</h4>
+    <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-truck fs-2 me-3 text-primary"></i>
+            <div>
+                <h5 class="mb-0">{{ vehiculo.marca }} {{ vehiculo.modelo }}
+                    <span class="badge bg-primary">{{ vehiculo.placa }}</span></h5>
+                <small class="text-muted">
+                    {{ vehiculo.cliente.nombre }} · Año: {{ vehiculo.anio or "—" }} · Color: {{ vehiculo.color or "—" }}
+                    {% if vehiculo.vin %} · VIN: {{ vehiculo.vin }}{% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><strong>Línea de tiempo ({{ registros|length }} registros)</strong></div>
+            <div class="card-body">
+                {% if registros %}
+                <div class="timeline">
+                    {% for h in registros %}
+                    <div class="timeline-item position-relative ps-4 pb-4 border-start ms-2">
+                        <span class="position-absolute translate-middle top-0 start-0 bg-primary rounded-circle border border-3 border-white" style="width: 12px; height: 12px;"></span>
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <span class="badge bg-{{ tipos_colores.get(h.tipo, 'secondary') }}">{{ h.tipo_label }}</span>
+                                <strong class="ms-1">{{ h.descripcion or "" }}</strong>
+                            </div>
+                            <small class="text-muted">{{ h.fecha }}{% if h.kilometraje %} · {{ h.kilometraje }} km{% endif %}</small>
+                        </div>
+                        {% if h.foto_path %}
+                        <img src="{{ h.foto_path }}" class="img-thumbnail mt-2" style="max-height: 150px;" alt="Foto">
+                        {% endif %}
+                        {% if h.fotos %}
+                        <div class="galeria mt-2">
+                            {% for f in h.fotos %}
+                            <div class="gal-item">
+                                <img src="{{ f.path }}" alt="{{ f.tipo_label }}" loading="lazy"
+                                     onclick="openLightbox(this.src, '{{ f.tipo_label }} · {{ f.descripcion or "" }}')">
+                                <span class="gal-badge bg-{{ f.tipo }}">{{ f.tipo_label }}</span>
+                                <form method="post" action="{{ url_for('vehiculos.eliminar_foto_historial', foto_id=f.id) }}"
+                                      class="position-absolute bottom-0 end-0 m-1" onsubmit="return confirm('¿Eliminar esta foto?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm p-0 px-1" title="Eliminar foto">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-primary mt-2" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#fotosForm{{ h.id }}" aria-expanded="false">
+                            <i class="bi bi-camera me-1"></i> Añadir fotos
+                        </button>
+                        <form method="post" action="{{ url_for('vehiculos.agregar_foto_historial', historial_id=h.id) }}"
+                              enctype="multipart/form-data" class="collapse mt-2 p-3 border rounded bg-body-tertiary" id="fotosForm{{ h.id }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row g-2">
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small mb-1">Etapa</label>
+                                    <select name="tipo" class="form-select form-select-sm">
+                                        {% for t in tipos_foto %}
+                                        <option value="{{ t }}">{{ tipos_foto_labels[t] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small mb-1">Imagen</label>
+                                    <input type="file" name="foto" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp" required>
+                                </div>
+                                <div class="col-12 col-md-4 d-flex align-items-end">
+                                    <button class="btn btn-primary btn-sm w-100"><i class="bi bi-upload me-1"></i>Subir</button>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small mb-1">Descripción</label>
+                                    <input type="text" name="descripcion" class="form-control form-control-sm" placeholder="Opcional">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">Sin registros. Las facturas, citas completadas y órdenes entregadas se registrarán automáticamente.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><strong>Agregar registro manual</strong></div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select name="tipo" class="form-select">
+                            {% for t in tipos %}
+                            <option value="{{ t }}" {% if t == "observacion" %}selected{% endif %}>{{ tipos_labels[t] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción *</label>
+                        <textarea name="descripcion" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kilometraje</label>
+                        <input type="number" name="kilometraje" class="form-control" min="0">
+                    </div>
+                    <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Agregar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
+    <button type="button" class="btn-close btn-close-white" aria-label="Cerrar"></button>
+    <img id="lightboxImg" src="" alt="Foto ampliada">
+    <p id="lightboxCaption" class="text-light text-center mt-2"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openLightbox(src, caption) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightboxCaption').textContent = caption || '';
+    document.getElementById('lightbox').classList.add('open');
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+});
+</script>
+{% endblock %}

@@ -9,9 +9,25 @@ from models.mecanico import Mecanico
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import MecanicoForm
+from exceptions import BusinessRuleException
+from services.image_service import ImageService, ImageError
 
 logger = logging.getLogger("siam.routes.mecanicos")
 mecanicos_bp = Blueprint("mecanicos", __name__, url_prefix="/mecanicos")
+
+
+def _procesar_foto(form, mecanico) -> None:
+    archivo = getattr(form, "foto", None)
+    if not archivo or not archivo.data or not getattr(archivo.data, "filename", ""):
+        return
+    try:
+        nueva = ImageService.guardar(archivo.data, "mecanicos")
+    except ImageError as e:
+        raise BusinessRuleException(str(e))
+    vieja = mecanico.foto_path
+    mecanico.foto_path = nueva
+    if vieja:
+        ImageService.eliminar(vieja)
 
 
 @mecanicos_bp.route("/")
@@ -33,6 +49,7 @@ def crear() -> Any:
                 correo=form.correo.data,
                 especialidad=form.especialidad.data,
             )
+            _procesar_foto(form, mecanico)
             db.session.add(mecanico)
             safe_commit()
             logger.info("Mecánico creado: %s", mecanico.nombre)
@@ -56,6 +73,7 @@ def editar(id: int) -> Any:
     if form.validate_on_submit():
         try:
             form.populate_obj(mecanico)
+            _procesar_foto(form, mecanico)
             safe_commit()
             logger.info("Mecánico actualizado: %s", mecanico.nombre)
             if request.is_json:

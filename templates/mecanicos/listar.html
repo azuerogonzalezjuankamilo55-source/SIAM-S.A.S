@@ -14,6 +14,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Foto</th>
                         <th>Nombre</th>
                         <th>Teléfono</th>
                         <th>Especialidad</th>
@@ -25,6 +26,15 @@
                     {% for m in mecanicos %}
                     <tr>
                         <td>{{ m.id }}</td>
+                        <td>
+                            {% if m.foto_path %}
+                            <img src="{{ m.foto_path }}" alt="{{ m.nombre }}" class="avatar">
+                            {% else %}
+                            <div class="avatar d-inline-flex align-items-center justify-content-center bg-body-tertiary text-muted">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            {% endif %}
+                        </td>
                         <td>{{ m.nombre }}</td>
                         <td>{{ m.telefono or "-" }}</td>
                         <td>{{ m.especialidad or "-" }}</td>
@@ -43,7 +53,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">No hay mecánicos registrados</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted">No hay mecánicos registrados</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

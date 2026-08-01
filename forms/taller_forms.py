@@ -17,5 +17,5 @@ class TallerConfigForm(FlaskForm):
         "IVA %", places=2, default=19.00,
         validators=[DataRequired(), NumberRange(min=0, max=100)],
     )
-    logo = FileField("Logo del taller", validators=[Optional(), FileAllowed(["jpg", "png", "jpeg", "svg"], "Solo imágenes")])
+    logo = FileField("Logo del taller", validators=[Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Solo imágenes JPG, PNG o WebP")])
     submit = SubmitField("Guardar configuración")

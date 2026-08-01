@@ -27,20 +27,31 @@ class Inventario(db.Model):
     stock_minimo: int = db.Column(db.Integer, default=0)
     stock_critico: int = db.Column(db.Integer, default=0)
     activo: bool = db.Column(db.Boolean, default=True)
+    motivo_baja: str | None = db.Column(db.Text)
+    fecha_baja = db.Column(db.DateTime)
+    usuario_baja_id: int | None = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+
+    usuario_baja = db.relationship(
+        "Usuario", backref="bajas_inventario", foreign_keys=[usuario_baja_id], lazy="joined"
+    )
 
     movimientos: list["MovimientoInventario"] = db.relationship(
         "MovimientoInventario", backref="item", lazy="select", order_by="MovimientoInventario.created_at.desc()"
     )
 
     @property
+    def es_baja(self) -> bool:
+        return self.fecha_baja is not None
+
+    @property
     def stock_bajo(self) -> bool:
-        return self.cantidad <= self.stock_minimo
+        return not self.es_baja and self.cantidad <= self.stock_minimo
 
     @property
     def stock_critico_alcanzado(self) -> bool:
-        return self.cantidad <= self.stock_critico
+        return not self.es_baja and self.cantidad <= self.stock_critico
 
     @property
     def categoria_nombre(self) -> str | None:
@@ -62,8 +73,8 @@ class Inventario(db.Model):
             self.cantidad += cantidad
         elif tipo == "salida":
             self.cantidad = max(0, self.cantidad - cantidad)
-        elif tipo == "ajuste":
-            self.cantidad = max(0, cantidad)
+        elif tipo in ("ajuste", "baja"):
+            self.cantidad = 0 if tipo == "baja" else max(0, cantidad)
 
         movimiento = MovimientoInventario(
             inventario_id=self.id,

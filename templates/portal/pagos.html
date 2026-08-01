@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Mis Pagos{% endblock %}
+{% block content %}
+<h4 class="mb-3">Mis Pagos</h4>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Factura</th>
+                        <th>Fecha</th>
+                        <th>Método</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pagos %}
+                    <tr>
+                        <td>{{ p.factura.numero }}</td>
+                        <td>{{ p.created_at.strftime('%d/%m/%Y') if p.created_at }}</td>
+                        <td>{{ p.metodo_pago_display }}</td>
+                        <td class="fw-bold">${{ "%.2f"|format(p.monto) }}</td>
+                        <td><span class="badge bg-success">{{ p.estado }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No has realizado pagos</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Mi Perfil{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header"><strong>Mis datos personales</strong></div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    {% if current_user.foto_path %}
+                    <img src="{{ current_user.foto_path }}" alt="Foto de perfil" class="avatar avatar-xl rounded-circle object-fit-cover mb-2">
+                    {% else %}
+                    <div class="avatar avatar-xl mx-auto d-flex align-items-center justify-content-center rounded-circle bg-body-tertiary text-primary mb-2">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <form method="post" novalidate enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        {{ form.nombre(class="form-control") }}
+                        {% for err in form.nombre.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        {{ form.correo(class="form-control") }}
+                        {% for err in form.correo.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        {{ form.telefono(class="form-control") }}
+                        {% for err in form.telefono.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        {{ form.direccion(class="form-control") }}
+                        {% for err in form.direccion.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Foto de perfil</label>
+                        {{ form.foto(class="form-control", accept="image/jpeg,image/png,image/webp") }}
+                        <small class="text-muted">JPG, PNG o WebP · Máx. 5 MB</small>
+                        {% for err in form.foto.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    {{ form.submit(class="btn btn-primary") }}
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><strong>Cambiar contraseña</strong></div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('portal.cambiar_password') }}" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña actual *</label>
+                        <input type="password" name="password_actual" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nueva contraseña *</label>
+                        <input type="password" name="nueva_password" class="form-control" required minlength="8">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar nueva contraseña *</label>
+                        <input type="password" name="confirmar" class="form-control" required minlength="8">
+                    </div>
+                    <button class="btn btn-outline-warning"><i class="bi bi-shield-lock"></i> Cambiar contraseña</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

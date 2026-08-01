@@ -1,9 +1,8 @@
 import logging
-import os
 from typing import Any
 from decimal import Decimal
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app, send_file
+from flask import Blueprint, render_template, redirect, url_for, request, flash, send_file
 from flask_login import login_required, current_user
 from flask_wtf.csrf import validate_csrf
 from decorators import admin_required
@@ -16,6 +15,7 @@ from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
 from database.db import db
 from services.factura_service import FacturaService, FacturaInput
+from services.image_service import ImageService, ImageError
 from forms import PagoForm, TallerConfigForm
 from exceptions import BusinessRuleException, NotFoundException
 from database.commit import safe_commit, json_success, json_error
@@ -253,16 +253,19 @@ def configuracion() -> Any:
         config.iva_porcentaje = form.iva_porcentaje.data
 
         if form.logo.data and hasattr(form.logo.data, "filename") and form.logo.data.filename:
-            ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "svg", "webp"}
-            ext = form.logo.data.filename.rsplit(".", 1)[-1].lower()
-            if ext not in ALLOWED_EXTENSIONS:
-                flash("Formato de logo no permitido. Usa PNG, JPG, SVG o WebP.", "danger")
+            try:
+                nueva_ruta = ImageService.guardar(form.logo.data, "logos")
+            except ImageError as e:
+                flash(str(e), "danger")
                 return redirect(url_for("facturas.configuracion"))
-            upload_dir = os.path.join(current_app.root_path, "static", "uploads")
-            os.makedirs(upload_dir, exist_ok=True)
-            filename = f"logo_taller.{ext}"
-            form.logo.data.save(os.path.join(upload_dir, filename))
-            config.logo_path = f"/static/uploads/{filename}"
+            vieja = config.logo_path
+            config.logo_path = nueva_ruta
+            try:
+                safe_commit()
+            except Exception:
+                ImageService.eliminar(nueva_ruta)
+                raise
+            ImageService.eliminar(vieja)
 
         try:
             safe_commit()
@@ -279,6 +282,33 @@ def configuracion() -> Any:
             return redirect(url_for("facturas.configuracion"))
 
     return render_template("facturas/configuracion.html", form=form, config=config)
+
+
+@facturas_bp.route("/configuracion/quitar-logo", methods=["POST"])
+@login_required
+@admin_required
+def quitar_logo() -> Any:
+    try:
+        csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
+        if csrf_token:
+            validate_csrf(csrf_token)
+    except Exception:
+        flash("Error de validación. Intenta de nuevo.", "danger")
+        return redirect(url_for("facturas.configuracion"))
+    config = ConfiguracionTaller.get_config()
+    if config.logo_path:
+        viejo = config.logo_path
+        config.logo_path = None
+        try:
+            safe_commit()
+            ImageService.eliminar(viejo)
+            flash("Logo eliminado", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+    else:
+        flash("No hay logo configurado", "warning")
+    return redirect(url_for("facturas.configuracion"))
 
 
 @facturas_bp.route("/eliminar-pago/<int:pago_id>", methods=["POST"])

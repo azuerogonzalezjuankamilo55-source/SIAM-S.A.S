@@ -2,8 +2,11 @@
 {% block title %}Inventario{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Inventario</h4>
+    <h4 class="mb-0"><i class="bi bi-box-seam me-2 text-primary"></i>Inventario</h4>
     <div>
+        <a href="{{ url_for('inventario.kardex') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-journal-text"></i> Kardex
+        </a>
         <a href="{{ url_for('inventario.alertas') }}" class="btn btn-outline-danger me-2">
             <i class="bi bi-exclamation-triangle"></i> Alertas
         </a>
@@ -13,6 +16,41 @@
         <a href="{{ url_for('inventario.crear') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> Nuevo Producto
         </a>
+    </div>
+</div>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Productos activos</div>
+                <h5 class="mb-0">{{ valorizacion.total_productos }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Valor del inventario</div>
+                <h5 class="mb-0 text-success">${{ "{:,.0f}".format(valorizacion.total_valor) }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Stock bajo</div>
+                <h5 class="mb-0 text-warning">{{ valorizacion.items_bajo }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body py-3">
+                <div class="text-muted small">Sin stock</div>
+                <h5 class="mb-0 text-danger">{{ valorizacion.items_sin_stock }}</h5>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -35,6 +73,12 @@
                 </div>
             </div>
             <div class="col-auto">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="incluir_bajas" value="1" id="filtroBajas" {{ "checked" if request.args.get('incluir_bajas') == '1' else "" }} onchange="this.form.submit()">
+                    <label class="form-check-label small" for="filtroBajas">Incluir dados de baja</label>
+                </div>
+            </div>
+            <div class="col-auto">
                 <a href="{{ url_for('inventario.listar') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
             </div>
         </form>
@@ -53,7 +97,7 @@
                         <th>Ubicación</th>
                         <th>Stock</th>
                         <th>Stock Mín.</th>
-                        <th>Costo</th>
+                        <th>Costo Prom.</th>
                         <th>Precio Venta</th>
                         <th>Proveedor</th>
                         <th>Acciones</th>
@@ -61,21 +105,26 @@
                 </thead>
                 <tbody>
                     {% for i in items %}
-                    <tr class="{{ 'table-danger' if i.stock_critico_alcanzado else 'table-warning' if i.stock_bajo else '' }}">
+                    <tr class="{{ 'table-secondary' if i.es_baja else 'table-danger' if i.stock_critico_alcanzado else 'table-warning' if i.stock_bajo else '' }}">
                         <td><code>{{ i.sku or "-" }}</code></td>
-                        <td><a href="{{ url_for('inventario.ver', id=i.id) }}">{{ i.nombre }}</a></td>
+                        <td>
+                            <a href="{{ url_for('inventario.ver', id=i.id) }}" class="text-decoration-none">{{ i.nombre }}</a>
+                            {% if i.es_baja %}<span class="badge bg-secondary">Baja</span>{% endif %}
+                        </td>
                         <td>{{ i.categoria_nombre or "-" }}</td>
                         <td>{{ i.ubicacion or "-" }}</td>
                         <td>
                             <strong>{{ i.cantidad }}</strong>
+                            {% if not i.es_baja %}
                             {% if i.stock_critico_alcanzado %}
                             <span class="badge bg-danger ms-1" title="Stock crítico">Crítico</span>
                             {% elif i.stock_bajo %}
                             <i class="bi bi-exclamation-triangle text-warning ms-1" title="Stock bajo"></i>
                             {% endif %}
+                            {% endif %}
                         </td>
                         <td>{{ i.stock_minimo }}</td>
-                        <td>${{ "%.2f"|format(i.precio_compra|float) if i.precio_compra else "-" }}</td>
+                        <td>${{ "%.2f"|format(i.costo_promedio|float) if i.costo_promedio else "-" }}</td>
                         <td>${{ "%.2f"|format(i.precio_venta|float) if i.precio_venta else "-" }}</td>
                         <td>{{ i.proveedor or "-" }}</td>
                         <td>
@@ -83,16 +132,34 @@
                                 <a href="{{ url_for('inventario.ver', id=i.id) }}" class="btn btn-outline-info" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                {% if not i.es_baja %}
                                 <a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-outline-primary" title="Movimiento">
                                     <i class="bi bi-arrow-left-right"></i>
                                 </a>
                                 <a href="{{ url_for('inventario.editar', id=i.id) }}" class="btn btn-outline-warning" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="{{ url_for('inventario.eliminar', id=i.id) }}" class="btn btn-outline-danger" title="Eliminar" data-confirm="¿Eliminar {{ i.nombre }}?">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                <button class="btn btn-outline-danger" title="Dar de baja"
+                                        onclick="document.getElementById('baja-motivo-{{ i.id }}').showModal()">
+                                    <i class="bi bi-archive"></i>
+                                </button>
+                                {% endif %}
                             </div>
+                            {% if not i.es_baja %}
+                            <dialog id="baja-motivo-{{ i.id }}" class="p-3 rounded-3 border">
+                                <form method="POST" action="{{ url_for('inventario.baja', id=i.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                                    <h6 class="mb-2">Dar de baja: {{ i.nombre }}</h6>
+                                    <textarea name="motivo" class="form-control mb-2" rows="2"
+                                              placeholder="Motivo de la baja (obligatorio)" required></textarea>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+                                                onclick="document.getElementById('baja-motivo-{{ i.id }}').close()">Cancelar</button>
+                                        <button class="btn btn-sm btn-danger">Confirmar baja</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}

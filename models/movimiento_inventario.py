@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from models.inventario import Inventario
     from models.usuario import Usuario
 
-TIPOS_MOVIMIENTO = ["entrada", "salida", "ajuste"]
+TIPOS_MOVIMIENTO = ["entrada", "salida", "ajuste", "baja"]
 
 
 class MovimientoInventario(db.Model):
@@ -26,12 +26,12 @@ class MovimientoInventario(db.Model):
 
     @property
     def tipo_display(self) -> str:
-        labels = {"entrada": "Entrada", "salida": "Salida", "ajuste": "Ajuste"}
+        labels = {"entrada": "Entrada", "salida": "Salida", "ajuste": "Ajuste", "baja": "Baja"}
         return labels.get(self.tipo, self.tipo)
 
     @property
     def tipo_clase(self) -> str:
-        clases = {"entrada": "success", "salida": "danger", "ajuste": "warning"}
+        clases = {"entrada": "success", "salida": "danger", "ajuste": "warning", "baja": "dark"}
         return clases.get(self.tipo, "secondary")
 
     def __repr__(self) -> str:

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-bar-chart-line me-2 text-primary"></i>Reportes</h4>
+    <div>
+        <a href="{{ url_for('reportes.excel', desde=desde.isoformat(), hasta=hasta.isoformat()) }}"
+           class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+        <a href="{{ url_for('reportes.pdf', desde=desde.isoformat(), hasta=hasta.isoformat()) }}"
+           class="btn btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label small mb-0">Desde</label>
+                <input type="date" name="desde" class="form-control form-control-sm" value="{{ desde.isoformat() }}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-0">Hasta</label>
+                <input type="date" name="hasta" class="form-control form-control-sm" value="{{ hasta.isoformat() }}">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-sm btn-primary"><i class="bi bi-funnel"></i> Aplicar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
+        <div class="text-muted small">Ingresos del período</div>
+        <h5 class="mb-0 text-success">${{ "{:,.0f}".format(data.ingresos) }}</h5>
+    </div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
+        <div class="text-muted small">Facturas emitidas</div>
+        <h5 class="mb-0">{{ data.facturas_periodo }}</h5>
+    </div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
+        <div class="text-muted small">Ticket promedio</div>
+        <h5 class="mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h5>
+    </div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
+        <div class="text-muted small">Cartera pendiente</div>
+        <h5 class="mb-0 text-danger">${{ "{:,.0f}".format(data.cartera) }}</h5>
+    </div></div></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Ingresos por día</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Fecha</th><th class="text-end">Ingresos</th></tr></thead>
+                    <tbody>
+                        {% for dia, total in data.ingresos_por_dia %}
+                        <tr><td>{{ dia }}</td><td class="text-end">${{ "{:,.0f}".format(total) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Sin ingresos en el período</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Ingresos por método de pago</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Método</th><th class="text-end">Ingresos</th></tr></thead>
+                    <tbody>
+                        {% for metodo, total in data.ingresos_por_metodo %}
+                        <tr><td>{{ metodo }}</td><td class="text-end">${{ "{:,.0f}".format(total) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Sin datos</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Facturación por cliente</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Cliente</th><th class="text-end">Facturas</th><th class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        {% for f in data.facturacion_clientes %}
+                        <tr><td>{{ f.cliente }}</td><td class="text-end">{{ f.facturas }}</td>
+                            <td class="text-end">${{ "{:,.0f}".format(f.total) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">Sin datos</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Servicios más vendidos</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Servicio</th><th class="text-end">Cantidad</th><th class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        {% for s in data.servicios_vendidos %}
+                        <tr><td>{{ s.servicio }}</td><td class="text-end">{{ s.cantidad }}</td>
+                            <td class="text-end">${{ "{:,.0f}".format(s.total) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">Sin datos</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Órdenes por estado</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Estado</th><th class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        {% for estado, total in data.ots_por_estado %}
+                        <tr><td>{{ estado|replace('_', ' ')|capitalize }}</td><td class="text-end">{{ total }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Sin datos</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>Productividad por mecánico</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Mecánico</th><th class="text-end">OTs entregadas</th></tr></thead>
+                    <tbody>
+                        {% for m in data.productividad_mecanicos %}
+                        <tr><td>{{ m.mecanico }}</td><td class="text-end">{{ m.ots }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center text-muted py-3">Sin datos</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header"><strong>Movimientos de inventario</strong></div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-3"><div class="text-muted small">Entradas</div>
+                        <h5 class="text-success">{{ data.movimientos_inventario.entradas }}</h5></div>
+                    <div class="col-3"><div class="text-muted small">Salidas</div>
+                        <h5 class="text-danger">{{ data.movimientos_inventario.salidas }}</h5></div>
+                    <div class="col-3"><div class="text-muted small">Ajustes</div>
+                        <h5>{{ data.movimientos_inventario.ajustes }}</h5></div>
+                    <div class="col-3"><div class="text-muted small">Bajas</div>
+                        <h5 class="text-secondary">{{ data.movimientos_inventario.bajas }}</h5></div>
+                </div>
+                <hr>
+                <p class="mb-0"><strong>Valor actual del inventario:</strong>
+                    <span class="text-success">${{ "{:,.0f}".format(data.valor_inventario) }}</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

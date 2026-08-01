@@ -32,6 +32,9 @@
                         <td>{{ v.anio or "-" }}</td>
                         <td>{{ v.cliente.nombre }}</td>
                         <td>
+                            <a href="{{ url_for('vehiculos.historial', vehiculo_id=v.id) }}" class="btn btn-sm btn-outline-info" title="Historial">
+                                <i class="bi bi-clock-history"></i>
+                            </a>
                             <a href="{{ url_for('vehiculos.editar', id=v.id) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>

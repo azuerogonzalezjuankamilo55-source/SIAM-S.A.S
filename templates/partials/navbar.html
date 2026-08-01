@@ -4,6 +4,11 @@
             <i class="bi bi-list fs-5"></i>
         </button>
     {% if current_user.is_authenticated %}
+        {% if current_user.foto_path %}
+        <img src="{{ current_user.foto_path }}" alt="{{ current_user.nombre }}" class="avatar avatar-sm ms-2">
+        {% else %}
+        <i class="bi bi-person-circle fs-4 ms-2 text-primary"></i>
+        {% endif %}
         <span class="ms-2 text-light">Bienvenido, <strong>{{ current_user.nombre }}</strong></span>
     {% else %}
         <span class="ms-2 text-light">Bienvenido</span>

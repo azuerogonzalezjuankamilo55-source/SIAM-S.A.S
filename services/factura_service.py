@@ -105,6 +105,13 @@ class FacturaService:
             logger.error("Error al generar factura: %s", e, exc_info=True)
             raise
 
+        try:
+            from services.historial_service import HistorialService
+            HistorialService.registrar_desde_factura(factura)
+        except Exception as e:
+            db.session.rollback()
+            logger.warning("No se pudo registrar historial de factura %s: %s", numero, e)
+
         logger.info("Factura %s generada: total=%s", numero, total)
         return factura
 

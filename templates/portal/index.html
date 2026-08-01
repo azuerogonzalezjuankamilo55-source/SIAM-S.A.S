@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Mi Portal{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Hola, {{ data.cliente.nombre }} 👋</h4>
+    <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-primary">
+        <i class="bi bi-calendar-plus"></i> Solicitar Cita
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <h2>{{ data.total_vehiculos }}</h2>
+            <span class="text-muted">Vehículos</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <h2>{{ data.proximas_citas|length }}</h2>
+            <span class="text-muted">Próximas citas</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <h2>{{ data.ordenes_activas|length }}</h2>
+            <span class="text-muted">Reparaciones activas</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center p-3">
+            <h2>{{ data.facturas_pendientes|length }}</h2>
+            <span class="text-muted">Facturas pendientes</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Próximas citas</strong>
+                <a href="{{ url_for('portal.citas') }}" class="small">Ver todas</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for c in data.proximas_citas %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div><strong>{{ c.fecha }} · {{ c.hora }}</strong></div>
+                            <small class="text-muted">{{ c.vehiculo.marca }} {{ c.vehiculo.modelo }} ({{ c.vehiculo.placa }})</small>
+                        </div>
+                        <span class="badge bg-warning">Pendiente</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">No tienes próximas citas.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Reparaciones en curso</strong>
+                <a href="{{ url_for('portal.ordenes') }}" class="small">Ver todas</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for o in data.ordenes_activas %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div><strong>{{ o.numero }}</strong></div>
+                            <small class="text-muted">{{ o.vehiculo.placa }} · {{ o.estado_display }}</small>
+                        </div>
+                        <a href="{{ url_for('portal.orden_detalle', orden_id=o.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">No tienes reparaciones en curso.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Facturas pendientes</strong>
+                <a href="{{ url_for('portal.facturas') }}" class="small">Ver todas</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for f in data.facturas_pendientes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div><strong>{{ f.numero }}</strong></div>
+                            <small class="text-muted">{{ f.created_at.strftime('%d/%m/%Y') if f.created_at }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="fw-bold">${{ "%.2f"|format(f.total) }}</span><br>
+                            <a href="{{ url_for('portal.factura_detalle', factura_id=f.id) }}" class="small">Ver</a>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">Sin facturas pendientes.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <strong>Actividad reciente</strong>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for h in data.historial_reciente %}
+                    <li class="list-group-item">
+                        <div><span class="badge bg-secondary">{{ h.tipo_label }}</span>
+                            <strong>{{ h.vehiculo.placa }}</strong>
+                            <small class="text-muted float-end">{{ h.fecha }}</small>
+                        </div>
+                        {% if h.descripcion %}<small class="text-muted">{{ h.descripcion }}</small>{% endif %}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">Sin actividad registrada.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

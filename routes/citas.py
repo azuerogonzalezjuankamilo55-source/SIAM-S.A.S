@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from models.cita import Cita
 from models.cliente import Cliente
@@ -108,6 +108,12 @@ def cambiar_estado(id: int, estado: str) -> Any:
         if estado in estados_validos:
             cita.estado = estado
             safe_commit()
+            if estado == "completado":
+                try:
+                    from services.historial_service import HistorialService
+                    HistorialService.registrar_desde_cita(cita, current_user.id if current_user.is_authenticated else None)
+                except Exception as e:
+                    logger.warning("No se pudo registrar historial de cita %s: %s", id, e)
             logger.info("Cita #%s cambió a estado: %s", id, estado)
     except Exception as e:
         db.session.rollback()

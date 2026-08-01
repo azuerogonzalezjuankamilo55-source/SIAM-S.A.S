@@ -11,3 +11,7 @@ from routes.ordenes_trabajo import ordenes_trabajo_bp
 from routes.assistant import assistant_bp
 from routes.sedes import sedes_bp
 from routes.api import api_bp
+from routes.portal import portal_bp
+from routes.inteligencia import ia_bp
+from routes.recordatorios import recordatorios_bp
+from routes.reportes import reportes_bp

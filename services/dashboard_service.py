@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from datetime import date, datetime
+from decimal import Decimal
 
 from sqlalchemy import func, extract
 
@@ -21,6 +22,8 @@ logger = logging.getLogger("siam.dashboard_service")
 class DashboardData:
     total_clientes: int = 0
     total_vehiculos: int = 0
+    total_servicios: int = 0
+    total_facturas: int = 0
     total_mecanicos: int = 0
     citas_hoy: int = 0
     citas_pendientes: int = 0
@@ -32,6 +35,10 @@ class DashboardData:
     inventario_bajo: int = 0
     ingresos_hoy: float = 0.0
     ingresos_mes: float = 0.0
+    por_cobrar: float = 0.0
+    ticket_promedio: float = 0.0
+    ot_retrasadas_count: int = 0
+    tasa_completacion_citas: float = 0.0
     clientes_nuevos_mes: int = 0
     mecanico_top_nombre: str = ""
     mecanico_top_total: int = 0
@@ -42,6 +49,10 @@ class DashboardData:
     servicios_mas_vendidos: list = field(default_factory=list)
     estado_ot_data: list = field(default_factory=list)
     citas_semana: list = field(default_factory=list)
+    ingresos_por_metodo: list = field(default_factory=list)
+    ot_por_mecanico: list = field(default_factory=list)
+    ot_retrasadas: list = field(default_factory=list)
+    ot_en_proceso: list = field(default_factory=list)
 
 
 class DashboardService:
@@ -167,9 +178,87 @@ class DashboardService:
         )
         citas_semana_list = [(str(row.dia), int(row.total)) for row in citas_semana]
 
+        facturas_activas = Factura.query.filter(
+            Factura.estado.in_(["pendiente", "parcial"])
+        ).all()
+        por_cobrar = float(sum((f.saldo_pendiente for f in facturas_activas), Decimal("0")))
+
+        facturas_validadas = Factura.query.filter(Factura.estado != "anulado").all()
+        total_facturado = float(sum((f.total for f in facturas_validadas), Decimal("0")))
+        ticket_promedio = (
+            total_facturado / len(facturas_validadas) if facturas_validadas else 0.0
+        )
+
+        ot_retrasadas = (
+            OrdenTrabajo.query
+            .filter(
+                OrdenTrabajo.fecha_estimada_entrega.isnot(None),
+                OrdenTrabajo.fecha_estimada_entrega < today,
+                OrdenTrabajo.estado != "entregado",
+            )
+            .order_by(OrdenTrabajo.fecha_estimada_entrega.asc())
+            .limit(5)
+            .all()
+        )
+        ot_retrasadas_count = (
+            OrdenTrabajo.query
+            .filter(
+                OrdenTrabajo.fecha_estimada_entrega.isnot(None),
+                OrdenTrabajo.fecha_estimada_entrega < today,
+                OrdenTrabajo.estado != "entregado",
+            )
+            .count()
+        )
+
+        total_citas = Cita.query.count()
+        citas_completadas = Cita.query.filter(Cita.estado == "completado").count()
+        tasa_completacion_citas = (
+            (citas_completadas / total_citas * 100) if total_citas else 0.0
+        )
+
+        ingresos_metodo = (
+            db.session.query(
+                Factura.metodo_pago,
+                func.coalesce(func.sum(Factura.total), 0).label("total"),
+            )
+            .filter(Factura.estado.in_(["pagado", "parcial"]), Factura.metodo_pago.isnot(None))
+            .group_by(Factura.metodo_pago)
+            .order_by(func.sum(Factura.total).desc())
+            .all()
+        )
+        ingresos_por_metodo = [(row.metodo_pago, float(row.total)) for row in ingresos_metodo]
+
+        ot_por_mecanico_rows = (
+            db.session.query(
+                Mecanico.nombre,
+                func.count(OrdenTrabajo.id).label("total"),
+            )
+            .join(OrdenTrabajo, Mecanico.id == OrdenTrabajo.mecanico_id)
+            .filter(OrdenTrabajo.estado == "entregado")
+            .group_by(Mecanico.id, Mecanico.nombre)
+            .order_by(func.count(OrdenTrabajo.id).desc())
+            .limit(5)
+            .all()
+        )
+        ot_por_mecanico = [(row.nombre, int(row.total)) for row in ot_por_mecanico_rows]
+
+        ot_en_proceso = (
+            OrdenTrabajo.query
+            .filter(
+                OrdenTrabajo.estado.in_(
+                    ["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "listo_entrega"]
+                )
+            )
+            .order_by(OrdenTrabajo.created_at.asc())
+            .limit(5)
+            .all()
+        )
+
         data = DashboardData(
             total_clientes=Cliente.query.count(),
             total_vehiculos=Vehiculo.query.count(),
+            total_servicios=Servicio.query.count(),
+            total_facturas=Factura.query.count(),
             total_mecanicos=Mecanico.query.count(),
             citas_hoy=Cita.query.filter(Cita.fecha == today).count(),
             citas_pendientes=Cita.query.filter(Cita.estado == "pendiente").count(),
@@ -181,6 +270,10 @@ class DashboardService:
             inventario_bajo=len(items_bajo),
             ingresos_hoy=ingresos_hoy,
             ingresos_mes=ingresos_mes,
+            por_cobrar=por_cobrar,
+            ticket_promedio=ticket_promedio,
+            ot_retrasadas_count=ot_retrasadas_count,
+            tasa_completacion_citas=tasa_completacion_citas,
             clientes_nuevos_mes=clientes_nuevos,
             mecanico_top_nombre=top_mecanico.nombre if top_mecanico else "",
             mecanico_top_total=top_mecanico.total if top_mecanico else 0,
@@ -191,6 +284,10 @@ class DashboardService:
             servicios_mas_vendidos=servicios_mas_vendidos,
             estado_ot_data=estado_ot_data,
             citas_semana=citas_semana_list,
+            ingresos_por_metodo=ingresos_por_metodo,
+            ot_por_mecanico=ot_por_mecanico,
+            ot_retrasadas=ot_retrasadas,
+            ot_en_proceso=ot_en_proceso,
         )
 
         logger.debug("Dashboard actualizado: %d clientes, $%.2f ingresos mes", data.total_clientes, data.ingresos_mes)

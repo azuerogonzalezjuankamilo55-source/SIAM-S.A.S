@@ -11,6 +11,8 @@ ESTADOS_OT = [
     ("entregado", "Entregado"),
 ]
 
+NIVELES_COMBUSTIBLE = ["Vacio", "1/4", "1/2", "3/4", "Lleno"]
+
 
 class OrdenTrabajoForm(FlaskForm):
     cliente_id = IntegerField("Cliente", validators=[DataRequired()])
@@ -20,6 +22,10 @@ class OrdenTrabajoForm(FlaskForm):
     fecha_estimada_entrega = DateField("Fecha Estimada de Entrega", validators=[Optional()])
     diagnostico_inicial = StringField("Diagnóstico Inicial", validators=[Optional()])
     observaciones = StringField("Observaciones", validators=[Optional()])
+    kms_ingreso = IntegerField("Kilometraje de Ingreso", validators=[Optional()])
+    nivel_combustible_ingreso = SelectField(
+        "Nivel de Combustible al Ingreso", choices=NIVELES_COMBUSTIBLE, validators=[Optional()]
+    )
     submit = SubmitField("Guardar")
 
 

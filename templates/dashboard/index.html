@@ -12,6 +12,129 @@
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+        <a href="{{ url_for('clientes.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-people fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Clientes</h6>
+                        <h3 class="mb-0 text-white">{{ data.total_clientes }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
+        <a href="{{ url_for('vehiculos.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-truck fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Vehículos</h6>
+                        <h3 class="mb-0 text-white">{{ data.total_vehiculos }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+        <a href="{{ url_for('servicios.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #6f42c1, #553098);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-wrench-adjustable fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Servicios</h6>
+                        <h3 class="mb-0 text-white">{{ data.total_servicios }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
+        <a href="{{ url_for('citas.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-calendar-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Citas</h6>
+                        <h3 class="mb-0 text-white">{{ data.citas_pendientes }}<small class="fs-6 text-white-50"> pend.</small></h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+        <a href="{{ url_for('facturas.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #fd7e14, #d96b0a);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-receipt-cutoff fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Facturas</h6>
+                        <h3 class="mb-0 text-white">{{ data.total_facturas }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="250">
+        <a href="{{ url_for('inventario.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-box-seam fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Inventario</h6>
+                        <h3 class="mb-0 text-white">{{ data.inventario_bajo }}<small class="fs-6 text-white-50"> alertas</small></h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+        <a href="{{ url_for('mecanicos.listar') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #20c997, #17a673);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-person-gear fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Mecánicos</h6>
+                        <h3 class="mb-0 text-white">{{ data.total_mecanicos }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="350">
+        <a href="{{ url_for('reportes.index') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #ffc107, #d39e00);">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-cash-stack fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Ingresos del Mes</h6>
+                        <h3 class="mb-0 text-white fs-5">${{ "{:,.0f}".format(data.ingresos_mes) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
         <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -125,6 +248,65 @@
     </div>
 </div>
 
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase small text-muted">Por Cobrar</h6>
+                        <h3 class="text-danger mb-0">${{ "{:,.0f}".format(data.por_cobrar) }}</h3>
+                        <small class="text-muted">{{ data.facturas_pendientes }} facturas sin pagar</small>
+                    </div>
+                    <i class="bi bi-credit-card fs-2 text-danger"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase small text-muted">Ticket Promedio</h6>
+                        <h3 class="text-primary mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h3>
+                        <small class="text-muted">Por factura emitida</small>
+                    </div>
+                    <i class="bi bi-receipt-cutoff fs-2 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase small text-muted">OT Retrasadas</h6>
+                        <h3 class="text-warning mb-0">{{ data.ot_retrasadas_count }}</h3>
+                        <small class="text-muted">Pasada la fecha estimada</small>
+                    </div>
+                    <i class="bi bi-alarm fs-2 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase small text-muted">Citas Completadas</h6>
+                        <h3 class="text-success mb-0">{{ "{:.0f}".format(data.tasa_completacion_citas) }}%</h3>
+                        <small class="text-muted">Del total de citas</small>
+                    </div>
+                    <i class="bi bi-check2-circle fs-2 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if data.ingresos_mensuales or data.servicios_mas_vendidos or data.estado_ot_data or data.citas_semana %}
 <div class="row g-3 mb-4">
     {% if data.ingresos_mensuales %}
@@ -172,6 +354,35 @@
             </div>
             <div class="card-body">
                 <canvas id="chartCitas" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if data.ingresos_por_metodo or data.ot_por_mecanico %}
+<div class="row g-3 mb-4">
+    {% if data.ingresos_por_metodo %}
+    <div class="col-md-6" data-aos="fade-up">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-cash-coin me-2 text-primary"></i>Ingresos por Método de Pago</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartMetodo" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if data.ot_por_mecanico %}
+    <div class="col-md-6" data-aos="fade-up">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-person-gear me-2 text-success"></i>Productividad por Mecánico</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="chartMecanicos" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -263,6 +474,78 @@
     </div>
     {% endif %}
 </div>
+
+{% if data.ot_retrasadas or data.ot_en_proceso %}
+<div class="row g-3 mb-3">
+    {% if data.ot_retrasadas %}
+    <div class="col-md-6" data-aos="fade-up">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-alarm me-2"></i>Órdenes Retrasadas</h6>
+                <span class="badge bg-dark">{{ data.ot_retrasadas_count }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>OT</th>
+                                <th>Cliente</th>
+                                <th>Estimada</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for o in data.ot_retrasadas %}
+                            <tr>
+                                <td><a href="{{ url_for('ordenes_trabajo.ver', id=o.id) }}">{{ o.numero }}</a></td>
+                                <td>{{ o.cliente.nombre }}</td>
+                                <td>{{ o.fecha_estimada_entrega }}</td>
+                                <td><span class="badge bg-secondary">{{ o.estado|replace("_", " ")|title }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if data.ot_en_proceso %}
+    <div class="col-md-6" data-aos="fade-up">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-tools me-2 text-info"></i>Órdenes en Proceso</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>OT</th>
+                                <th>Vehículo</th>
+                                <th>Mecánico</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for o in data.ot_en_proceso %}
+                            <tr>
+                                <td><a href="{{ url_for('ordenes_trabajo.ver', id=o.id) }}">{{ o.numero }}</a></td>
+                                <td>{{ o.vehiculo.placa }}</td>
+                                <td>{{ o.mecanico.nombre if o.mecanico else "—" }}</td>
+                                <td><span class="badge bg-info">{{ o.estado|replace("_", " ")|title }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
 
 {% if data.items_stock_bajo %}
 <div class="mt-3" data-aos="fade-up">
@@ -383,6 +666,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 tension: 0.4,
                 pointBackgroundColor: '#198754',
                 pointRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if data.ingresos_por_metodo %}
+    new Chart(document.getElementById('chartMetodo'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for l, _ in data.ingresos_por_metodo %}'{{ l }}',{% endfor %}],
+            datasets: [{
+                data: [{% for _, v in data.ingresos_por_metodo %}{{ v }},{% endfor %}],
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997'],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
+            }
+        }
+    });
+    {% endif %}
+
+    {% if data.ot_por_mecanico %}
+    new Chart(document.getElementById('chartMecanicos'), {
+        type: 'bar',
+        data: {
+            labels: [{% for l, _ in data.ot_por_mecanico %}'{{ l }}',{% endfor %}],
+            datasets: [{
+                label: 'OTs entregadas',
+                data: [{% for _, v in data.ot_por_mecanico %}{{ v }},{% endfor %}],
+                backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                borderColor: 'rgba(25, 135, 84, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
             }]
         },
         options: {

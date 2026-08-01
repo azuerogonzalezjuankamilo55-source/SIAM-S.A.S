@@ -1,17 +1,25 @@
 import logging
 from typing import Any
+from decimal import Decimal
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, current_app
 from flask_login import login_required, current_user
+from flask_wtf.csrf import validate_csrf
 
 from models.orden_trabajo import OrdenTrabajo, ESTADOS_OT
 from models.orden_trabajo_historial import OrdenTrabajoHistorial
+from models.orden_trabajo_item import OrdenTrabajoItem
+from models.orden_trabajo_foto import OrdenTrabajoFoto
+from models.orden_trabajo_repuesto import OrdenTrabajoRepuesto
 from models.cliente import Cliente
 from models.vehiculo import Vehiculo
 from models.mecanico import Mecanico
+from models.inventario import Inventario
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
+from services.orden_trabajo_service import OrdenTrabajoService, NIVELES_COMBUSTIBLE
+from exceptions import BusinessRuleException, NotFoundException
 
 logger = logging.getLogger("siam.routes.ordenes_trabajo")
 ordenes_trabajo_bp = Blueprint("ordenes_trabajo", __name__, url_prefix="/ordenes-trabajo")
@@ -68,6 +76,8 @@ def crear() -> Any:
                 fecha_estimada_entrega=form.fecha_estimada_entrega.data,
                 diagnostico_inicial=form.diagnostico_inicial.data,
                 observaciones=form.observaciones.data,
+                kms_ingreso=form.kms_ingreso.data or None,
+                nivel_combustible_ingreso=form.nivel_combustible_ingreso.data or None,
             )
             db.session.add(orden)
             db.session.flush()
@@ -93,7 +103,11 @@ def crear() -> Any:
 @login_required
 def ver(id: int) -> Any:
     orden = OrdenTrabajo.query.get_or_404(id)
-    return render_template("ordenes_trabajo/ver.html", orden=orden, estados=ESTADOS_OT)
+    inventario = Inventario.query.filter_by(activo=True).order_by(Inventario.nombre).all()
+    return render_template(
+        "ordenes_trabajo/ver.html", orden=orden, estados=ESTADOS_OT,
+        inventario=inventario, niveles_combustible=NIVELES_COMBUSTIBLE,
+    )
 
 
 @ordenes_trabajo_bp.route("/editar/<int:id>", methods=["GET", "POST"])
@@ -170,6 +184,12 @@ def cambiar_estado(id: int) -> Any:
         orden.estado = estado_nuevo
         _registrar_historial(orden, estado_anterior, observacion)
         safe_commit()
+        if estado_nuevo == "entregado":
+            try:
+                from services.historial_service import HistorialService
+                HistorialService.registrar_desde_orden(orden, current_user.id if current_user.is_authenticated else None)
+            except Exception as e:
+                logger.warning("No se pudo registrar historial de OT %s: %s", orden.numero, e)
         logger.info("OT %s: %s -> %s", orden.numero, estado_anterior, estado_nuevo)
         if request.is_json:
             return json_success(message=f"Estado cambiado a: {orden.estado_display}")
@@ -190,3 +210,197 @@ def obtener_vehiculos(cliente_id: int) -> Any:
         {"id": v.id, "texto": f"{v.marca} {v.modelo} - {v.placa}"}
         for v in vehiculos
     ])
+
+
+@ordenes_trabajo_bp.route("/items/agregar/<int:id>", methods=["POST"])
+@login_required
+def agregar_item(id: int) -> Any:
+    orden = OrdenTrabajo.query.get_or_404(id)
+    descripcion = request.form.get("descripcion", "").strip()
+    tiempo = request.form.get("tiempo_minutos") or None
+    try:
+        OrdenTrabajoService.agregar_item(
+            orden.id, descripcion,
+            tiempo_minutos=int(tiempo) if tiempo else None,
+        )
+        if request.is_json:
+            return json_success(message="Tarea agregada.")
+        flash("Tarea agregada al checklist", "success")
+    except (BusinessRuleException, NotFoundException, ValueError) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+    return redirect(url_for("ordenes_trabajo.ver", id=orden.id))
+
+
+@ordenes_trabajo_bp.route("/items/toggle/<int:item_id>", methods=["POST"])
+@login_required
+def toggle_item(item_id: int) -> Any:
+    try:
+        item = OrdenTrabajoService.toggle_item(item_id)
+        estado = "completada" if item.completado else "pendiente"
+        if request.is_json:
+            return json_success(message=f"Tarea marcada como {estado}.")
+        flash(f"Tarea marcada como {estado}", "success")
+        return redirect(url_for("ordenes_trabajo.ver", id=item.orden_trabajo_id))
+    except NotFoundException as e:
+        if request.is_json:
+            return json_error(message=str(e)), 404
+        flash(str(e), "danger")
+        return redirect(url_for("ordenes_trabajo.listar"))
+
+
+@ordenes_trabajo_bp.route("/items/eliminar/<int:item_id>", methods=["POST"])
+@login_required
+def eliminar_item(item_id: int) -> Any:
+    try:
+        item = OrdenTrabajoItem.query.get_or_404(item_id)
+        orden_id = item.orden_trabajo_id
+        OrdenTrabajoService.eliminar_item(item_id)
+        if request.is_json:
+            return json_success(message="Tarea eliminada.")
+        flash("Tarea eliminada", "success")
+        return redirect(url_for("ordenes_trabajo.ver", id=orden_id))
+    except NotFoundException as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e)), 404
+        flash(str(e), "danger")
+        return redirect(url_for("ordenes_trabajo.listar"))
+
+
+@ordenes_trabajo_bp.route("/repuestos/agregar/<int:id>", methods=["POST"])
+@login_required
+def agregar_repuesto(id: int) -> Any:
+    orden = OrdenTrabajo.query.get_or_404(id)
+    inventario_id = request.form.get("inventario_id")
+    cantidad = request.form.get("cantidad", "1")
+    precio = request.form.get("precio_unitario", "0")
+    nota = request.form.get("nota", "")
+    try:
+        OrdenTrabajoService.agregar_repuesto(
+            orden.id,
+            inventario_id=int(inventario_id),
+            cantidad=int(cantidad),
+            precio_unitario=Decimal(precio or "0"),
+            nota=nota,
+            usuario_id=current_user.id if current_user.is_authenticated else None,
+        )
+        if request.is_json:
+            return json_success(message="Repuesto agregado.")
+        flash("Repuesto agregado a la orden", "success")
+    except (BusinessRuleException, NotFoundException, ValueError, TypeError) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+    return redirect(url_for("ordenes_trabajo.ver", id=orden.id))
+
+
+@ordenes_trabajo_bp.route("/repuestos/eliminar/<int:repuesto_id>", methods=["POST"])
+@login_required
+def eliminar_repuesto(repuesto_id: int) -> Any:
+    try:
+        repuesto = OrdenTrabajoRepuesto.query.get_or_404(repuesto_id)
+        orden_id = repuesto.orden_trabajo_id
+        OrdenTrabajoService.eliminar_repuesto(
+            repuesto_id,
+            usuario_id=current_user.id if current_user.is_authenticated else None,
+        )
+        if request.is_json:
+            return json_success(message="Repuesto eliminado.")
+        flash("Repuesto eliminado de la orden", "success")
+        return redirect(url_for("ordenes_trabajo.ver", id=orden_id))
+    except (BusinessRuleException, NotFoundException) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+        return redirect(url_for("ordenes_trabajo.listar"))
+
+
+@ordenes_trabajo_bp.route("/fotos/agregar/<int:id>", methods=["POST"])
+@login_required
+def agregar_foto(id: int) -> Any:
+    orden = OrdenTrabajo.query.get_or_404(id)
+    archivo = request.files.get("foto")
+    descripcion = request.form.get("descripcion", "")
+    try:
+        OrdenTrabajoService.guardar_foto(
+            orden.id, archivo, descripcion or None,
+            upload_root=current_app.root_path,
+        )
+        if request.is_json:
+            return json_success(message="Foto agregada.")
+        flash("Foto agregada a la orden", "success")
+    except (BusinessRuleException, NotFoundException) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+    return redirect(url_for("ordenes_trabajo.ver", id=orden.id))
+
+
+@ordenes_trabajo_bp.route("/fotos/eliminar/<int:foto_id>", methods=["POST"])
+@login_required
+def eliminar_foto(foto_id: int) -> Any:
+    try:
+        foto = OrdenTrabajoFoto.query.get_or_404(foto_id)
+        orden_id = foto.orden_trabajo_id
+        OrdenTrabajoService.eliminar_foto(foto_id, upload_root=current_app.root_path)
+        if request.is_json:
+            return json_success(message="Foto eliminada.")
+        flash("Foto eliminada", "success")
+        return redirect(url_for("ordenes_trabajo.ver", id=orden_id))
+    except NotFoundException as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e)), 404
+        flash(str(e), "danger")
+        return redirect(url_for("ordenes_trabajo.listar"))
+
+
+@ordenes_trabajo_bp.route("/firma/<int:id>", methods=["POST"])
+@login_required
+def subir_firma(id: int) -> Any:
+    orden = OrdenTrabajo.query.get_or_404(id)
+    tipo = request.form.get("tipo", "")
+    archivo = request.files.get("firma")
+    try:
+        OrdenTrabajoService.guardar_firma(
+            orden.id, tipo, archivo, upload_root=current_app.root_path,
+        )
+        if request.is_json:
+            return json_success(message="Firma guardada.")
+        flash("Firma guardada", "success")
+    except (BusinessRuleException, NotFoundException) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+    return redirect(url_for("ordenes_trabajo.ver", id=orden.id))
+
+
+@ordenes_trabajo_bp.route("/entregar/<int:id>", methods=["POST"])
+@login_required
+def entregar(id: int) -> Any:
+    orden = OrdenTrabajo.query.get_or_404(id)
+    kms = request.form.get("kms_salida") or None
+    combustible = request.form.get("nivel_combustible_salida") or None
+    try:
+        OrdenTrabajoService.entregar(
+            orden.id,
+            kms_salida=int(kms) if kms else None,
+            nivel_combustible_salida=combustible,
+            usuario_id=current_user.id if current_user.is_authenticated else None,
+        )
+        if request.is_json:
+            return json_success(message="Orden entregada.")
+        flash(f"Orden {orden.numero} entregada", "success")
+    except (BusinessRuleException, NotFoundException, ValueError) as e:
+        db.session.rollback()
+        if request.is_json:
+            return json_error(message=str(e))
+        flash(str(e), "danger")
+    return redirect(url_for("ordenes_trabajo.ver", id=orden.id))
