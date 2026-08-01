@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Any
 
-from flask import Flask, redirect, url_for, render_template, send_from_directory
+from flask import Flask, redirect, url_for, render_template, send_from_directory, flash
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect

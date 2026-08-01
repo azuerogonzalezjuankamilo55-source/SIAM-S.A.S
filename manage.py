@@ -21,9 +21,9 @@ def cli():
 def create_admin(nombre, correo, password):
     """Crea el usuario administrador inicial."""
     from app import create_app
-from database.db import db
-from database.commit import safe_commit
-from models.usuario import Usuario
+    from database.db import db
+    from database.commit import safe_commit
+    from models.usuario import Usuario
 
     app = create_app()
     with app.app_context():
@@ -38,9 +38,9 @@ from models.usuario import Usuario
             rol="admin",
         )
         admin.set_password(password)
-            db.session.add(admin)
-            safe_commit()
-            click.echo(f"Administrador creado: {correo}")
+        db.session.add(admin)
+        safe_commit()
+        click.echo(f"Administrador creado: {correo}")
 
 
 @cli.command()

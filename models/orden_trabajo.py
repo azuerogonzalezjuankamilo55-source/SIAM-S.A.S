@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from database.db import db
@@ -91,8 +92,7 @@ class OrdenTrabajo(db.Model):
 
     @property
     def total_repuestos(self) -> Decimal:
-        from decimal import Decimal as D
-        return sum((r.subtotal for r in self.repuestos), D("0")).quantize(D("0.01"))
+        return sum((r.subtotal for r in self.repuestos), Decimal("0")).quantize(Decimal("0.01"))
 
     def __repr__(self) -> str:
         return f"<OrdenTrabajo {self.numero}:{self.estado}>"
