@@ -4,8 +4,8 @@
   "description": "Sistema de gestión para talleres mecánicos. Administra clientes, vehículos, servicios, citas, facturas e inventario.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#212529",
-  "theme_color": "#0d6efd",
+  "background_color": "#0F172A",
+  "theme_color": "#2563EB",
   "icons": [
     {
       "src": "/static/icons/icon-192x192.png",

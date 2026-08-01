@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Orden {{ orden.numero }}</h4>
     <a href="{{ url_for('portal.ordenes') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> Volver
+        <i class="fa-solid fa-arrow-left"></i> Volver
     </a>
 </div>
 
@@ -13,7 +13,7 @@
         <div class="card mb-3">
             <div class="card-header"><strong>Estado de la reparación</strong></div>
             <div class="card-body">
-                <span class="badge bg-{{
+                <span class="badge bg-{{ {
                     'recibido': 'secondary',
                     'diagnostico': 'info',
                     'esperando_repuestos': 'warning',
@@ -62,7 +62,7 @@
                 <span class="badge bg-secondary">{{ h.created_at.strftime('%d/%m/%Y %H:%M') if h.created_at }}</span>
                 {% if h.estado_anterior %}
                 <span class="text-muted">{{ h.estado_anterior|replace("_", " ")|title }}</span>
-                <i class="bi bi-arrow-right"></i>
+                <i class="fa-solid fa-arrow-right"></i>
                 {% endif %}
                 <strong>{{ h.estado_nuevo|replace("_", " ")|title }}</strong>
                 {% if h.observacion %}<div class="small text-muted mt-1">{{ h.observacion }}</div>{% endif %}

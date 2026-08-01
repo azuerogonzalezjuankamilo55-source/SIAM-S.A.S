@@ -2,11 +2,11 @@
 {% block title %}Acceso denegado{% endblock %}
 {% block content %}
 <div class="text-center py-5" data-aos="fade-up">
-    <i class="bi bi-shield-lock display-1 text-danger" aria-hidden="true"></i>
+    <i class="fa-solid fa-shield-halved display-1 text-danger" aria-hidden="true"></i>
     <h1 class="display-4 mt-3">403</h1>
     <p class="lead text-muted">No tienes permisos para acceder a esta página.</p>
     <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">
-        <i class="bi bi-house-door"></i> Volver al inicio
+        <i class="fa-solid fa-house"></i> Volver al inicio
     </a>
 </div>
 {% endblock %}

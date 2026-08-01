@@ -4,13 +4,17 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Órdenes de Trabajo</h4>
     <a href="{{ url_for('ordenes_trabajo.crear') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nueva OT
+        <i class="fa-solid fa-plus"></i> Nueva OT
     </a>
 </div>
 <div class="card">
     <div class="card-body">
+        <div class="search-input mb-3" style="max-width: 340px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaOrdenes">
+        </div>
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="tablaOrdenes">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -49,21 +53,30 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ url_for('ordenes_trabajo.ver', id=ot.id) }}" class="btn btn-outline-info">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="fa-solid fa-eye"></i>
                                 </a>
                                 {% if ot.estado != "entregado" %}
                                 <a href="{{ url_for('ordenes_trabajo.editar', id=ot.id) }}" class="btn btn-outline-warning">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="fa-solid fa-pen"></i>
                                 </a>
                                 <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-outline-danger" data-confirm="¿Eliminar orden {{ ot.numero }}?">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="fa-solid fa-trash"></i>
                                 </a>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="9" class="text-center text-muted">No hay órdenes de trabajo registradas</td></tr>
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <div class="empty-state-icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></div>
+                                <h6 class="mb-1">Aún no hay órdenes de trabajo</h6>
+                                <p class="text-muted small mb-3">Crea una orden para dar seguimiento a las reparaciones.</p>
+                                <a href="{{ url_for('ordenes_trabajo.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear OT</a>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

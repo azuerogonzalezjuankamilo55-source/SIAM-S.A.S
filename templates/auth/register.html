@@ -1,38 +1,47 @@
 {% extends "base.html" %}
 {% block title %}Crear Cuenta{% endblock %}
 {% block auth_content %}
-<div class="card shadow">
-    <div class="card-body p-4">
-        <div class="text-center mb-4">
-            <i class="bi bi-person-plus hero-icon display-3 text-primary"></i>
-            <h3 class="mt-2 fw-bold">Crear Cuenta</h3>
-            <p class="text-muted">Regístrate para gestionar tu taller</p>
+<div class="card shadow border-0">
+    <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4 d-lg-none">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:64px;height:64px;background:var(--siam-gradient);color:#fff;">
+                <i class="fa-solid fa-user-plus fa-2x"></i>
+            </span>
+            <h3 class="fw-bold">{{ taller_config.nombre_taller if taller_config and taller_config.nombre_taller else "SIAM" }}</h3>
+            <p class="text-muted">Sistema Integral Automotriz</p>
+        </div>
+        <div class="d-none d-lg-block mb-4">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:52px;height:52px;background:var(--siam-gradient);color:#fff;">
+                <i class="fa-solid fa-user-plus"></i>
+            </span>
+            <h3 class="fw-bold mb-1">Crea tu cuenta</h3>
+            <p class="text-muted mb-0">Comienza a gestionar tu taller en minutos</p>
         </div>
         <form method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 <label class="form-label">Nombre completo</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                     <input type="text" name="nombre" class="form-control" placeholder="Tu nombre" required>
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Correo electrónico</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                     <input type="email" name="correo" class="form-control" placeholder="correo@ejemplo.com" required>
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Contraseña</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                     <input type="password" name="password" class="form-control" placeholder="Mínimo 8 caracteres" required>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 mt-2">
-                <i class="bi bi-person-check me-1"></i> Registrarse
+                <i class="fa-solid fa-user-check me-1"></i> Registrarse
             </button>
         </form>
         <p class="text-center mt-3 mb-0 small">
@@ -42,8 +51,30 @@
     </div>
 </div>
 {% endblock %}
-{% block scripts %}
-<script>
-gsap.from('.card', { opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' });
-</script>
+{% block auth_side %}
+<div class="d-flex align-items-center gap-2" data-aos="fade-right">
+    {% if taller_config and taller_config.logo_path %}
+    <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img bg-white p-1 rounded">
+    {% else %}
+    <span class="d-flex align-items-center justify-content-center rounded-3" style="width:44px;height:44px;background:var(--siam-gradient);color:#fff;">
+        <i class="fa-solid fa-gears"></i>
+    </span>
+    <span class="fw-bold fs-4">{{ taller_config.nombre_taller if taller_config else "SIAM" }}</span>
+    {% endif %}
+</div>
+<div data-aos="fade-up" data-aos-delay="150">
+    <h1 class="fw-bold display-6 mb-3">Moderniza tu <span class="text-primary">taller</span> hoy</h1>
+    <p class="lead mb-4 text-white-50">
+        Administra clientes, vehículos, servicios, citas, facturas e inventario
+        desde una sola plataforma web. Sin papeles, sin caos.
+    </p>
+    <div class="d-flex gap-4 mt-2 text-white-50 small">
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Sin instalación</span>
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> 100% web</span>
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Multi-dispositivo</span>
+    </div>
+</div>
+<div class="text-white-50 small" data-aos="fade-up">
+    <i class="fa-solid fa-shield-halved me-1"></i> SIAM · Sistema Integral Automotriz
+</div>
 {% endblock %}

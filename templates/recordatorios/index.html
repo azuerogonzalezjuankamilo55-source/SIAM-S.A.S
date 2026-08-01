@@ -2,14 +2,14 @@
 {% block title %}Recordatorios{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="bi bi-bell me-2 text-warning"></i>Recordatorios</h4>
+    <h4 class="mb-0"><i class="fa-solid fa-bell me-2 text-warning"></i>Recordatorios</h4>
     <span class="badge bg-warning text-dark">Pendientes: {{ pendientes }}</span>
 </div>
 
 <div class="row g-3 mb-3">
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header"><strong><i class="bi bi-magic"></i> Generar automáticamente</strong></div>
+            <div class="card-header"><strong><i class="fa-solid fa-wand-magic-sparkles"></i> Generar automáticamente</strong></div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('recordatorios.generar') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
@@ -18,14 +18,14 @@
                         alineación, llantas, batería) según el historial de cada vehículo y crea
                         recordatorios pendientes sin duplicar.
                     </p>
-                    <button class="btn btn-warning"><i class="bi bi-lightning-charge"></i> Generar mantenimientos</button>
+                    <button class="btn btn-warning"><i class="fa-solid fa-bolt"></i> Generar mantenimientos</button>
                 </form>
             </div>
         </div>
     </div>
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><strong><i class="bi bi-plus-circle"></i> Crear recordatorio manual</strong></div>
+            <div class="card-header"><strong><i class="fa-solid fa-circle-plus"></i> Crear recordatorio manual</strong></div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('recordatorios.crear') }}" class="row g-2">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
@@ -51,7 +51,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button class="btn btn-primary w-100"><i class="bi bi-check-lg"></i> Crear</button>
+                        <button class="btn btn-primary w-100"><i class="fa-solid fa-check"></i> Crear</button>
                     </div>
                     <div class="col-12">
                         <textarea name="descripcion" class="form-control" rows="2" placeholder="Descripción (opcional)"></textarea>
@@ -65,7 +65,7 @@
 <div class="card">
     <div class="card-header">
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <strong><i class="bi bi-list-ul"></i> Listado</strong>
+            <strong><i class="fa-solid fa-list"></i> Listado</strong>
             <form method="GET" action="{{ url_for('recordatorios.index') }}" class="d-flex gap-2 ms-auto">
                 <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value="">Todos los estados</option>
@@ -127,18 +127,18 @@
                         <form method="POST" action="{{ url_for('recordatorios.cambiar_estado', recordatorio_id=r.id, estado='enviado') }}"
                               class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                            <button class="btn btn-sm btn-outline-info" title="Marcar enviado"><i class="bi bi-send"></i></button>
+                            <button class="btn btn-sm btn-outline-info" title="Marcar enviado"><i class="fa-solid fa-paper-plane"></i></button>
                         </form>
                         <form method="POST" action="{{ url_for('recordatorios.cambiar_estado', recordatorio_id=r.id, estado='completado') }}"
                               class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                            <button class="btn btn-sm btn-outline-success" title="Marcar completado"><i class="bi bi-check-lg"></i></button>
+                            <button class="btn btn-sm btn-outline-success" title="Marcar completado"><i class="fa-solid fa-check"></i></button>
                         </form>
                         {% if r.estado != 'cancelado' %}
                         <form method="POST" action="{{ url_for('recordatorios.cambiar_estado', recordatorio_id=r.id, estado='cancelado') }}"
                               class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                            <button class="btn btn-sm btn-outline-danger" title="Cancelar"><i class="bi bi-x-lg"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" title="Cancelar"><i class="fa-solid fa-xmark"></i></button>
                         </form>
                         {% endif %}
                     </td>

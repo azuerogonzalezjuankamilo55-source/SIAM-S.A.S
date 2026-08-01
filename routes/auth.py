@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 from models import Usuario, Cliente
 from database.db import db
@@ -15,6 +15,10 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login() -> Any:
+    if current_user.is_authenticated:
+        if current_user.es_cliente:
+            return redirect(url_for("portal.index"))
+        return redirect(url_for("dashboard.index"))
     form = LoginForm()
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()
@@ -43,6 +47,10 @@ def logout() -> Any:
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register() -> Any:
+    if current_user.is_authenticated:
+        if current_user.es_cliente:
+            return redirect(url_for("portal.index"))
+        return redirect(url_for("dashboard.index"))
     form = RegisterForm()
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()

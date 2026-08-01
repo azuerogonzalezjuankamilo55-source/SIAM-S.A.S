@@ -2,9 +2,9 @@
 {% block title %}Mis Recordatorios{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="bi bi-bell me-2 text-warning"></i>Mis Recordatorios</h4>
+    <h4 class="mb-0"><i class="fa-solid fa-bell me-2 text-warning"></i>Mis Recordatorios</h4>
     <a href="{{ url_for('portal.index') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> Volver
+        <i class="fa-solid fa-arrow-left"></i> Volver
     </a>
 </div>
 
@@ -32,7 +32,7 @@
             <div class="text-end">
                 <small class="text-muted d-block mb-2">Programado: {{ r.fecha_programada.strftime('%d/%m/%Y') }}</small>
                 <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Agendar cita
+                    <i class="fa-solid fa-calendar-plus"></i> Agendar cita
                 </a>
             </div>
         </li>
@@ -42,7 +42,7 @@
 {% else %}
 <div class="card">
     <div class="card-body text-center text-muted py-5">
-        <i class="bi bi-bell-slash fs-1 d-block mb-2"></i>
+        <i class="fa-solid fa-bell-slash fs-1 d-block mb-2"></i>
         No tienes recordatorios pendientes. ¡Estás al día!
     </div>
 </div>

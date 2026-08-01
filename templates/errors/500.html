@@ -2,11 +2,11 @@
 {% block title %}Error interno{% endblock %}
 {% block content %}
 <div class="text-center py-5" data-aos="fade-up">
-    <i class="bi bi-exclamation-triangle display-1 text-danger" aria-hidden="true"></i>
+    <i class="fa-solid fa-triangle-exclamation display-1 text-danger" aria-hidden="true"></i>
     <h1 class="display-4 mt-3">500</h1>
     <p class="lead text-muted">Ocurrió un error inesperado. El equipo ha sido notificado.</p>
     <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">
-        <i class="bi bi-arrow-repeat"></i> Intentar de nuevo
+        <i class="fa-solid fa-arrows-rotate"></i> Intentar de nuevo
     </a>
 </div>
 {% endblock %}

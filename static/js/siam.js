@@ -3,12 +3,13 @@ document.addEventListener('DOMContentLoaded', function () {
     initSidebar();
     initAnimations();
     initToast();
-    initConfirmDialogs();
     initDeleteLinks();
     initDarkMode();
     initAjaxForms();
     initAjaxDelete();
     initLocationButton();
+    initTableSearch();
+    initFormLabels();
 });
 
 function initTooltips() {
@@ -19,12 +20,43 @@ function initTooltips() {
 }
 
 function initSidebar() {
-    var toggler = document.querySelector('[data-bs-toggle="collapse"][data-bs-target=".sidebar"]');
+    var toggler = document.getElementById('sidebarToggler');
+    var sidebar = document.querySelector('.sidebar');
+    var backdrop = null;
+
+    function closeSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.remove('show');
+        if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        if (backdrop) { backdrop.remove(); backdrop = null; }
+    }
+
+    function openSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.add('show');
+        if (toggler) toggler.setAttribute('aria-expanded', 'true');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'sidebar-backdrop';
+            backdrop.addEventListener('click', closeSidebar);
+            document.body.appendChild(backdrop);
+        }
+    }
+
     if (toggler) {
         toggler.addEventListener('click', function () {
-            document.querySelector('.sidebar').classList.toggle('show');
+            if (sidebar && sidebar.classList.contains('show')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
         });
     }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeSidebar();
+    });
+
     var navLinks = document.querySelectorAll('.sidebar .nav-link');
     var currentPath = window.location.pathname;
     navLinks.forEach(function (link) {
@@ -36,11 +68,14 @@ function initSidebar() {
 
 function initAnimations() {
     if (typeof AOS !== 'undefined') {
+        document.documentElement.classList.add('aos-ready');
         AOS.init({
             duration: 600,
             once: true,
             offset: 50,
         });
+    } else {
+        document.documentElement.classList.add('aos-fallback');
     }
 }
 
@@ -59,15 +94,15 @@ function showToast(message, type) {
     var container = document.getElementById('toastContainer');
     if (!container) return;
     var icons = {
-        success: 'bi-check-circle-fill',
-        danger: 'bi-exclamation-circle-fill',
-        warning: 'bi-exclamation-triangle-fill',
-        info: 'bi-info-circle-fill'
+        success: 'fa-solid fa-circle-check',
+        danger: 'fa-solid fa-circle-exclamation',
+        warning: 'fa-solid fa-triangle-exclamation',
+        info: 'fa-solid fa-circle-info'
     };
     var toast = document.createElement('div');
     toast.className = 'toast align-items-center text-bg-' + type + ' border-0 show';
     toast.setAttribute('role', 'alert');
-    toast.innerHTML = '<div class="d-flex"><div class="toast-body"><i class="bi ' + (icons[type] || icons.info) + ' me-2"></i>' + message + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+    toast.innerHTML = '<div class="d-flex"><div class="toast-body"><i class="' + (icons[type] || icons.info) + ' me-2"></i>' + message + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
     container.appendChild(toast);
     var bsToast = new bootstrap.Toast(toast, { delay: 4000 });
     bsToast.show();
@@ -80,17 +115,6 @@ function getCSRFToken() {
     var input = document.querySelector('input[name="csrf_token"]');
     if (input) return input.value;
     return '';
-}
-
-function initConfirmDialogs() {
-    document.querySelectorAll('[data-confirm]').forEach(function (el) {
-        el.addEventListener('click', function (e) {
-            var msg = el.getAttribute('data-confirm') || '¿Estás seguro?';
-            if (!confirm(msg)) {
-                e.preventDefault();
-            }
-        });
-    });
 }
 
 function initDeleteLinks() {
@@ -147,7 +171,7 @@ function updateToggleIcons(theme) {
     allToggles.forEach(function (t) {
         var icon = t.querySelector('i');
         if (icon) {
-            icon.className = theme === 'dark' ? 'bi bi-moon-stars' : 'bi bi-sun';
+            icon.className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         }
         var text = t.textContent || '';
         if (text.includes('Oscuro') || text.includes('Claro')) {
@@ -300,7 +324,7 @@ function initLocationButton() {
                 },
                 function (error) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-geo-alt me-1"></i> Compartir ubicación';
+                    btn.innerHTML = '<i class="fa-solid fa-location-dot me-1"></i> Compartir ubicación';
                     var msg = 'No se pudo obtener la ubicación. ';
                     switch(error.code) {
                         case error.PERMISSION_DENIED: msg += 'Permiso denegado.'; break;
@@ -333,7 +357,7 @@ function sendLocation(lat, lng, accuracy, btn) {
     .then(function (r) { return r.json(); })
     .then(function (data) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Ubicación recibida';
+        btn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Ubicación recibida';
         if (data.success) {
             showToast('Ubicación recibida correctamente.', 'success');
         } else {
@@ -342,8 +366,59 @@ function sendLocation(lat, lng, accuracy, btn) {
     })
     .catch(function () {
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-geo-alt me-1"></i> Compartir ubicación';
+        btn.innerHTML = '<i class="fa-solid fa-location-dot me-1"></i> Compartir ubicación';
         showToast('Error al enviar ubicación.', 'danger');
+    });
+}
+
+/* ============================================================
+   Table client-side search — filters tbody rows by text
+   ============================================================ */
+
+function initTableSearch() {
+    var inputs = document.querySelectorAll('input[data-table-search]');
+    inputs.forEach(function (input) {
+        var table = document.querySelector(input.getAttribute('data-table-search'));
+        if (!table) return;
+        input.addEventListener('input', function () {
+            var q = input.value.toLowerCase().trim();
+            var tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+            var placeholder = null;
+            var visible = 0;
+            rows.forEach(function (row) {
+                if (row.querySelector('td[colspan]')) {
+                    placeholder = row;
+                    row.style.display = 'none';
+                    return;
+                }
+                var match = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (placeholder) {
+                placeholder.style.display = (!q || visible === 0) ? '' : 'none';
+            }
+        });
+    });
+}
+
+/* ============================================================
+   Form labels — associa label con su campo (accesibilidad)
+   ============================================================ */
+
+function initFormLabels() {
+    document.querySelectorAll('label.form-label').forEach(function (label) {
+        if (label.getAttribute('for')) return;
+        var control = label.nextElementSibling;
+        if (!control) return;
+        var tag = control.tagName;
+        if (tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') return;
+        var name = control.getAttribute('name') || '';
+        var id = control.getAttribute('id') || (name || 'campo') + '-' + Math.random().toString(36).slice(2, 7);
+        control.setAttribute('id', id);
+        label.setAttribute('for', id);
     });
 }
 
@@ -445,10 +520,10 @@ function addChatMessage(role, text, type, items) {
     if (type === 'botones' || text.includes('Compartir ubicación') || text.includes('Compartir mi ubicación')) {
         html += '<div class="mt-2 d-flex gap-2 flex-wrap chat-actions">';
         if (text.includes('ubicación') || text.includes('Ubicación')) {
-            html += '<button class="btn btn-sm btn-outline-info" data-action="share-location"><i class="bi bi-geo-alt me-1"></i> Compartir ubicación</button>';
+            html += '<button class="btn btn-sm btn-outline-info" data-action="share-location"><i class="fa-solid fa-location-dot me-1"></i> Compartir ubicación</button>';
         }
         if (text.includes('asesor') || text.includes('Asesor')) {
-            html += '<button class="btn btn-sm btn-outline-warning" onclick="showToast(\'Conectando con un asesor...\', \'info\')"><i class="bi bi-person me-1"></i> Hablar con asesor</button>';
+            html += '<button class="btn btn-sm btn-outline-warning" onclick="showToast(\'Conectando con un asesor...\', \'info\')"><i class="fa-solid fa-user me-1"></i> Hablar con asesor</button>';
         }
         html += '</div>';
     }

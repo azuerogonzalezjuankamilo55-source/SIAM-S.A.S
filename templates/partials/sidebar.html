@@ -1,168 +1,182 @@
 <nav class="sidebar d-flex flex-column p-3" aria-label="Navegación principal">
-    <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand text-decoration-none mb-4 d-flex align-items-center">
+    <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand text-decoration-none mb-3 d-flex align-items-center px-2">
         {% if taller_config and taller_config.logo_path %}
         <img src="{{ taller_config.logo_path }}" alt="{{ taller_config.nombre_taller or 'SIAM' }}" class="sidebar-logo-img me-2">
         {% else %}
-        <i class="bi bi-gear-wide-connected fs-4 me-2" aria-hidden="true"></i>
-        <span class="fw-bold">SIAM</span>
+        <span class="d-flex align-items-center justify-content-center rounded-3 me-2" style="width:36px;height:36px;background:var(--siam-gradient);color:#fff;">
+            <i class="fa-solid fa-gears" aria-hidden="true"></i>
+        </span>
+        <span class="fw-bold fs-5">SIAM</span>
         {% endif %}
-        <span class="badge bg-primary bg-opacity-25 text-primary ms-2 small">v2.0</span>
     </a>
+
+    {% if current_user.es_cliente %}
     <ul class="nav nav-pills flex-column">
-        {% if current_user.es_cliente %}
         <li class="nav-item">
             <a href="{{ url_for('portal.index') }}" class="nav-link">
-                <i class="bi bi-person-circle me-2" aria-hidden="true"></i> Mi Portal
+                <i class="fa-solid fa-gauge-high me-2" aria-hidden="true"></i> Mi Portal
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.vehiculos') }}" class="nav-link">
-                <i class="bi bi-truck me-2" aria-hidden="true"></i> Mis Vehículos
+                <i class="fa-solid fa-truck me-2" aria-hidden="true"></i> Mis Vehículos
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.citas') }}" class="nav-link">
-                <i class="bi bi-calendar-check me-2" aria-hidden="true"></i> Mis Citas
+                <i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i> Mis Citas
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.solicitar_cita') }}" class="nav-link">
-                <i class="bi bi-calendar-plus me-2" aria-hidden="true"></i> Solicitar Cita
+                <i class="fa-solid fa-calendar-plus me-2" aria-hidden="true"></i> Solicitar Cita
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.ordenes') }}" class="nav-link">
-                <i class="bi bi-tools me-2" aria-hidden="true"></i> Mis Reparaciones
+                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Mis Reparaciones
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.facturas') }}" class="nav-link">
-                <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i> Mis Facturas
+                <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Mis Facturas
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.pagos') }}" class="nav-link">
-                <i class="bi bi-credit-card me-2" aria-hidden="true"></i> Mis Pagos
+                <i class="fa-solid fa-credit-card me-2" aria-hidden="true"></i> Mis Pagos
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.historial') }}" class="nav-link">
-                <i class="bi bi-clock-history me-2" aria-hidden="true"></i> Historial
+                <i class="fa-solid fa-clock-rotate-left me-2" aria-hidden="true"></i> Historial
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.recordatorios') }}" class="nav-link">
-                <i class="bi bi-bell me-2" aria-hidden="true"></i> Recordatorios
+                <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Recordatorios
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('portal.perfil') }}" class="nav-link">
-                <i class="bi bi-gear me-2" aria-hidden="true"></i> Mi Perfil
+                <i class="fa-solid fa-gear me-2" aria-hidden="true"></i> Mi Perfil
             </a>
         </li>
-        {% else %}
+    </ul>
+    {% else %}
+    <div class="px-3 pt-2 pb-1 small text-uppercase text-secondary fw-semibold">General</div>
+    <ul class="nav nav-pills flex-column">
         <li class="nav-item">
             <a href="{{ url_for('dashboard.index') }}" class="nav-link">
-                <i class="bi bi-speedometer2 me-2" aria-hidden="true"></i> Dashboard
+                <i class="fa-solid fa-gauge-high me-2" aria-hidden="true"></i> Dashboard
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('assistant.index') }}" class="nav-link">
-                <i class="bi bi-robot me-2" aria-hidden="true"></i> Asistente IA
+                <i class="fa-solid fa-robot me-2" aria-hidden="true"></i> Asistente IA
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('ia.index') }}" class="nav-link">
-                <i class="bi bi-stars me-2" aria-hidden="true"></i> IA 2.0 — Inteligencia
+                <i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i> Diagnóstico IA
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('recordatorios.index') }}" class="nav-link">
-                <i class="bi bi-bell me-2" aria-hidden="true"></i> Recordatorios
+                <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Recordatorios
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('sedes.index') }}" class="nav-link">
-                <i class="bi bi-geo-alt me-2" aria-hidden="true"></i> Sedes
+                <i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i> Sedes
             </a>
         </li>
+    </ul>
+
+    <div class="px-3 pt-3 pb-1 small text-uppercase text-secondary fw-semibold">Gestión</div>
+    <ul class="nav nav-pills flex-column">
         <li class="nav-item">
             <a href="{{ url_for('clientes.listar') }}" class="nav-link">
-                <i class="bi bi-people me-2" aria-hidden="true"></i> Clientes
+                <i class="fa-solid fa-users me-2" aria-hidden="true"></i> Clientes
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('vehiculos.listar') }}" class="nav-link">
-                <i class="bi bi-truck me-2" aria-hidden="true"></i> Vehículos
+                <i class="fa-solid fa-truck me-2" aria-hidden="true"></i> Vehículos
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('servicios.listar') }}" class="nav-link">
-                <i class="bi bi-wrench me-2" aria-hidden="true"></i> Servicios
+                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Servicios
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('mecanicos.listar') }}" class="nav-link">
-                <i class="bi bi-person-gear me-2" aria-hidden="true"></i> Mecánicos
+                <i class="fa-solid fa-user-gear me-2" aria-hidden="true"></i> Mecánicos
             </a>
         </li>
+    </ul>
+
+    <div class="px-3 pt-3 pb-1 small text-uppercase text-secondary fw-semibold">Operación</div>
+    <ul class="nav nav-pills flex-column">
         <li class="nav-item">
             <a href="{{ url_for('citas.listar') }}" class="nav-link">
-                <i class="bi bi-calendar-check me-2" aria-hidden="true"></i> Citas
+                <i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i> Citas
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('ordenes_trabajo.listar') }}" class="nav-link">
-                <i class="bi bi-tools me-2" aria-hidden="true"></i> Órdenes de Trabajo
+                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Órdenes de Trabajo
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('facturas.listar') }}" class="nav-link">
-                <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i> Facturas
+                <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Facturas
             </a>
             <ul class="nav flex-column ms-3 mt-1 small">
                 <li class="nav-item">
                     <a href="{{ url_for('facturas.configuracion') }}" class="nav-link py-0">
-                        <i class="bi bi-gear me-1"></i> Configuración
+                        <i class="fa-solid fa-gear me-1"></i> Configuración
                     </a>
                 </li>
             </ul>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('inventario.listar') }}" class="nav-link">
-                <i class="bi bi-box-seam me-2" aria-hidden="true"></i> Inventario
+                <i class="fa-solid fa-boxes-stacked me-2" aria-hidden="true"></i> Inventario
             </a>
             <ul class="nav flex-column ms-3 mt-1 small">
                 <li class="nav-item">
                     <a href="{{ url_for('inventario.kardex') }}" class="nav-link py-0">
-                        <i class="bi bi-journal-text me-1"></i> Kardex
+                        <i class="fa-solid fa-book-open me-1"></i> Kardex
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('inventario.listar_categorias') }}" class="nav-link py-0">
-                        <i class="bi bi-tags me-1"></i> Categorías
+                        <i class="fa-solid fa-tags me-1"></i> Categorías
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('inventario.alertas') }}" class="nav-link py-0">
-                        <i class="bi bi-exclamation-triangle me-1"></i> Alertas
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Alertas
                     </a>
                 </li>
             </ul>
         </li>
         <li class="nav-item">
             <a href="{{ url_for('reportes.index') }}" class="nav-link">
-                <i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i> Reportes
+                <i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i> Reportes
             </a>
         </li>
-        {% endif %}
     </ul>
-    <div class="mt-auto">
-        <button class="btn btn-outline-secondary btn-sm w-100 mb-2" id="darkModeToggleSidebar" title="Modo oscuro/claro">
-            <i class="bi bi-moon-stars me-1"></i> Modo Oscuro
+    {% endif %}
+
+    <div class="mt-auto pt-3">
+        <button class="btn btn-soft btn-sm w-100 mb-2" id="darkModeToggleSidebar" title="Modo oscuro/claro">
+            <i class="fa-solid fa-moon me-1"></i> Modo Oscuro
         </button>
         <a href="{{ url_for('auth.logout') }}" class="nav-link">
-            <i class="bi bi-box-arrow-left me-2" aria-hidden="true"></i> Cerrar sesión
+            <i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i> Cerrar sesión
         </a>
     </div>
 </nav>

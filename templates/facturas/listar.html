@@ -5,7 +5,7 @@
     <h4 class="mb-0">Facturas</h4>
     <div>
         <a href="{{ url_for('facturas.configuracion') }}" class="btn btn-outline-info me-2">
-            <i class="bi bi-gear"></i> Configuración
+            <i class="fa-solid fa-gear"></i> Configuración
         </a>
     </div>
 </div>
@@ -24,6 +24,13 @@
                 </select>
             </div>
             <div class="col-auto">
+                <label class="form-label small mb-0">Buscar</label>
+                <div class="search-input">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search" name="busqueda" class="form-control form-control-sm" placeholder="Número o cliente..." aria-label="Buscar" value="{{ request.args.get('busqueda', '') }}" data-table-search="#tablaFacturas">
+                </div>
+            </div>
+            <div class="col-auto">
                 <a href="{{ url_for('facturas.listar') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
             </div>
         </form>
@@ -33,7 +40,7 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" id="tablaFacturas">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -84,26 +91,35 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ url_for('facturas.ver', id=f.id) }}" class="btn btn-outline-info" title="Ver">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="fa-solid fa-eye"></i>
                                 </a>
                                 <a href="{{ url_for('facturas.pdf', id=f.id) }}" class="btn btn-outline-secondary" title="PDF" target="_blank">
-                                    <i class="bi bi-file-pdf"></i>
+                                    <i class="fa-solid fa-file-pdf"></i>
                                 </a>
                                 {% if f.estado != "pagado" and f.estado != "anulado" %}
                                 <a href="{{ url_for('facturas.pagar', id=f.id) }}" class="btn btn-outline-success" title="Pagar">
-                                    <i class="bi bi-cash"></i>
+                                    <i class="fa-solid fa-money-bill"></i>
                                 </a>
                                 {% endif %}
                                 {% if f.estado == "pendiente" and f.monto_pagado == 0 %}
                                 <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-outline-danger" title="Anular" data-confirm="¿Anular factura {{ f.numero }}?">
-                                    <i class="bi bi-x-circle"></i>
+                                    <i class="fa-solid fa-circle-xmark"></i>
                                 </a>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="10" class="text-center text-muted py-4">No hay facturas</td></tr>
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <div class="empty-state-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></div>
+                                <h6 class="mb-1">Aún no hay facturas</h6>
+                                <p class="text-muted small mb-3">Las facturas generadas desde las órdenes de trabajo aparecerán aquí.</p>
+                                <a href="{{ url_for('facturas.configuracion') }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-gear me-1"></i>Configurar facturación</a>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

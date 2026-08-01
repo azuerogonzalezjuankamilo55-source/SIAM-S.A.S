@@ -4,13 +4,17 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Clientes</h4>
     <a href="{{ url_for('clientes.crear') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nuevo Cliente
+        <i class="fa-solid fa-plus"></i> Nuevo Cliente
     </a>
 </div>
 <div class="card">
     <div class="card-body">
+        <div class="search-input mb-3" style="max-width: 340px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaClientes">
+        </div>
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="tablaClientes">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -31,15 +35,24 @@
                         <td>{{ c.cedula or "-" }}</td>
                         <td>
                             <a href="{{ url_for('clientes.editar', id=c.id) }}" class="btn btn-sm btn-outline-warning">
-                                <i class="bi bi-pencil"></i>
+                                <i class="fa-solid fa-pen"></i>
                             </a>
                             <a href="{{ url_for('clientes.eliminar', id=c.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar este cliente?">
-                                <i class="bi bi-trash"></i>
+                                <i class="fa-solid fa-trash"></i>
                             </a>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">No hay clientes registrados</td></tr>
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-state-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                                <h6 class="mb-1">Aún no hay clientes registrados</h6>
+                                <p class="text-muted small mb-3">Registra tu primer cliente para comenzar a gestionar tu taller.</p>
+                                <a href="{{ url_for('clientes.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear cliente</a>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -4,13 +4,17 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Vehículos</h4>
     <a href="{{ url_for('vehiculos.crear') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Nuevo Vehículo
+        <i class="fa-solid fa-plus"></i> Nuevo Vehículo
     </a>
 </div>
 <div class="card">
     <div class="card-body">
+        <div class="search-input mb-3" style="max-width: 340px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaVehiculos">
+        </div>
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" id="tablaVehiculos">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -33,18 +37,27 @@
                         <td>{{ v.cliente.nombre }}</td>
                         <td>
                             <a href="{{ url_for('vehiculos.historial', vehiculo_id=v.id) }}" class="btn btn-sm btn-outline-info" title="Historial">
-                                <i class="bi bi-clock-history"></i>
+                                <i class="fa-solid fa-clock-rotate-left"></i>
                             </a>
                             <a href="{{ url_for('vehiculos.editar', id=v.id) }}" class="btn btn-sm btn-outline-warning">
-                                <i class="bi bi-pencil"></i>
+                                <i class="fa-solid fa-pen"></i>
                             </a>
                             <a href="{{ url_for('vehiculos.eliminar', id=v.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar vehículo?">
-                                <i class="bi bi-trash"></i>
+                                <i class="fa-solid fa-trash"></i>
                             </a>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="7" class="text-center text-muted">No hay vehículos registrados</td></tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon"><i class="fa-solid fa-truck" aria-hidden="true"></i></div>
+                                <h6 class="mb-1">Aún no hay vehículos registrados</h6>
+                                <p class="text-muted small mb-3">Agrega un vehículo para llevar su historial de servicios y reparaciones.</p>
+                                <a href="{{ url_for('vehiculos.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear vehículo</a>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

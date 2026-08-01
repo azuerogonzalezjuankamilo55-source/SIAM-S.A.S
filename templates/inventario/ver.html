@@ -6,22 +6,22 @@
     <div>
         {% if not item.es_baja %}
         <a href="{{ url_for('inventario.movimiento', id=item.id) }}" class="btn btn-primary">
-            <i class="bi bi-arrow-left-right"></i> Registrar Movimiento
+            <i class="fa-solid fa-arrows-left-right"></i> Registrar Movimiento
         </a>
         <a href="{{ url_for('inventario.editar', id=item.id) }}" class="btn btn-outline-warning">
-            <i class="bi bi-pencil"></i> Editar
+            <i class="fa-solid fa-pen"></i> Editar
         </a>
         <button class="btn btn-outline-danger" onclick="document.getElementById('bajaModal').showModal()">
-            <i class="bi bi-archive"></i> Dar de baja
+            <i class="fa-solid fa-box-archive"></i> Dar de baja
         </button>
         {% else %}
         <form method="POST" action="{{ url_for('inventario.restaurar', id=item.id) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-            <button class="btn btn-success"><i class="bi bi-arrow-counterclockwise"></i> Restaurar</button>
+            <button class="btn btn-success"><i class="fa-solid fa-rotate-left"></i> Restaurar</button>
         </form>
         {% endif %}
         <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
+            <i class="fa-solid fa-arrow-left"></i> Volver
         </a>
     </div>
 </div>
@@ -29,7 +29,7 @@
 {% if item.es_baja %}
 <div class="alert alert-secondary d-flex justify-content-between align-items-center">
     <div>
-        <strong><i class="bi bi-archive"></i> Producto dado de baja</strong>
+        <strong><i class="fa-solid fa-box-archive"></i> Producto dado de baja</strong>
         <div class="small">
             {% if item.motivo_baja %}Motivo: {{ item.motivo_baja }}<br>{% endif %}
             {% if item.fecha_baja %}Fecha: {{ item.fecha_baja.strftime('%d/%m/%Y %H:%M') }}{% endif %}

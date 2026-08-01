@@ -5,10 +5,10 @@
     <h4 class="mb-0">Orden de Trabajo {{ orden.numero }}</h4>
     <div class="btn-group">
         <a href="{{ url_for('ordenes_trabajo.editar', id=orden.id) }}" class="btn btn-outline-warning">
-            <i class="bi bi-pencil"></i> Editar
+            <i class="fa-solid fa-pen"></i> Editar
         </a>
         <a href="{{ url_for('ordenes_trabajo.listar') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
+            <i class="fa-solid fa-arrow-left"></i> Volver
         </a>
     </div>
 </div>
@@ -89,7 +89,7 @@
 
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-list-check"></i> Checklist de Trabajo</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-list-check"></i> Checklist de Trabajo</h6>
                 <span class="badge bg-primary">{{ orden.items_completados }}/{{ orden.items|length }}</span>
             </div>
             <div class="card-body">
@@ -104,19 +104,19 @@
                         <form method="POST" action="{{ url_for('ordenes_trabajo.toggle_item', item_id=i.id) }}" class="m-0">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
                             <button type="submit" class="btn btn-sm {{ 'btn-success' if i.completado else 'btn-outline-secondary' }} rounded-circle">
-                                <i class="bi {{ 'bi-check-lg' if i.completado else 'bi-circle' }}"></i>
+                                <i class="{{ 'fa-solid fa-check' if i.completado else 'fa-solid fa-circle' }}"></i>
                             </button>
                         </form>
                         <div class="flex-grow-1">
                             <span class="{{ 'text-decoration-line-through text-muted' if i.completado else '' }}">{{ i.descripcion }}</span>
                             {% if i.tiempo_minutos %}
-                            <small class="text-muted ms-2"><i class="bi bi-clock"></i> {{ i.tiempo_minutos }} min</small>
+                            <small class="text-muted ms-2"><i class="fa-solid fa-clock"></i> {{ i.tiempo_minutos }} min</small>
                             {% endif %}
                         </div>
                         <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_item', item_id=i.id) }}" class="m-0"
                               onsubmit="return confirm('¿Eliminar tarea?');">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                         </form>
                     </li>
                     {% endfor %}
@@ -134,7 +134,7 @@
                         <input type="number" name="tiempo_minutos" class="form-control" placeholder="Min (opc)" min="0">
                     </div>
                     <div class="col-2">
-                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                        <button class="btn btn-primary w-100"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </form>
             </div>
@@ -142,7 +142,7 @@
 
         <div class="card mb-3">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-box-seam"></i> Repuestos Utilizados</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-boxes-stacked"></i> Repuestos Utilizados</h6>
             </div>
             <div class="card-body">
                 {% if orden.repuestos %}
@@ -171,7 +171,7 @@
                                     <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_repuesto', repuesto_id=r.id) }}"
                                           onsubmit="return confirm('¿Quitar repuesto y devolver stock?');">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>
@@ -199,7 +199,7 @@
                         <input type="number" name="precio_unitario" class="form-control" placeholder="Precio" min="0" step="0.01" required>
                     </div>
                     <div class="col-2">
-                        <button class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button>
+                        <button class="btn btn-primary w-100"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </form>
             </div>
@@ -207,7 +207,7 @@
 
         <div class="card mb-3">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-camera"></i> Fotos del Trabajo</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-camera"></i> Fotos del Trabajo</h6>
             </div>
             <div class="card-body">
                 {% if orden.fotos %}
@@ -219,7 +219,7 @@
                         {% if f.descripcion %}<small class="d-block text-muted text-truncate px-1">{{ f.descripcion }}</small>{% endif %}
                         <form method="POST" action="{{ url_for('ordenes_trabajo.eliminar_foto', foto_id=f.id) }}" class="position-absolute top-0 end-0 m-1" onsubmit="return confirm('¿Eliminar esta foto?');">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                            <button class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i></button>
+                            <button class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i></button>
                         </form>
                     </div>
                     {% endfor %}
@@ -236,7 +236,7 @@
                         <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opc)">
                     </div>
                     <div class="col-2">
-                        <button class="btn btn-primary w-100"><i class="bi bi-upload"></i></button>
+                        <button class="btn btn-primary w-100"><i class="fa-solid fa-upload"></i></button>
                     </div>
                 </form>
             </div>
@@ -247,12 +247,12 @@
         {% if orden.estado in ("listo_entrega", "entregado") and not orden.facturas %}
         <div class="card mb-3 border-success">
             <div class="card-header bg-success text-white">
-                <h6 class="mb-0"><i class="bi bi-receipt"></i> Facturación</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-receipt"></i> Facturación</h6>
             </div>
             <div class="card-body text-center">
                 <p class="mb-2">Generar factura para esta orden de trabajo</p>
                 <a href="{{ url_for('facturas.crear_desde_ot', ot_id=orden.id) }}" class="btn btn-success w-100">
-                    <i class="bi bi-file-earmark-text"></i> Generar Factura
+                    <i class="fa-solid fa-file-lines"></i> Generar Factura
                 </a>
             </div>
         </div>
@@ -282,7 +282,7 @@
         {% if orden.estado != "entregado" %}
         <div class="card mb-3 border-success">
             <div class="card-header bg-success text-white">
-                <h6 class="mb-0"><i class="bi bi-check2-circle"></i> Entrega del Vehículo</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-circle-check"></i> Entrega del Vehículo</h6>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('ordenes_trabajo.entregar', id=orden.id) }}">
@@ -300,7 +300,7 @@
                         </select>
                     </div>
                     <button type="submit" class="btn btn-success w-100">
-                        <i class="bi bi-box-arrow-right"></i> Marcar Entregado
+                        <i class="fa-solid fa-right-from-bracket"></i> Marcar Entregado
                     </button>
                 </form>
             </div>
@@ -308,7 +308,7 @@
         {% else %}
         <div class="card mb-3">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-box-arrow-right"></i> Datos de Entrega</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-right-from-bracket"></i> Datos de Entrega</h6>
             </div>
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between">
@@ -329,7 +329,7 @@
 
         <div class="card mb-3">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-pen"></i> Firmas</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-pen"></i> Firmas</h6>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -378,7 +378,7 @@
                         <textarea name="observacion" class="form-control" rows="2" placeholder="Observación (opcional)"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                        <i class="fa-solid fa-arrows-rotate"></i> Cambiar Estado
                     </button>
                 </form>
             </div>

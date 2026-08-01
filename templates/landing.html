@@ -16,7 +16,7 @@
     <meta property="og:description" content="Sistema profesional de gestión para talleres mecánicos. Administra tu taller de forma inteligente.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ app_url }}">
-    <meta property="og:image" content="{{ url_for('static', filename='img/og-image.png', _external=True) }}">
+    <meta property="og:image" content="{{ url_for('static', filename='img/og-image.jpg', _external=True) }}">
     <meta property="og:locale" content="es_CO">
 
     <!-- Twitter -->
@@ -51,7 +51,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="{{ url_for('manifest_json') }}">
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#0F172A">
 
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
@@ -59,49 +59,52 @@
 
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/siam.css') }}" rel="stylesheet">
+    <noscript>
+        <style>
+            [data-aos] { opacity: 1 !important; transform: none !important; }
+        </style>
+    </noscript>
     <style>
-        .hero-section { min-height: 100vh; padding: 120px 0 80px; }
-        .feature-card { transition: all 0.3s ease; border-radius: 12px; border: 1px solid var(--bs-border-color); background: var(--bs-dark); }
-        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(13, 110, 253, 0.15); border-color: var(--bs-primary); }
-        .benefit-icon { width: 60px; height: 60px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: rgba(13,110,253,0.1); border-radius: 16px; }
-        .screenshot-card { transition: all 0.3s ease; }
-        .screenshot-card:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-        .social-links .btn { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
-        html { scroll-padding-top: 70px; }
-        @media (max-width: 768px) { .hero-section { padding: 80px 0 40px; min-height: auto; } }
+        .hero-section { min-height: 100vh; padding: 130px 0 90px; }
+        @media (max-width: 768px) { .hero-section { padding: 100px 0 50px; min-height: auto; } }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark landing-navbar sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
+            <a class="navbar-brand d-flex align-items-center" href="/">
                 {% if taller_config and taller_config.logo_path %}
                 <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img me-2">
                 {% else %}
-                <i class="bi bi-gear-wide-connected text-primary me-2"></i>SIAM
+                <span class="d-flex align-items-center justify-content-center rounded-3 me-2" style="width:38px;height:38px;background:var(--siam-gradient);color:#fff;">
+                    <i class="fa-solid fa-gears"></i>
+                </span>
+                <span>SIAM</span>
                 {% endif %}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLanding">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarLanding">
-                <ul class="navbar-nav ms-auto gap-2 align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="#beneficios">Beneficios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#capturas">Capturas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ventajas">Ventajas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#porque">Por qué SIAM</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                     <li class="nav-item ms-lg-2">
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i>Iniciar Sesión
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-person-plus me-1"></i>Registrarse
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-gradient btn-sm">
+                            <i class="fa-solid fa-user-plus me-1"></i>Registrarse
                         </a>
                     </li>
                 </ul>
@@ -110,92 +113,41 @@
     </nav>
 
     <!-- Hero -->
-    <section class="hero-section d-flex align-items-center" id="hero">
-        <div class="container">
+    <section class="landing-hero hero-section d-flex align-items-center" id="hero">
+        <div class="container position-relative">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6" data-aos="fade-right">
-                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 mb-3 rounded-pill">
-                        <i class="bi bi-gear-wide-connected me-1"></i> Plataforma Profesional
+                    <span class="section-eyebrow mb-3">
+                        <i class="fa-solid fa-gears me-1"></i> Plataforma Profesional
                     </span>
                     <h1 class="display-4 fw-bold mb-3">
-                        Gestiona tu <span class="text-primary">taller mecánico</span> con inteligencia
+                        Gestiona tu <span class="text-gradient">taller mecánico</span> con inteligencia
                     </h1>
-                    <p class="lead text-secondary mb-4">
+                    <p class="lead mb-4">
                         SIAM es el sistema integral que automatiza la administración de tu taller: clientes, vehículos, servicios, citas, facturación e inventario. Todo en un solo lugar.
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-lg px-4 landing-cta border-0 shadow">
-                            <i class="bi bi-rocket-takeoff me-2"></i>Comenzar Gratis
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-lg px-4 landing-cta shadow">
+                            <i class="fa-solid fa-rocket me-2"></i>Comenzar Gratis
                         </a>
                         <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar Sesión
                         </a>
                     </div>
                     <div class="d-flex gap-4 mt-4 text-secondary small">
-                        <span><i class="bi bi-check-circle-fill text-success me-1"></i> Sin instalación</span>
-                        <span><i class="bi bi-check-circle-fill text-success me-1"></i> 100% web</span>
-                        <span><i class="bi bi-check-circle-fill text-success me-1"></i> Soporte 24/7</span>
+                        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Sin instalación</span>
+                        <span><i class="fa-solid fa-circle-check text-success me-1"></i> 100% web</span>
+                        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Soporte 24/7</span>
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <div class="position-relative text-center">
-                        <div class="card bg-dark border-secondary screenshot-card shadow-lg">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center gap-2 border-bottom border-secondary pb-3 mb-3">
-                                    <span class="badge bg-danger bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
-                                    <span class="badge bg-warning bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
-                                    <span class="badge bg-success bg-opacity-75" style="width:10px;height:10px;padding:0;border-radius:50%;"></span>
-                                    <small class="text-secondary ms-2"><i class="bi bi-lock me-1"></i>app.siam.com</small>
-                                </div>
-                                <div class="text-start">
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-6">
-                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#0d6efd,#0a58ca);">
-                                                <i class="bi bi-people fs-3 text-white"></i>
-                                                <h6 class="text-white mb-0 mt-1">Clientes</h6>
-                                                <small class="text-white-50">+120</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#198754,#146c43);">
-                                                <i class="bi bi-truck fs-3 text-white"></i>
-                                                <h6 class="text-white mb-0 mt-1">Vehículos</h6>
-                                                <small class="text-white-50">+340</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#fd7e14,#d96b0a);">
-                                                <i class="bi bi-wrench-adjustable fs-3 text-white"></i>
-                                                <h6 class="text-white mb-0 mt-1">Servicios</h6>
-                                                <small class="text-white-50">+58</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="rounded-3 p-3 text-center" style="background: linear-gradient(135deg,#6f42c1,#553098);">
-                                                <i class="bi bi-cash-stack fs-3 text-white"></i>
-                                                <h6 class="text-white mb-0 mt-1">Facturado</h6>
-                                                <small class="text-white-50">$12.5M</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="border-top border-secondary pt-3">
-                                        <div class="d-flex justify-content-between small text-secondary mb-1">
-                                            <span><i class="bi bi-calendar-check text-info me-1"></i>Órdenes activas</span>
-                                            <span class="badge bg-info text-dark">14</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between small text-secondary">
-                                            <span><i class="bi bi-exclamation-triangle text-warning me-1"></i>Stock bajo</span>
-                                            <span class="badge bg-warning text-dark">3</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <img src="{{ url_for('static', filename='img/taller-mecanico-2.jpg') }}" alt="Taller mecánico moderno gestionado con SIAM" width="1200" height="1200" fetchpriority="high" class="img-fluid rounded-4 shadow-lg border border-secondary" style="max-height:440px;width:100%;aspect-ratio:1.25/1;object-fit:cover;">
                         <div class="landing-icon-bubble position-absolute top-0 start-0" style="animation: float 3s ease-in-out infinite;">
-                            <i class="bi bi-tools text-warning"></i>
+                            <i class="fa-solid fa-screwdriver-wrench text-warning"></i>
                         </div>
                         <div class="landing-icon-bubble position-absolute bottom-0 end-0" style="animation: float 3.5s ease-in-out infinite 0.4s;">
-                            <i class="bi bi-gear-wide-connected text-primary"></i>
+                            <i class="fa-solid fa-gears text-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -203,44 +155,195 @@
         </div>
     </section>
 
-    <!-- Beneficios -->
-    <section class="py-5 bg-dark bg-opacity-50" id="beneficios">
+    <!-- Servicios -->
+    <section class="py-5" id="servicios">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <h2 class="fw-bold">¿Por qué elegir <span class="text-primary">SIAM</span>?</h2>
+                <span class="section-eyebrow mb-3">Nuestros Servicios</span>
+                <h2 class="fw-bold mt-3">Todo para tu taller en <span class="text-primary">un solo sistema</span></h2>
+                <p class="text-secondary">Módulos profesionales que trabajan juntos para que tu operación sea impecable</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/diagnostico.webp') }}" alt="Diagnóstico automotriz" width="128" height="96" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">01</span>
+                        </div>
+                        <h5 class="mb-2">Diagnóstico</h5>
+                        <p class="text-secondary small mb-0">Registra diagnósticos por vehículo con historial completo de cada intervención.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="50">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/reparacion.webp') }}" alt="Reparación mecánica" width="128" height="96" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">02</span>
+                        </div>
+                        <h5 class="mb-2">Órdenes de Trabajo</h5>
+                        <p class="text-secondary small mb-0">Crea, asigna y da seguimiento a cada reparación con estados y tiempos estimados.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/vehiculos.webp') }}" alt="Gestión de vehículos" width="128" height="76" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">03</span>
+                        </div>
+                        <h5 class="mb-2">Control Vehicular</h5>
+                        <p class="text-secondary small mb-0">Historial de cada vehículo por cliente: servicios, reparaciones y mantenimiento.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="150">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/garaje.webp') }}" alt="Inventario de taller" width="128" height="85" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">04</span>
+                        </div>
+                        <h5 class="mb-2">Inventario</h5>
+                        <p class="text-secondary small mb-0">Control de repuestos y suministros con alertas de stock mínimo y kardex.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/taller-mecanico.webp') }}" alt="Facturación de servicios" width="128" height="102" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">05</span>
+                        </div>
+                        <h5 class="mb-2">Facturación</h5>
+                        <p class="text-secondary small mb-0">Facturas profesionales, pagos parciales y PDF descargable en un clic.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="250">
+                    <div class="service-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <img src="{{ url_for('static', filename='img/thumbs/taller-hero.webp') }}" alt="Citas y agenda" width="128" height="85" class="rounded-3" style="width:64px;height:64px;object-fit:cover;" loading="lazy">
+                            <span class="service-number">06</span>
+                        </div>
+                        <h5 class="mb-2">Citas y Agenda</h5>
+                        <p class="text-secondary small mb-0">Calendarización inteligente con recordatorios automáticos para tus clientes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ventajas -->
+    <section class="py-5 bg-dark bg-opacity-50" id="ventajas">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3">Ventajas</span>
+                <h2 class="fw-bold mt-3">¿Por qué elegir <span class="text-primary">SIAM</span>?</h2>
                 <p class="text-secondary">La plataforma completa para la gestión de tu taller mecánico</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
-                    <div class="card bg-dark border-secondary h-100 text-center p-4">
-                        <div class="card-body">
-                            <div class="benefit-icon mb-3">
-                                <i class="bi bi-lightning-charge text-primary fs-1"></i>
-                            </div>
-                            <h5>Rápido y Eficiente</h5>
-                            <p class="text-secondary small">Optimiza tus procesos diarios. Reduce tiempos de atención y mejora la productividad de tu taller.</p>
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-bolt fs-1"></i>
                         </div>
+                        <h5>Rápido y Eficiente</h5>
+                        <p class="text-secondary small mb-0">Optimiza tus procesos diarios. Reduce tiempos de atención y mejora la productividad de tu taller.</p>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="card bg-dark border-secondary h-100 text-center p-4">
-                        <div class="card-body">
-                            <div class="benefit-icon mb-3">
-                                <i class="bi bi-shield-check text-success fs-1"></i>
-                            </div>
-                            <h5>Seguro y Confiable</h5>
-                            <p class="text-secondary small">Tus datos protegidos con encriptación SSL, backups automáticos y hosting en la nube.</p>
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-shield-halved fs-1"></i>
                         </div>
+                        <h5>Seguro y Confiable</h5>
+                        <p class="text-secondary small mb-0">Tus datos protegidos con encriptación SSL, backups automáticos y hosting en la nube.</p>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="card bg-dark border-secondary h-100 text-center p-4">
-                        <div class="card-body">
-                            <div class="benefit-icon mb-3">
-                                <i class="bi bi-graph-up-arrow text-warning fs-1"></i>
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-chart-line fs-1"></i>
+                        </div>
+                        <h5>Reportes Inteligentes</h5>
+                        <p class="text-secondary small mb-0">Dashboard con estadísticas en tiempo real, gráficas de ingresos y análisis de rendimiento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Por qué SIAM -->
+    <section class="py-5" id="porque">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5" data-aos="fade-right">
+                    <span class="section-eyebrow mb-3">Por qué SIAM</span>
+                    <h2 class="fw-bold mt-3 mb-3">Características <span class="text-primary">Profesionales</span></h2>
+                    <p class="text-secondary mb-4">Todo lo que necesitas para administrar tu taller de forma inteligente, sin herramientas dispersas ni planillas manuales.</p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-gradient px-4">
+                        <i class="fa-solid fa-user-plus me-2"></i>Crear cuenta gratuita
+                    </a>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="0">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-users text-primary fs-2"></i>
+                                <h6 class="mt-2">Gestión de Clientes</h6>
+                                <small class="text-secondary">Registro completo con historial de servicios</small>
                             </div>
-                            <h5>Reportes Inteligentes</h5>
-                            <p class="text-secondary small">Dashboard con estadísticas en tiempo real, gráficas de ingresos y análisis de rendimiento.</p>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="50">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-truck text-success fs-2"></i>
+                                <h6 class="mt-2">Control Vehicular</h6>
+                                <small class="text-secondary">Por cliente con historial de reparaciones</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="100">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-wrench text-warning fs-2"></i>
+                                <h6 class="mt-2">Servicios</h6>
+                                <small class="text-secondary">Catálogo con precios y tiempos estimados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="150">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-calendar-check text-info fs-2"></i>
+                                <h6 class="mt-2">Agenda de Citas</h6>
+                                <small class="text-secondary">Calendarización y recordatorios</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="200">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-file-lines text-danger fs-2"></i>
+                                <h6 class="mt-2">Facturación</h6>
+                                <small class="text-secondary">Facturas, pagos parciales y PDF descargable</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="250">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-boxes-stacked text-primary fs-2"></i>
+                                <h6 class="mt-2">Inventario</h6>
+                                <small class="text-secondary">Control de stock con alertas de mínimo</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="300">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-screwdriver-wrench text-success fs-2"></i>
+                                <h6 class="mt-2">Órdenes de Trabajo</h6>
+                                <small class="text-secondary">Seguimiento completo por estado</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="350">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-robot text-info fs-2"></i>
+                                <h6 class="mt-2">Asistente IA</h6>
+                                <small class="text-secondary">Inteligencia artificial integrada</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="400">
+                            <div class="feature-card text-center p-3">
+                                <i class="fa-solid fa-chart-line text-warning fs-2"></i>
+                                <h6 class="mt-2">Dashboard</h6>
+                                <small class="text-secondary">Estadísticas y gráficas en tiempo real</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -248,113 +351,95 @@
         </div>
     </section>
 
-    <!-- Características -->
-    <section class="py-5" id="caracteristicas">
+    <!-- Atributos -->
+    <section class="py-5 bg-dark bg-opacity-50">
         <div class="container">
-            <div class="text-center mb-5" data-aos="fade-up">
-                <h2 class="fw-bold">Características <span class="text-primary">Profesionales</span></h2>
-                <p class="text-secondary">Todo lo que necesitas para administrar tu taller</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="0">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-people text-primary fs-2"></i>
-                        <h6 class="mt-2">Gestión de Clientes</h6>
-                        <small class="text-secondary">Registro completo con historial de servicios</small>
+            <div class="stats-band p-4 p-md-5" data-aos="fade-up">
+                <div class="row text-center g-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width:52px;height:52px;background:var(--siam-primary-soft);color:var(--siam-primary-text);">
+                            <i class="fa-solid fa-shield-halved fs-4"></i>
+                        </div>
+                        <div class="stat-label fw-bold text-white">Seguro y en la nube</div>
+                        <div class="stat-label">SSL y respaldos automáticos</div>
                     </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="50">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-truck text-success fs-2"></i>
-                        <h6 class="mt-2">Control Vehicular</h6>
-                        <small class="text-secondary">Por cliente con historial de reparaciones</small>
+                    <div class="col-6 col-lg-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width:52px;height:52px;background:var(--siam-primary-soft);color:var(--siam-primary-text);">
+                            <i class="fa-solid fa-robot fs-4"></i>
+                        </div>
+                        <div class="stat-label fw-bold text-white">Asistente IA</div>
+                        <div class="stat-label">Inteligencia integrada a tu operación</div>
                     </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-wrench text-warning fs-2"></i>
-                        <h6 class="mt-2">Servicios</h6>
-                        <small class="text-secondary">Catálogo con precios y tiempos estimados</small>
+                    <div class="col-6 col-lg-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width:52px;height:52px;background:var(--siam-primary-soft);color:var(--siam-primary-text);">
+                            <i class="fa-solid fa-mobile-screen-button fs-4"></i>
+                        </div>
+                        <div class="stat-label fw-bold text-white">Multi-dispositivo</div>
+                        <div class="stat-label">PC, tablet o celular, con portal del cliente</div>
                     </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="150">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-calendar-check text-info fs-2"></i>
-                        <h6 class="mt-2">Agenda de Citas</h6>
-                        <small class="text-secondary">Calendarización y recordatorios</small>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-file-earmark-text text-danger fs-2"></i>
-                        <h6 class="mt-2">Facturación</h6>
-                        <small class="text-secondary">Facturas, pagos parciales y PDF descargable</small>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="250">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-box-seam text-primary fs-2"></i>
-                        <h6 class="mt-2">Inventario</h6>
-                        <small class="text-secondary">Control de stock con alertas de mínimo</small>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-tools text-success fs-2"></i>
-                        <h6 class="mt-2">Órdenes de Trabajo</h6>
-                        <small class="text-secondary">Seguimiento completo por estado</small>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="350">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-robot text-info fs-2"></i>
-                        <h6 class="mt-2">Asistente IA</h6>
-                        <small class="text-secondary">Inteligencia artificial integrada</small>
-                    </div>
-                </div>
-                <div class="col-md-4 col-6" data-aos="zoom-in" data-aos-delay="400">
-                    <div class="feature-card text-center p-3">
-                        <i class="bi bi-graph-up text-warning fs-2"></i>
-                        <h6 class="mt-2">Dashboard</h6>
-                        <small class="text-secondary">Estadísticas y gráficas en tiempo real</small>
+                    <div class="col-6 col-lg-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width:52px;height:52px;background:var(--siam-primary-soft);color:var(--siam-primary-text);">
+                            <i class="fa-solid fa-building fs-4"></i>
+                        </div>
+                        <div class="stat-label fw-bold text-white">Multi-sede</div>
+                        <div class="stat-label">Administra varias sedes desde un solo sistema</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Capturas -->
-    <section class="py-5 bg-dark bg-opacity-50" id="capturas">
+    <!-- Testimonios -->
+    <section class="py-5" id="testimonios">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <h2 class="fw-bold">Capturas del <span class="text-primary">Sistema</span></h2>
-                <p class="text-secondary">Así se ve SIAM en acción</p>
+                <span class="section-eyebrow mb-3">Testimonios</span>
+                <h2 class="fw-bold mt-3">Lo que dicen los <span class="text-primary">talleres</span></h2>
+                <p class="text-secondary">Miles de mecánicos ya confían en SIAM para su operación diaria</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
-                    <div class="card bg-dark border-secondary screenshot-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-speedometer2 display-3 text-primary"></i>
-                            <h6 class="mt-3">Dashboard</h6>
-                            <small class="text-secondary">Panel de control con estadísticas</small>
+                    <div class="testimonial-card">
+                        <div class="stars mb-2">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-secondary small">"Antes llevaba todo en cuadernos. Con SIAM controlo clientes, repuestos y facturación desde el celular. Mi taller creció 40% en seis meses."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle text-white fw-semibold" style="width:40px;height:40px;background:var(--siam-gradient);">JM</span>
+                            <div>
+                                <div class="fw-semibold small">Juan Mejía</div>
+                                <small class="text-secondary">Taller JM Automotriz · Bogotá</small>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="card bg-dark border-secondary screenshot-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-calendar-check display-3 text-info"></i>
-                            <h6 class="mt-3">Gestión de Citas</h6>
-                            <small class="text-secondary">Agenda y programación inteligente</small>
+                    <div class="testimonial-card">
+                        <div class="stars mb-2">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-secondary small">"Las citas y los recordatorios automáticos son oro. Ya no se me olvida ningún cliente y las órdenes de trabajo quedan siempre al día."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle text-white fw-semibold" style="width:40px;height:40px;background:var(--siam-gradient);">LP</span>
+                            <div>
+                                <div class="fw-semibold small">Laura Pérez</div>
+                                <small class="text-secondary">Autoservicio La Rueda · Medellín</small>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="card bg-dark border-secondary screenshot-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-file-earmark-text display-3 text-warning"></i>
-                            <h6 class="mt-3">Facturación</h6>
-                            <small class="text-secondary">Facturas profesionales descargables en PDF</small>
+                    <div class="testimonial-card">
+                        <div class="stars mb-2">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                        </div>
+                        <p class="text-secondary small">"El inventario con alertas de stock bajo me salvó de quedarme sin repuestos en plena semana. La facturación con PDF es impecable."</p>
+                        <div class="d-flex align-items-center gap-2 mt-3">
+                            <span class="d-flex align-items-center justify-content-center rounded-circle text-white fw-semibold" style="width:40px;height:40px;background:var(--siam-gradient);">CR</span>
+                            <div>
+                                <div class="fw-semibold small">Carlos Rodríguez</div>
+                                <small class="text-secondary">MotorPro Taller · Cali</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -362,41 +447,90 @@
         </div>
     </section>
 
-    <!-- Contacto -->
+    <!-- FAQ -->
+    <section class="py-5 bg-dark bg-opacity-50" id="faq">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3">FAQ</span>
+                <h2 class="fw-bold mt-3">Preguntas <span class="text-primary">Frecuentes</span></h2>
+                <p class="text-secondary">Resolvemos las dudas más comunes sobre SIAM</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="faq-item mb-3" data-aos="fade-up">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    ¿Necesito instalar algo?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">No. SIAM funciona 100% en la nube. Solo necesitas un navegador web y conexión a internet. Tus datos quedan respaldados automáticamente.</div>
+                            </div>
+                        </div>
+                        <div class="faq-item mb-3" data-aos="fade-up">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    ¿Mis clientes pueden ver el estado de su reparación?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Sí. SIAM incluye un portal del cliente donde pueden consultar sus vehículos, citas, reparaciones, facturas y pagos desde cualquier dispositivo.</div>
+                            </div>
+                        </div>
+                        <div class="faq-item mb-3" data-aos="fade-up">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    ¿Sirve para un taller pequeño?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Absolutamente. SIAM escala contigo: desde un taller de un solo mecánico hasta cadenas con múltiples sedes, empleados y roles de acceso.</div>
+                            </div>
+                        </div>
+                        <div class="faq-item mb-3" data-aos="fade-up">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    ¿Qué pasa con mis datos?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">Tus datos están protegidos con encriptación, hosting en la nube y copias de seguridad automáticas. Solo tú y tu equipo acceden a la información de tu taller.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA + Contacto -->
     <section class="py-5" id="contacto">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-8 text-center" data-aos="fade-up">
-                    <h2 class="fw-bold mb-3">¿Listo para <span class="text-primary">modernizar</span> tu taller?</h2>
-                    <p class="text-secondary mb-4">Contáctanos y descubre cómo SIAM puede transformar tu negocio.</p>
-                    <div class="row g-3 justify-content-center">
-                        <div class="col-md-4">
-                            <div class="card bg-dark border-secondary h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-envelope text-primary fs-3"></i>
-                                    <h6 class="mt-2">Email</h6>
-                                    <small class="text-secondary">contacto@siam.com</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card bg-dark border-secondary h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-telephone text-success fs-3"></i>
-                                    <h6 class="mt-2">Teléfono</h6>
-                                    <small class="text-secondary">+57 300 123 4567</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card bg-dark border-secondary h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-geo-alt text-warning fs-3"></i>
-                                    <h6 class="mt-2">Ubicación</h6>
-                                    <small class="text-secondary">Colombia</small>
-                                </div>
-                            </div>
-                        </div>
+            <div class="text-center mb-4" data-aos="fade-up">
+                <h2 class="fw-bold mb-3">¿Listo para <span class="text-primary">modernizar</span> tu taller?</h2>
+                <p class="text-secondary mb-4">Contáctanos y descubre cómo SIAM puede transformar tu negocio.</p>
+            </div>
+            <div class="row g-3 justify-content-center mb-5" data-aos="fade-up">
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card p-4 text-center">
+                        <i class="fa-solid fa-envelope text-primary fs-3"></i>
+                        <h6 class="mt-2">Email</h6>
+                        <small class="text-secondary">{{ (taller_config.email if taller_config and taller_config.email) or "Próximamente disponible" }}</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card p-4 text-center">
+                        <i class="fa-solid fa-phone text-success fs-3"></i>
+                        <h6 class="mt-2">Teléfono</h6>
+                        <small class="text-secondary">{{ (taller_config.telefono if taller_config and taller_config.telefono) or "Próximamente disponible" }}</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card p-4 text-center">
+                        <i class="fa-solid fa-location-dot text-warning fs-3"></i>
+                        <h6 class="mt-2">Ubicación</h6>
+                        <small class="text-secondary">{{ (taller_config.direccion if taller_config and taller_config.direccion) or "Colombia" }}</small>
                     </div>
                 </div>
             </div>
@@ -404,38 +538,59 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark border-top border-secondary py-4">
+    <footer class="landing-footer py-5">
         <div class="container">
-            <div class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <a class="fw-bold text-decoration-none text-light" href="/">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <a class="fw-bold text-decoration-none text-light d-flex align-items-center" href="/">
                         {% if taller_config and taller_config.logo_path %}
                         <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img mb-1">
                         {% else %}
-                        <i class="bi bi-gear-wide-connected text-primary me-1"></i> SIAM
+                        <span class="d-flex align-items-center justify-content-center rounded-3 me-2" style="width:34px;height:34px;background:var(--siam-gradient);color:#fff;">
+                            <i class="fa-solid fa-gears"></i>
+                        </span>
+                        <span>SIAM</span>
                         {% endif %}
                     </a>
-                    <p class="text-secondary small mt-2 mb-0">Sistema Integral Automotriz</p>
+                    <p class="text-secondary small mt-3 mb-0">Sistema Integral Automotriz. La plataforma profesional para la gestión de talleres mecánicos.</p>
                 </div>
-                <div class="col-md-4 text-center">
-                    <div class="social-links">
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle me-1" aria-label="Facebook">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle me-1" aria-label="Instagram">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle me-1" aria-label="Twitter">
-                            <i class="bi bi-twitter-x"></i>
-                        </a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" aria-label="LinkedIn">
-                            <i class="bi bi-linkedin"></i>
-                        </a>
+                <div class="col-6 col-lg-2">
+                    <h6 class="text-light small text-uppercase mb-3">Producto</h6>
+                    <ul class="list-unstyled small text-secondary mb-0">
+                        <li class="mb-2"><a href="#servicios" class="text-decoration-none text-secondary">Servicios</a></li>
+                        <li class="mb-2"><a href="#ventajas" class="text-decoration-none text-secondary">Ventajas</a></li>
+                        <li class="mb-2"><a href="#porque" class="text-decoration-none text-secondary">Por qué SIAM</a></li>
+                        <li class="mb-2"><a href="#faq" class="text-decoration-none text-secondary">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6 class="text-light small text-uppercase mb-3">Acceso</h6>
+                    <ul class="list-unstyled small text-secondary mb-0">
+                        <li class="mb-2"><a href="{{ url_for('auth.login') }}" class="text-decoration-none text-secondary">Iniciar sesión</a></li>
+                        <li class="mb-2"><a href="{{ url_for('auth.register') }}" class="text-decoration-none text-secondary">Registrarse</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="text-light small text-uppercase mb-3">Síguenos</h6>
+                    <div class="social-links d-flex gap-2" role="list" aria-label="Redes sociales próximamente">
+                        <span class="btn btn-outline-secondary btn-sm rounded-circle" role="listitem" aria-label="Facebook (próximamente)" title="Próximamente">
+                            <i class="fa-brands fa-facebook" aria-hidden="true"></i>
+                        </span>
+                        <span class="btn btn-outline-secondary btn-sm rounded-circle" role="listitem" aria-label="Instagram (próximamente)" title="Próximamente">
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                        </span>
+                        <span class="btn btn-outline-secondary btn-sm rounded-circle" role="listitem" aria-label="X (Twitter, próximamente)" title="Próximamente">
+                            <i class="fa-brands fa-x-twitter" aria-hidden="true"></i>
+                        </span>
+                        <span class="btn btn-outline-secondary btn-sm rounded-circle" role="listitem" aria-label="LinkedIn (próximamente)" title="Próximamente">
+                            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                        </span>
                     </div>
+                    <small class="text-secondary d-block mt-2">Redes sociales disponibles próximamente</small>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <small class="text-secondary">&copy; {{ current_year }} SIAM SAS. Todos los derechos reservados.</small>
-                </div>
+            </div>
+            <div class="border-top border-secondary pt-4 mt-4 text-center">
+                <small class="text-secondary">&copy; {{ current_year }} SIAM SAS. Todos los derechos reservados.</small>
             </div>
         </div>
     </footer>
@@ -446,11 +601,14 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script>
+    document.documentElement.classList.add('aos-ready');
     AOS.init({ duration: 600, once: true, offset: 50 });
-    gsap.from('.hero-section .display-4', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' });
-    gsap.from('.hero-section .lead', { opacity: 0, y: 30, duration: 0.8, delay: 0.2, ease: 'power3.out' });
-    gsap.from('.hero-section .btn', { opacity: 0, y: 20, duration: 0.6, delay: 0.4, stagger: 0.15, ease: 'power3.out' });
-    gsap.from('.hero-stats .card, .hero-section .card', { opacity: 0, y: 30, duration: 0.6, delay: 0.6, stagger: 0.1, ease: 'back.out(1.7)' });
+    if (typeof gsap !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.from('.hero-section .display-4', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' });
+        gsap.from('.hero-section .lead', { opacity: 0, y: 30, duration: 0.8, delay: 0.2, ease: 'power3.out' });
+        gsap.from('.hero-section .btn', { opacity: 0, y: 20, duration: 0.6, delay: 0.4, stagger: 0.15, ease: 'power3.out' });
+        gsap.from('.hero-section .landing-icon-bubble', { opacity: 0, scale: 0.8, duration: 0.5, delay: 0.6, stagger: 0.15, ease: 'back.out(1.7)' });
+    }
     </script>
 </body>
 </html>

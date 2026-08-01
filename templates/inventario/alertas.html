@@ -7,12 +7,12 @@
         <form method="POST" action="{{ url_for('inventario.generar_alertas') }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
             <button class="btn btn-warning me-2">
-                <i class="bi bi-bell"></i> Generar recordatorios de reposición
+                <i class="fa-solid fa-bell"></i> Generar recordatorios de reposición
             </button>
         </form>
         <span class="badge bg-warning text-dark me-2">Reposiciones pendientes: {{ reposiciones_pendientes }}</span>
         <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
+            <i class="fa-solid fa-arrow-left"></i> Volver
         </a>
     </div>
 </div>
@@ -20,7 +20,7 @@
 {% if sin_stock %}
 <div class="card border-danger mb-3">
     <div class="card-header bg-danger text-white d-flex justify-content-between">
-        <span><i class="bi bi-x-circle"></i> Sin Stock ({{ sin_stock|length }})</span>
+        <span><i class="fa-solid fa-circle-xmark"></i> Sin Stock ({{ sin_stock|length }})</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -45,7 +45,7 @@
 {% if stock_critico %}
 <div class="card border-warning mb-3">
     <div class="card-header bg-warning text-dark d-flex justify-content-between">
-        <span><i class="bi bi-exclamation-triangle"></i> Stock Crítico ({{ stock_critico|length }})</span>
+        <span><i class="fa-solid fa-triangle-exclamation"></i> Stock Crítico ({{ stock_critico|length }})</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -70,7 +70,7 @@
 
 <div class="card">
     <div class="card-header bg-warning text-dark d-flex justify-content-between">
-        <span><i class="bi bi-exclamation-diamond"></i> Stock Bajo ({{ stock_bajo|length }})</span>
+        <span><i class="fa-solid fa-circle-exclamation"></i> Stock Bajo ({{ stock_bajo|length }})</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

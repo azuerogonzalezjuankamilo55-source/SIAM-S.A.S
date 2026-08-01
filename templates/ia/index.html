@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}IA 2.0 — Inteligencia{% endblock %}
+{% block title %}Diagnóstico IA{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="bi bi-stars me-2 text-primary"></i>IA 2.0 — Diagnóstico Inteligente</h4>
+    <h4 class="mb-0"><i class="fa-solid fa-star me-2 text-primary"></i>Diagnóstico Inteligente</h4>
 </div>
 
 <div class="card mb-3 border-primary">
     <div class="card-body">
         <div class="d-flex align-items-center">
-            <i class="bi bi-cpu fs-2 me-3 text-primary"></i>
+            <i class="fa-solid fa-microchip fs-2 me-3 text-primary"></i>
             <div>
                 <strong>Resumen del taller</strong>
                 <p class="mb-0 text-muted">{{ resumen }}</p>
@@ -20,7 +20,7 @@
 <div class="row g-3">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><strong><i class="bi bi-search"></i> Diagnóstico por síntomas</strong></div>
+            <div class="card-header"><strong><i class="fa-solid fa-magnifying-glass"></i> Diagnóstico por síntomas</strong></div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('ia.diagnosticar') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
@@ -40,7 +40,7 @@
                         <textarea name="sintomas" class="form-control" rows="3" required
                                   placeholder="Ej: el motor hace un ruido y pierde fuerza, o vibra al frenar">{{ sintomas or "" }}</textarea>
                     </div>
-                    <button class="btn btn-primary"><i class="bi bi-stars"></i> Diagnosticar</button>
+                    <button class="btn btn-primary"><i class="fa-solid fa-star"></i> Diagnosticar</button>
                 </form>
                 <hr>
                 <small class="text-muted">Ejemplos: <em>"ruido en el motor"</em>, <em>"vibra al frenar"</em>,
@@ -51,7 +51,7 @@
 
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header"><strong><i class="bi bi-clipboard2-pulse"></i> Recomendaciones de mantenimiento</strong></div>
+            <div class="card-header"><strong><i class="fa-solid fa-heart-pulse"></i> Recomendaciones de mantenimiento</strong></div>
             <div class="card-body">
                 <form method="GET" action="{{ url_for('ia.mantenimiento', vehiculo_id=0) }}" id="form-mant">
                     <div class="input-group">
@@ -61,7 +61,7 @@
                             <option value="{{ v.id }}">{{ v.placa }} · {{ v.marca }} {{ v.modelo }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-success" type="submit"><i class="bi bi-calendar-check"></i> Ver</button>
+                        <button class="btn btn-success" type="submit"><i class="fa-solid fa-calendar-check"></i> Ver</button>
                     </div>
                 </form>
                 <script>
@@ -79,7 +79,7 @@
 {% if resultado %}
 <div class="card mt-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <strong><i class="bi bi-clipboard-pulse me-1"></i> Resultado del diagnóstico</strong>
+        <strong><i class="fa-solid fa-heart-pulse me-1"></i> Resultado del diagnóstico</strong>
         <span class="badge bg-{{ 'danger' if resultado.urgencia == 'alta' else 'warning' if resultado.urgencia == 'media' else 'success' }}">
             Prioridad {{ resultado.urgencia|upper }}
         </span>

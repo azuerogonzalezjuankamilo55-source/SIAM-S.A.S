@@ -2,21 +2,28 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+    <div>
+        <h4 class="mb-1 fw-bold"><i class="fa-solid fa-gauge-high me-2 text-primary"></i>Dashboard</h4>
+        <small class="text-muted">Resumen general de la operación de tu taller</small>
+    </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
-            <i class="bi bi-arrow-clockwise"></i> Actualizar
+        <button class="btn btn-sm btn-soft" onclick="location.reload()">
+            <i class="fa-solid fa-rotate-right"></i> Actualizar
         </button>
     </div>
 </div>
 
+{% set ot_stats = namespace(total=0) %}
+{% for _, v in data.estado_ot_data %}{% set ot_stats.total = ot_stats.total + v %}{% endfor %}
+
+<!-- Módulos -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
         <a href="{{ url_for('clientes.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-people fs-3"></i>
+                        <i class="fa-solid fa-users fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Clientes</h6>
@@ -28,10 +35,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="50">
         <a href="{{ url_for('vehiculos.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #0EA5E9, #0369A1);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-truck fs-3"></i>
+                        <i class="fa-solid fa-truck fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Vehículos</h6>
@@ -43,10 +50,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
         <a href="{{ url_for('servicios.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #6f42c1, #553098);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #6366F1, #4338CA);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-wrench-adjustable fs-3"></i>
+                        <i class="fa-solid fa-screwdriver-wrench fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Servicios</h6>
@@ -58,10 +65,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
         <a href="{{ url_for('citas.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #14B8A6, #0F766E);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-calendar-check fs-3"></i>
+                        <i class="fa-solid fa-calendar-check fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Citas</h6>
@@ -73,10 +80,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
         <a href="{{ url_for('facturas.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #fd7e14, #d96b0a);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #F97316, #EA580C);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-receipt-cutoff fs-3"></i>
+                        <i class="fa-solid fa-receipt fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Facturas</h6>
@@ -88,10 +95,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="250">
         <a href="{{ url_for('inventario.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #8B5CF6, #6D28D9);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-box-seam fs-3"></i>
+                        <i class="fa-solid fa-boxes-stacked fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Inventario</h6>
@@ -103,10 +110,10 @@
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
         <a href="{{ url_for('mecanicos.listar') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #20c997, #17a673);">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #10B981, #047857);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-person-gear fs-3"></i>
+                        <i class="fa-solid fa-user-gear fs-3"></i>
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Mecánicos</h6>
@@ -117,15 +124,16 @@
         </a>
     </div>
     <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="350">
-        <a href="{{ url_for('reportes.index') }}" class="text-decoration-none">
-            <div class="card h-100 border-0 mod-card" style="background: linear-gradient(135deg, #ffc107, #d39e00);">
+        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="text-decoration-none">
+            <div class="card h-100 mod-card" style="background: linear-gradient(135deg, #F43F5E, #BE123C);">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="mod-icon rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-cash-stack fs-3"></i>
+                        <i class="fa-solid fa-list-check fs-3"></i>
                     </div>
                     <div>
-                        <h6 class="text-uppercase small text-white-50 mb-1">Ingresos del Mes</h6>
-                        <h3 class="mb-0 text-white fs-5">${{ "{:,.0f}".format(data.ingresos_mes) }}</h3>
+                        <h6 class="text-uppercase small text-white-50 mb-1">Órdenes de Trabajo</h6>
+                        <h3 class="mb-0 text-white">{{ ot_stats.total }}<small class="fs-6 text-white-50"> total</small></h3>
+                        <small class="text-white-50">{{ data.ordenes_activas }} en proceso · {{ data.ordenes_listas }} listas</small>
                     </div>
                 </div>
             </div>
@@ -133,60 +141,110 @@
     </div>
 </div>
 
+<!-- KPIs principales -->
 <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
-        <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="card-title text-uppercase small text-white-50">Clientes</h6>
-                        <h2 class="mb-0 text-white">{{ data.total_clientes }}</h2>
-                        <small class="text-white-50"><i class="bi bi-arrow-up"></i> +{{ data.clientes_nuevos_mes }} este mes</small>
-                    </div>
-                    <i class="bi bi-people fs-1 opacity-50 text-white"></i>
+    <div class="col-6 col-xl-3" data-aos="fade-up" data-aos-delay="0">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="d-flex align-items-center justify-content-center rounded-3" style="width:52px;height:52px;background:var(--siam-primary-soft);color:var(--siam-primary);">
+                    <i class="fa-solid fa-sack-dollar fs-4"></i>
+                </span>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Ingresos del Mes</small>
+                    <h4 class="mb-0 fw-bold">${{ "{:,.0f}".format(data.ingresos_mes) }}</h4>
+                    <small class="text-muted"><i class="fa-solid fa-arrow-trend-up text-success"></i> {{ data.facturas_hoy }} facturas hoy</small>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
-        <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #198754, #146c43);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="card-title text-uppercase small text-white-50">Vehículos</h6>
-                        <h2 class="mb-0 text-white">{{ data.total_vehiculos }}</h2>
-                        <small class="text-white-50"><i class="bi bi-truck"></i> Registrados</small>
-                    </div>
-                    <i class="bi bi-truck fs-1 opacity-50 text-white"></i>
+    <div class="col-6 col-xl-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="d-flex align-items-center justify-content-center rounded-3" style="width:52px;height:52px;background:rgba(16,185,129,.15);color:#10B981;">
+                    <i class="fa-solid fa-users fs-4"></i>
+                </span>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Clientes</small>
+                    <h4 class="mb-0 fw-bold">{{ data.total_clientes }}</h4>
+                    <small class="text-muted"><i class="fa-solid fa-arrow-up text-success"></i> +{{ data.clientes_nuevos_mes }} este mes</small>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
-        <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #6f42c1, #553098);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="card-title text-uppercase small text-white-50">Ingresos Hoy</h6>
-                        <h2 class="mb-0 text-white">${{ "{:,.0f}".format(data.ingresos_hoy) }}</h2>
-                        <small class="text-white-50"><i class="bi bi-cash-stack"></i> {{ data.facturas_hoy }} facturas</small>
-                    </div>
-                    <i class="bi bi-cash-stack fs-1 opacity-50 text-white"></i>
+    <div class="col-6 col-xl-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="d-flex align-items-center justify-content-center rounded-3" style="width:52px;height:52px;background:rgba(56,189,248,.15);color:#38BDF8;">
+                    <i class="fa-solid fa-truck fs-4"></i>
+                </span>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Vehículos</small>
+                    <h4 class="mb-0 fw-bold">{{ data.total_vehiculos }}</h4>
+                    <small class="text-muted"><i class="fa-solid fa-truck text-info"></i> Registrados</small>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
-        <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #fd7e14, #d96b0a);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="card-title text-uppercase small text-white-50">Ingresos del Mes</h6>
-                        <h2 class="mb-0 text-white">${{ "{:,.0f}".format(data.ingresos_mes) }}</h2>
-                        <small class="text-white-50"><i class="bi bi-graph-up-arrow"></i> Total mensual</small>
-                    </div>
-                    <i class="bi bi-graph-up-arrow fs-1 opacity-50 text-white"></i>
+    <div class="col-6 col-xl-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="d-flex align-items-center justify-content-center rounded-3" style="width:52px;height:52px;background:rgba(239,68,68,.13);color:#EF4444;">
+                    <i class="fa-solid fa-credit-card fs-4"></i>
+                </span>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Por Cobrar</small>
+                    <h4 class="mb-0 fw-bold">${{ "{:,.0f}".format(data.por_cobrar) }}</h4>
+                    <small class="text-muted">{{ data.facturas_pendientes }} facturas sin pagar</small>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas secundarias -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Citas Hoy</h6>
+                    <h3 class="text-warning mb-0">{{ data.citas_hoy }}</h3>
+                </div>
+                <i class="fa-solid fa-calendar-check fs-2 text-warning"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">OT Activas</h6>
+                    <h3 class="text-info mb-0">{{ data.ordenes_activas }}</h3>
+                </div>
+                <i class="fa-solid fa-screwdriver-wrench fs-2 text-info"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Stock Bajo</h6>
+                    <h3 class="text-danger mb-0">{{ data.inventario_bajo }}</h3>
+                </div>
+                <i class="fa-solid fa-triangle-exclamation fs-2 text-danger"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Mecánico Top</h6>
+                    <h3 class="mb-0 small">{{ data.mecanico_top_nombre or "—" }}</h3>
+                    <small class="text-muted">{{ data.mecanico_top_total }} OTs</small>
+                </div>
+                <i class="fa-solid fa-trophy fs-2 text-warning"></i>
             </div>
         </div>
     </div>
@@ -195,113 +253,49 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
         <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Citas Hoy</h6>
-                        <h3 class="text-warning mb-0">{{ data.citas_hoy }}</h3>
-                    </div>
-                    <i class="bi bi-calendar-check fs-2 text-warning"></i>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Ingresos Hoy</h6>
+                    <h3 class="text-success mb-0">${{ "{:,.0f}".format(data.ingresos_hoy) }}</h3>
+                    <small class="text-muted">Facturación del día</small>
                 </div>
+                <i class="fa-solid fa-coins fs-2 text-success"></i>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
         <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">OT Activas</h6>
-                        <h3 class="text-info mb-0">{{ data.ordenes_activas }}</h3>
-                    </div>
-                    <i class="bi bi-tools fs-2 text-info"></i>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Ticket Promedio</h6>
+                    <h3 class="text-primary mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h3>
+                    <small class="text-muted">Por factura emitida</small>
                 </div>
+                <i class="fa-solid fa-receipt fs-2 text-primary"></i>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
         <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Stock Bajo</h6>
-                        <h3 class="text-danger mb-0">{{ data.inventario_bajo }}</h3>
-                    </div>
-                    <i class="bi bi-exclamation-triangle fs-2 text-danger"></i>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">OT Retrasadas</h6>
+                    <h3 class="text-warning mb-0">{{ data.ot_retrasadas_count }}</h3>
+                    <small class="text-muted">Pasada la fecha estimada</small>
                 </div>
+                <i class="fa-solid fa-bell fs-2 text-warning"></i>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
         <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Mecánico Top</h6>
-                        <h3 class="mb-0 small">{{ data.mecanico_top_nombre or "—" }}</h3>
-                        <small class="text-muted">{{ data.mecanico_top_total }} OTs</small>
-                    </div>
-                    <i class="bi bi-trophy fs-2 text-warning"></i>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small text-muted mb-1">Citas Completadas</h6>
+                    <h3 class="text-success mb-0">{{ "{:.0f}".format(data.tasa_completacion_citas) }}%</h3>
+                    <small class="text-muted">Del total de citas</small>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Por Cobrar</h6>
-                        <h3 class="text-danger mb-0">${{ "{:,.0f}".format(data.por_cobrar) }}</h3>
-                        <small class="text-muted">{{ data.facturas_pendientes }} facturas sin pagar</small>
-                    </div>
-                    <i class="bi bi-credit-card fs-2 text-danger"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Ticket Promedio</h6>
-                        <h3 class="text-primary mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h3>
-                        <small class="text-muted">Por factura emitida</small>
-                    </div>
-                    <i class="bi bi-receipt-cutoff fs-2 text-primary"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">OT Retrasadas</h6>
-                        <h3 class="text-warning mb-0">{{ data.ot_retrasadas_count }}</h3>
-                        <small class="text-muted">Pasada la fecha estimada</small>
-                    </div>
-                    <i class="bi bi-alarm fs-2 text-warning"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6 class="text-uppercase small text-muted">Citas Completadas</h6>
-                        <h3 class="text-success mb-0">{{ "{:.0f}".format(data.tasa_completacion_citas) }}%</h3>
-                        <small class="text-muted">Del total de citas</small>
-                    </div>
-                    <i class="bi bi-check2-circle fs-2 text-success"></i>
-                </div>
+                <i class="fa-solid fa-circle-check fs-2 text-success"></i>
             </div>
         </div>
     </div>
@@ -313,8 +307,8 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-bar-chart me-2 text-primary"></i>Ingresos Mensuales</h6>
-                <span class="badge bg-primary bg-opacity-10 text-primary">Total: ${{ "{:,.0f}".format(data.ingresos_mes) }}</span>
+                <h6 class="mb-0"><i class="fa-solid fa-chart-column me-2 text-primary"></i>Ingresos Mensuales</h6>
+                <span class="badge badge-soft-primary">Total: ${{ "{:,.0f}".format(data.ingresos_mes) }}</span>
             </div>
             <div class="card-body">
                 <canvas id="chartIngresos" height="200"></canvas>
@@ -326,7 +320,7 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-tag me-2 text-success"></i>Servicios Más Vendidos</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-tag me-2 text-success"></i>Servicios Más Vendidos</h6>
             </div>
             <div class="card-body">
                 <canvas id="chartServicios" height="200"></canvas>
@@ -338,7 +332,7 @@
     <div class="col-md-4" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-pie-chart me-2 text-info"></i>OT por Estado</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-chart-pie me-2 text-info"></i>OT por Estado</h6>
             </div>
             <div class="card-body">
                 <canvas id="chartEstadosOT" height="200"></canvas>
@@ -350,7 +344,7 @@
     <div class="col-md-8" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-calendar-week me-2 text-warning"></i>Citas Próximos Días</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-calendar-week me-2 text-warning"></i>Citas Próximos Días</h6>
             </div>
             <div class="card-body">
                 <canvas id="chartCitas" height="200"></canvas>
@@ -367,7 +361,7 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-cash-coin me-2 text-primary"></i>Ingresos por Método de Pago</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-coins me-2 text-primary"></i>Ingresos por Método de Pago</h6>
             </div>
             <div class="card-body">
                 <canvas id="chartMetodo" height="200"></canvas>
@@ -379,7 +373,7 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-person-gear me-2 text-success"></i>Productividad por Mecánico</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-user-gear me-2 text-success"></i>Productividad por Mecánico</h6>
             </div>
             <div class="card-body">
                 <canvas id="chartMecanicos" height="200"></canvas>
@@ -395,8 +389,8 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-receipt me-2 text-primary"></i>Últimas Facturas</h6>
-                <a href="{{ url_for('facturas.listar') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                <h6 class="mb-0"><i class="fa-solid fa-receipt me-2 text-primary"></i>Últimas Facturas</h6>
+                <a href="{{ url_for('facturas.listar') }}" class="btn btn-sm btn-soft">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -416,7 +410,7 @@
                                 <td>{{ f.cliente.nombre if f.cliente else "—" }}</td>
                                 <td>${{ "{:,.0f}".format(f.total) }}</td>
                                 <td>
-                                    <span class="badge bg-{{ 'success' if f.estado == 'pagado' else 'warning' if f.estado == 'pendiente' else 'info' }}">
+                                    <span class="badge badge-soft-{{ 'success' if f.estado == 'pagado' else 'warning' if f.estado == 'pendiente' else 'info' }}">
                                         {{ f.estado|title }}
                                     </span>
                                 </td>
@@ -434,8 +428,8 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-calendar-check me-2 text-success"></i>Citas Recientes</h6>
-                <a href="{{ url_for('citas.listar') }}" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                <h6 class="mb-0"><i class="fa-solid fa-calendar-check me-2 text-success"></i>Citas Recientes</h6>
+                <a href="{{ url_for('citas.listar') }}" class="btn btn-sm btn-soft">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -457,7 +451,7 @@
                                 <td>{{ c.fecha }}</td>
                                 <td>{{ c.hora }}</td>
                                 <td>
-                                    <span class="badge bg-{{ {
+                                    <span class="badge badge-soft-{{ {
                                         'pendiente': 'warning',
                                         'en_proceso': 'info',
                                         'completado': 'success',
@@ -481,7 +475,7 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100 border-warning">
             <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-alarm me-2"></i>Órdenes Retrasadas</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-bell me-2"></i>Órdenes Retrasadas</h6>
                 <span class="badge bg-dark">{{ data.ot_retrasadas_count }}</span>
             </div>
             <div class="card-body p-0">
@@ -515,7 +509,7 @@
     <div class="col-md-6" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-tools me-2 text-info"></i>Órdenes en Proceso</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-screwdriver-wrench me-2 text-info"></i>Órdenes en Proceso</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -551,7 +545,7 @@
 <div class="mt-3" data-aos="fade-up">
     <div class="card border-warning">
         <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Stock Bajo</h6>
+            <h6 class="mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>Stock Bajo</h6>
             <a href="{{ url_for('inventario.alertas') }}" class="btn btn-sm btn-dark">Ver todas</a>
         </div>
         <div class="card-body p-0">
@@ -595,10 +589,10 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Ingresos',
                 data: [{% for _, v in data.ingresos_mensuales %}{{ v }},{% endfor %}],
-                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                borderColor: 'rgba(13, 110, 253, 1)',
+                backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                borderColor: 'rgba(37, 99, 235, 1)',
                 borderWidth: 1,
-                borderRadius: 4,
+                borderRadius: 6,
             }]
         },
         options: {
@@ -619,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [{% for l, _ in data.servicios_mas_vendidos %}'{{ l }}',{% endfor %}],
             datasets: [{
                 data: [{% for _, v in data.servicios_mas_vendidos %}{{ v }},{% endfor %}],
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1'],
+                backgroundColor: ['#2563EB', '#0EA5E9', '#14B8A6', '#10B981', '#6366F1', '#F59E0B'],
             }]
         },
         options: {
@@ -639,7 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [{% for l, _ in data.estado_ot_data %}'{{ l|replace("_", " ")|title }}',{% endfor %}],
             datasets: [{
                 data: [{% for _, v in data.estado_ot_data %}{{ v }},{% endfor %}],
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#adb5bd'],
+                backgroundColor: ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#F97316', '#94A3B8'],
             }]
         },
         options: {
@@ -661,10 +655,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Citas',
                 data: [{% for _, v in data.citas_semana %}{{ v }},{% endfor %}],
                 fill: true,
-                backgroundColor: 'rgba(25, 135, 84, 0.15)',
-                borderColor: '#198754',
+                backgroundColor: 'rgba(20, 184, 166, 0.15)',
+                borderColor: '#14B8A6',
                 tension: 0.4,
-                pointBackgroundColor: '#198754',
+                pointBackgroundColor: '#14B8A6',
                 pointRadius: 4,
             }]
         },
@@ -686,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: [{% for l, _ in data.ingresos_por_metodo %}'{{ l }}',{% endfor %}],
             datasets: [{
                 data: [{% for _, v in data.ingresos_por_metodo %}{{ v }},{% endfor %}],
-                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997'],
+                backgroundColor: ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#6366F1', '#F97316', '#14B8A6'],
             }]
         },
         options: {
@@ -707,10 +701,10 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'OTs entregadas',
                 data: [{% for _, v in data.ot_por_mecanico %}{{ v }},{% endfor %}],
-                backgroundColor: 'rgba(25, 135, 84, 0.7)',
-                borderColor: 'rgba(25, 135, 84, 1)',
+                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                borderColor: 'rgba(16, 185, 129, 1)',
                 borderWidth: 1,
-                borderRadius: 4,
+                borderRadius: 6,
             }]
         },
         options: {
@@ -724,7 +718,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     {% endif %}
 
-    gsap.from('.stat-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
 });
 </script>
 {% endblock %}

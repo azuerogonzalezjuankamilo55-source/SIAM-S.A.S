@@ -26,7 +26,7 @@
                         <td>{{ o.vehiculo.marca }} {{ o.vehiculo.modelo }} ({{ o.vehiculo.placa }})</td>
                         <td>{{ o.fecha_ingreso }}</td>
                         <td>
-                            <span class="badge bg-{{
+                            <span class="badge bg-{{ {
                                 'recibido': 'secondary',
                                 'diagnostico': 'info',
                                 'esperando_repuestos': 'warning',
@@ -40,7 +40,7 @@
                         <td>{{ o.fecha_estimada_entrega or "—" }}</td>
                         <td>
                             <a href="{{ url_for('portal.orden_detalle', orden_id=o.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Ver
+                                <i class="fa-solid fa-eye"></i> Ver
                             </a>
                         </td>
                     </tr>
