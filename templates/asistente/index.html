@@ -15,6 +15,10 @@
 #chatInput { resize: none; max-height: 120px; }
 .chat-actions .btn { transition: all 0.2s; }
 .chat-actions .btn:hover { transform: translateY(-1px); }
+.chat-avatar { width: 32px; height: 32px; font-size: .8rem; }
+@media (prefers-reduced-motion: reduce) {
+    .typing-dots span { animation: none; }
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -37,7 +41,7 @@
         <div class="chat-message chat-{{ msg.rol }} mb-3">
             <div class="d-flex {{ 'justify-content-end' if msg.rol == 'usuario' else 'justify-content-start' }}">
                 <div class="chat-bubble rounded-3 p-3 {{ 'bg-primary text-white' if msg.rol == 'usuario' else 'bg-dark border' }}" style="max-width: 80%;">
-                    <div class="chat-text">{{ msg.texto.replace('\n', '<br>') | safe }}</div>
+                    <div class="chat-text">{{ msg.texto | e | replace('\n', '<br>') | safe }}</div>
                     {% if msg.hora %}
                     <div class="chat-time small {{ 'text-white-50' if msg.rol == 'usuario' else 'text-secondary' }} mt-1">{{ msg.hora }}</div>
                     {% endif %}
@@ -48,6 +52,22 @@
         {% endif %}
     </div>
     <div class="card-footer border-top">
+        <div id="quickReplies" class="mb-2">
+            <small class="text-secondary d-block mb-2">¿En qué podemos ayudarte?</small>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro no quiere arrancar">🔧 Mi carro no arranca</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi moto se está apagando">🏍️ Mi moto se apaga</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Por qué mi carro vibra?">🚗 Mi carro vibra</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cada cuánto debo cambiar el aceite?">🛢️ Cambio de aceite</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro se está calentando">🔥 Se calienta</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Qué significa el Check Engine?">💡 Check Engine</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Necesito cambiar una llanta">🛞 Cambiar llanta</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Estoy varado">🚨 Estoy varado</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Quiero solicitar una cita">📅 Solicitar cita</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuánto cuesta una revisión?">💰 Precio revisión</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuál es la sede más cercana?">📍 Sede cercana</button>
+            </div>
+        </div>
         <form id="chatForm" class="d-flex gap-2">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="flex-grow-1 position-relative">
@@ -69,6 +89,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     initChat();
     scrollChat();
+
+    var quickPanel = document.getElementById('quickReplies');
+    if (quickPanel) {
+        var chatForm = document.getElementById('chatForm');
+        if (chatForm) {
+            chatForm.addEventListener('submit', function() {
+                quickPanel.style.display = 'none';
+            });
+        }
+        document.querySelectorAll('.quick-reply-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var input = document.getElementById('chatInput');
+                var form = document.getElementById('chatForm');
+                if (input && form) {
+                    input.value = btn.getAttribute('data-text');
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    }
 
     var input = document.getElementById('chatInput');
     if (input) {
@@ -100,7 +140,9 @@ function clearChat() {
         if (data.ok) {
             var container = document.getElementById('chatMessages');
             if (container) container.innerHTML = '';
-            addChatMessage('assistant', '¡Hola! Soy el asistente de SIAM. ¿En qué puedo ayudarte?');
+            addChatMessage('assistant', '¿En qué podemos ayudarte?\n\nPuedes preguntarme sobre mecánica, mantenimiento, motos, carros, servicios o asistencia.');
+            var quickPanel = document.getElementById('quickReplies');
+            if (quickPanel) quickPanel.style.display = '';
         }
     });
 }

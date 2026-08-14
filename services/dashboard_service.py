@@ -14,6 +14,8 @@ from models.inventario import Inventario
 from models.orden_trabajo import OrdenTrabajo
 from models.servicio import Servicio
 from models.mecanico import Mecanico
+from models.asistencia import AsistenciaEmergencia
+from models.pago_factura import PagoFactura
 
 logger = logging.getLogger("siam.dashboard_service")
 
@@ -53,6 +55,7 @@ class DashboardData:
     ot_por_mecanico: list = field(default_factory=list)
     ot_retrasadas: list = field(default_factory=list)
     ot_en_proceso: list = field(default_factory=list)
+    asistencias_activas: list = field(default_factory=list)
 
 
 class DashboardService:
@@ -254,6 +257,14 @@ class DashboardService:
             .all()
         )
 
+        asistencias_activas = (
+            AsistenciaEmergencia.query
+            .filter(AsistenciaEmergencia.estado == "pendiente")
+            .order_by(AsistenciaEmergencia.created_at.desc())
+            .limit(6)
+            .all()
+        )
+
         data = DashboardData(
             total_clientes=Cliente.query.count(),
             total_vehiculos=Vehiculo.query.count(),
@@ -288,7 +299,65 @@ class DashboardService:
             ot_por_mecanico=ot_por_mecanico,
             ot_retrasadas=ot_retrasadas,
             ot_en_proceso=ot_en_proceso,
+            asistencias_activas=asistencias_activas,
         )
 
         logger.debug("Dashboard actualizado: %d clientes, $%.2f ingresos mes", data.total_clientes, data.ingresos_mes)
         return data
+
+    @staticmethod
+    def get_actividad(limit: int = 10) -> list[dict]:
+        """Última actividad (clientes, citas, órdenes, facturas, pagos, asistencias)."""
+        eventos: list[dict] = []
+
+        for c in Cliente.query.order_by(Cliente.created_at.desc()).limit(limit).all():
+            eventos.append({
+                "tipo": "cliente",
+                "icono": "user-plus",
+                "texto": f"Nuevo cliente: {c.nombre}",
+                "cuando": c.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        for c in Cita.query.order_by(Cita.created_at.desc()).limit(limit).all():
+            estados = {"pendiente": "pendiente", "confirmada": "confirmada", "completado": "completada"}
+            eventos.append({
+                "tipo": "cita",
+                "icono": "calendar-check",
+                "texto": f"Cita {estados.get(c.estado, c.estado)} para {c.cliente.nombre}",
+                "cuando": c.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        for o in OrdenTrabajo.query.order_by(OrdenTrabajo.created_at.desc()).limit(limit).all():
+            eventos.append({
+                "tipo": "orden",
+                "icono": "wrench",
+                "texto": f"OT #{o.id}: {o.estado_display}",
+                "cuando": o.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        for f in Factura.query.order_by(Factura.created_at.desc()).limit(limit).all():
+            eventos.append({
+                "tipo": "factura",
+                "icono": "file-invoice-dollar",
+                "texto": f"Factura #{f.id}: ${float(f.total):,.0f}",
+                "cuando": f.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        for p in PagoFactura.query.order_by(PagoFactura.created_at.desc()).limit(limit).all():
+            eventos.append({
+                "tipo": "pago",
+                "icono": "money-bill-wave",
+                "texto": f"Pago de ${float(p.monto):,.0f} ({p.metodo_pago_display})",
+                "cuando": p.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        for a in AsistenciaEmergencia.query.order_by(AsistenciaEmergencia.created_at.desc()).limit(limit).all():
+            eventos.append({
+                "tipo": "asistencia",
+                "icono": "truck-fast",
+                "texto": f"Asistencia en emergencia #{a.id}: {a.estado}",
+                "cuando": a.created_at.isoformat(sep=" ", timespec="seconds"),
+            })
+
+        eventos.sort(key=lambda e: e["cuando"], reverse=True)
+        return eventos[:limit]

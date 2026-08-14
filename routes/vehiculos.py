@@ -14,9 +14,11 @@ from forms import VehiculoForm
 from database.commit import safe_commit, json_success, json_error
 from services.historial_service import HistorialService
 from services.image_service import ImageService, ImageError
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.vehiculos")
 vehiculos_bp = Blueprint("vehiculos", __name__, url_prefix="/vehiculos")
+vehiculos_bp.before_request(staff_blueprint_guard)
 
 
 @vehiculos_bp.route("/")
@@ -29,13 +31,13 @@ def listar() -> Any:
 @vehiculos_bp.route("/historial/<int:vehiculo_id>", methods=["GET", "POST"])
 @login_required
 def historial(vehiculo_id: int) -> Any:
-    vehiculo = Vehiculo.query.get_or_404(vehiculo_id)
+    vehiculo = db.get_or_404(Vehiculo, vehiculo_id)
     if request.method == "POST":
         tipo = request.form.get("tipo", "observacion")
         descripcion = request.form.get("descripcion", "").strip()
         kilometraje = request.form.get("kilometraje") or None
         if not descripcion:
-            flash("La descripción es obligatoria", "danger")
+            flash("La descripciÃ³n es obligatoria", "danger")
         else:
             try:
                 HistorialService.registrar(
@@ -45,7 +47,7 @@ def historial(vehiculo_id: int) -> Any:
                     kilometraje=int(kilometraje) if kilometraje else None,
                     creado_por=current_user.id if current_user.is_authenticated else None,
                 )
-                logger.info("Historial manual agregado al vehículo %s", vehiculo.placa)
+                logger.info("Historial manual agregado al vehÃ­culo %s", vehiculo.placa)
                 flash("Registro de historial agregado", "success")
             except Exception as e:
                 db.session.rollback()
@@ -84,12 +86,12 @@ def historial(vehiculo_id: int) -> Any:
 @vehiculos_bp.route("/historial/<int:historial_id>/fotos/agregar", methods=["POST"])
 @login_required
 def agregar_foto_historial(historial_id: int) -> Any:
-    registro = HistorialVehiculo.query.get_or_404(historial_id)
+    registro = db.get_or_404(HistorialVehiculo, historial_id)
     archivo = request.files.get("foto")
     tipo = request.form.get("tipo", "antes")
     descripcion = request.form.get("descripcion", "").strip()
     if tipo not in TIPOS_FOTO_HISTORIAL:
-        flash("Tipo de foto inválido", "danger")
+        flash("Tipo de foto invÃ¡lido", "danger")
         return redirect(url_for("vehiculos.historial", vehiculo_id=registro.vehiculo_id))
     if not archivo or not getattr(archivo, "filename", ""):
         flash("Selecciona una imagen", "danger")
@@ -129,10 +131,10 @@ def eliminar_foto_historial(foto_id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF inválido"), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF invÃ¡lido"), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("vehiculos.listar"))
-    foto = HistorialFoto.query.get_or_404(foto_id)
+    foto = db.get_or_404(HistorialFoto, foto_id)
     vehiculo_id = foto.historial.vehiculo_id
     ruta = foto.path
     db.session.delete(foto)
@@ -168,10 +170,10 @@ def crear() -> Any:
         db.session.add(vehiculo)
         try:
             safe_commit()
-            logger.info("Vehículo registrado: %s %s", vehiculo.marca, vehiculo.placa)
+            logger.info("VehÃ­culo registrado: %s %s", vehiculo.marca, vehiculo.placa)
             if request.is_json:
-                return jsonify({"success": True, "message": "Vehículo registrado"})
-            flash("Vehículo registrado", "success")
+                return jsonify({"success": True, "message": "VehÃ­culo registrado"})
+            flash("VehÃ­culo registrado", "success")
             return redirect(url_for("vehiculos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -185,17 +187,17 @@ def crear() -> Any:
 @vehiculos_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    vehiculo = Vehiculo.query.get_or_404(id)
+    vehiculo = db.get_or_404(Vehiculo, id)
     form = VehiculoForm(obj=vehiculo)
     clientes = Cliente.query.order_by(Cliente.nombre).all()
     if form.validate_on_submit():
         form.populate_obj(vehiculo)
         try:
             safe_commit()
-            logger.info("Vehículo actualizado: %s", vehiculo.placa)
+            logger.info("VehÃ­culo actualizado: %s", vehiculo.placa)
             if request.is_json:
-                return jsonify({"success": True, "message": "Vehículo actualizado"})
-            flash("Vehículo actualizado", "success")
+                return jsonify({"success": True, "message": "VehÃ­culo actualizado"})
+            flash("VehÃ­culo actualizado", "success")
             return redirect(url_for("vehiculos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -215,17 +217,17 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF inválido"}), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF invÃ¡lido"}), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("vehiculos.listar"))
-    vehiculo = Vehiculo.query.get_or_404(id)
+    vehiculo = db.get_or_404(Vehiculo, id)
     db.session.delete(vehiculo)
     try:
         safe_commit()
-        logger.info("Vehículo eliminado: %s", vehiculo.placa)
+        logger.info("VehÃ­culo eliminado: %s", vehiculo.placa)
         if request.is_json:
             return jsonify({"success": True})
-        flash("Vehículo eliminado", "success")
+        flash("VehÃ­culo eliminado", "success")
         return redirect(url_for("vehiculos.listar"))
     except Exception as e:
         db.session.rollback()

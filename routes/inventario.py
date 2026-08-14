@@ -14,9 +14,11 @@ from database.db import db
 from forms import InventarioForm, MovimientoInventarioForm, CategoriaInventarioForm
 from database.commit import safe_commit, json_success, json_error
 from services.inventario_service import InventarioService
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.inventario")
 inventario_bp = Blueprint("inventario", __name__, url_prefix="/inventario")
+inventario_bp.before_request(staff_blueprint_guard)
 
 
 @inventario_bp.route("/")
@@ -91,7 +93,7 @@ def crear() -> Any:
 @inventario_bp.route("/ver/<int:id>")
 @login_required
 def ver(id: int) -> Any:
-    item = Inventario.query.get_or_404(id)
+    item = db.get_or_404(Inventario, id)
     movimientos = item.movimientos
     return render_template("inventario/ver.html", item=item, movimientos=movimientos)
 
@@ -99,7 +101,7 @@ def ver(id: int) -> Any:
 @inventario_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    item = Inventario.query.get_or_404(id)
+    item = db.get_or_404(Inventario, id)
     form = InventarioForm(obj=item)
     if form.validate_on_submit():
         try:
@@ -110,7 +112,7 @@ def editar(id: int) -> Any:
                     tipo="ajuste",
                     cantidad=item.cantidad,
                     usuario_id=current_user.id,
-                    motivo="Ajuste por edición de producto",
+                    motivo="Ajuste por ediciÃ³n de producto",
                 )
             safe_commit()
             logger.info("Producto actualizado: %s", item.nombre)
@@ -129,7 +131,7 @@ def editar(id: int) -> Any:
 @inventario_bp.route("/baja/<int:id>", methods=["POST"])
 @login_required
 def baja(id: int) -> Any:
-    item = Inventario.query.get_or_404(id)
+    item = db.get_or_404(Inventario, id)
     motivo = request.form.get("motivo") or ""
     try:
         InventarioService.dar_baja(item, motivo, current_user.id)
@@ -149,7 +151,7 @@ def baja(id: int) -> Any:
 @inventario_bp.route("/restaurar/<int:id>", methods=["POST"])
 @login_required
 def restaurar(id: int) -> Any:
-    item = Inventario.query.get_or_404(id)
+    item = db.get_or_404(Inventario, id)
     try:
         InventarioService.restaurar(item, current_user.id)
         logger.info("Producto restaurado: %s", item.nombre)
@@ -204,7 +206,7 @@ def kardex() -> Any:
 @inventario_bp.route("/movimiento/<int:id>", methods=["GET", "POST"])
 @login_required
 def movimiento(id: int) -> Any:
-    item = Inventario.query.get_or_404(id)
+    item = db.get_or_404(Inventario, id)
     form = MovimientoInventarioForm()
     if form.validate_on_submit():
         try:
@@ -279,8 +281,8 @@ def generar_alertas() -> Any:
         flash(str(e), "danger")
         return redirect(url_for("inventario.alertas"))
     if request.is_json:
-        return json_success(message=f"{creados} alertas de reposición generadas.")
-    flash(f"{creados} alertas de reposición generadas.", "success" if creados else "info")
+        return json_success(message=f"{creados} alertas de reposiciÃ³n generadas.")
+    flash(f"{creados} alertas de reposiciÃ³n generadas.", "success" if creados else "info")
     return redirect(url_for("inventario.alertas"))
 
 
@@ -304,10 +306,10 @@ def crear_categoria() -> Any:
             )
             db.session.add(cat)
             safe_commit()
-            logger.info("Categoría creada: %s", cat.nombre)
+            logger.info("CategorÃ­a creada: %s", cat.nombre)
             if request.is_json:
-                return json_success(message="Categoría creada.")
-            flash("Categoría creada", "success")
+                return json_success(message="CategorÃ­a creada.")
+            flash("CategorÃ­a creada", "success")
             return redirect(url_for("inventario.listar_categorias"))
         except Exception as e:
             db.session.rollback()
@@ -320,7 +322,7 @@ def crear_categoria() -> Any:
 @inventario_bp.route("/categorias/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_categoria(id: int) -> Any:
-    cat = CategoriaInventario.query.get_or_404(id)
+    cat = db.get_or_404(CategoriaInventario, id)
     form = CategoriaInventarioForm(obj=cat)
     if form.validate_on_submit():
         try:
@@ -328,10 +330,10 @@ def editar_categoria(id: int) -> Any:
             cat.descripcion = form.descripcion.data
             cat.padre_id = form.padre_id.data or None
             safe_commit()
-            logger.info("Categoría actualizada: %s", cat.nombre)
+            logger.info("CategorÃ­a actualizada: %s", cat.nombre)
             if request.is_json:
-                return json_success(message="Categoría actualizada.")
-            flash("Categoría actualizada", "success")
+                return json_success(message="CategorÃ­a actualizada.")
+            flash("CategorÃ­a actualizada", "success")
             return redirect(url_for("inventario.listar_categorias"))
         except Exception as e:
             db.session.rollback()
@@ -350,15 +352,15 @@ def eliminar_categoria(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF inválido"}), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF invÃ¡lido"}), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("inventario.listar_categorias"))
-    cat = CategoriaInventario.query.get_or_404(id)
+    cat = db.get_or_404(CategoriaInventario, id)
     items_asociados = Inventario.query.filter(Inventario.categoria_id == id).count()
     if items_asociados > 0:
         if request.is_json:
-            return json_error(message=f"No se puede eliminar: {items_asociados} producto(s) usan esta categoría")
-        flash(f"No se puede eliminar: {items_asociados} producto(s) usan esta categoría", "danger")
+            return json_error(message=f"No se puede eliminar: {items_asociados} producto(s) usan esta categorÃ­a")
+        flash(f"No se puede eliminar: {items_asociados} producto(s) usan esta categorÃ­a", "danger")
         return redirect(url_for("inventario.listar_categorias"))
     try:
         CategoriaInventario.query.filter(CategoriaInventario.padre_id == id).update(
@@ -366,10 +368,10 @@ def eliminar_categoria(id: int) -> Any:
         )
         db.session.delete(cat)
         safe_commit()
-        logger.info("Categoría eliminada: %s", cat.nombre)
+        logger.info("CategorÃ­a eliminada: %s", cat.nombre)
         if request.is_json:
-            return json_success(message="Categoría eliminada.")
-        flash("Categoría eliminada", "success")
+            return json_success(message="CategorÃ­a eliminada.")
+        flash("CategorÃ­a eliminada", "success")
         return redirect(url_for("inventario.listar_categorias"))
     except Exception as e:
         db.session.rollback()

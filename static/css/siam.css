@@ -849,6 +849,33 @@ html {
     color: var(--siam-primary);
 }
 
+.portal-quick {
+    color: var(--bs-body-color);
+    background-color: var(--siam-surface);
+    border: 1px solid var(--siam-border);
+    border-radius: var(--siam-radius);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.portal-quick:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37, 99, 235, .55);
+    box-shadow: var(--siam-shadow-sm);
+    color: var(--bs-body-color);
+}
+
+.actividad-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--siam-primary-soft);
+    color: var(--siam-primary);
+    border-radius: .6rem;
+}
+
 .service-card {
     height: 100%;
     background-color: var(--siam-surface);

@@ -506,9 +506,14 @@ function addChatMessage(role, text, type, items) {
     div.setAttribute('data-aos', 'fade-up');
     div.setAttribute('data-aos-duration', '300');
 
-    var html = '<div class="d-flex ' + (role === 'user' ? 'justify-content-end' : 'justify-content-start') + '">';
+    var avatar = role === 'user'
+        ? '<span class="chat-avatar d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0 bg-primary text-white order-2"><i class="fa-solid fa-user"></i></span>'
+        : '<span class="chat-avatar d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0 bg-dark border text-primary"><i class="fa-solid fa-robot"></i></span>';
+
+    var html = '<div class="d-flex ' + (role === 'user' ? 'justify-content-end' : 'justify-content-start') + ' align-items-start gap-2">';
+    html += avatar;
     html += '<div class="chat-bubble rounded-3 p-3 ' + (role === 'user' ? 'bg-primary text-white' : 'bg-dark border') + '" style="max-width: 80%;">';
-    html += '<div class="chat-text">' + text.replace(/\n/g, '<br>') + '</div>';
+    html += '<div class="chat-text">' + escapeHtml(text).replace(/\n/g, '<br>') + '</div>';
     html += '<div class="chat-time small ' + (role === 'user' ? 'text-white-50' : 'text-secondary') + ' mt-1">' + time + '</div>';
 
     if (type === 'lista_clientes' || type === 'lista_vehiculos' || type === 'lista_facturas') {
@@ -531,6 +536,12 @@ function addChatMessage(role, text, type, items) {
     html += '</div></div>';
     div.innerHTML = html;
     container.appendChild(div);
+}
+
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
 }
 
 function showTyping() {
@@ -556,13 +567,59 @@ function scrollChat() {
 }
 
 function initChatButtons() {
-    document.querySelectorAll('.chat-actions button').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var action = btn.getAttribute('data-action');
-            if (action === 'share-location') {
-                btn.click();
-            }
-        });
+    var container = document.getElementById('chatMessages');
+    if (!container) return;
+    container.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        e.stopPropagation();
+        var action = btn.getAttribute('data-action');
+        if (action === 'share-location') {
+            compartirUbicacionDesdeChat(btn);
+        }
     });
+}
+
+function compartirUbicacionDesdeChat(btn) {
+    if (!navigator.geolocation) {
+        addChatMessage('assistant', 'Tu navegador no soporta geolocalización.');
+        return;
+    }
+    var original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Obteniendo ubicación...';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+        fetch('/api/ubicacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' },
+            body: JSON.stringify({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy,
+                descripcion: 'Solicitud de asistencia desde el asistente'
+            })
+        }).then(function (r) { return r.json(); })
+        .then(function (data) {
+            btn.disabled = false;
+            btn.innerHTML = original;
+            if (data.success) {
+                addChatMessage('assistant', '📍 **Ubicación recibida** (solicitud #' + data.id + ')\n🚗 SIAM está buscando asistencia cercana...\n\nEstado: **Pendiente**. Te avisaremos cuando la asistencia esté en camino.');
+                scrollChat();
+            } else {
+                addChatMessage('assistant', 'No se pudo enviar la ubicación: ' + (data.error || 'intenta nuevamente.'));
+                scrollChat();
+            }
+        }).catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = original;
+            addChatMessage('assistant', 'Error de conexión al enviar la ubicación. Intenta nuevamente.');
+            scrollChat();
+        });
+    }, function (err) {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        var msgs = { 1: 'Permiso denegado. Habilita la ubicación para compartirla.', 2: 'No se pudo obtener la ubicación.', 3: 'Tiempo agotado.' };
+        addChatMessage('assistant', msgs[err.code] || 'Error de ubicación.');
+        scrollChat();
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
 }

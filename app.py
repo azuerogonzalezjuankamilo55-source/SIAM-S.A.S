@@ -84,7 +84,7 @@ def configure_security_headers(app: Flask) -> None:
         response.headers["X-Powered-By"] = "SIAM"
         if not app.debug:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-            response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com cdnjs.cloudflare.com fonts.googleapis.com; img-src 'self' data:; font-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.gstatic.com; connect-src 'self'"
+            response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com cdnjs.cloudflare.com fonts.googleapis.com; img-src 'self' data: https://*.tile.openstreetmap.org; font-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.gstatic.com; connect-src 'self'"
         return response
 
 
@@ -235,7 +235,7 @@ def register_template_processors(app: Flask) -> None:
 
 @login_manager.user_loader
 def load_user(user_id: str) -> Usuario | None:
-    return Usuario.query.get(int(user_id))
+    return db.session.get(Usuario, int(user_id))
 
 
 if __name__ == "__main__":

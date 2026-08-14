@@ -2,10 +2,56 @@
 {% block title %}Mi Portal{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Hola, {{ data.cliente.nombre }}</h4>
-    <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-primary">
-        <i class="fa-solid fa-calendar-plus"></i> Solicitar Cita
-    </a>
+    <h4 class="mb-0">Hola, {{ data.cliente.nombre }} 👋</h4>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('sedes.index') }}" class="btn btn-danger">
+            <i class="fa-solid fa-truck-ramp-box"></i> Asistencia / Sedes
+        </a>
+        <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-primary">
+            <i class="fa-solid fa-calendar-plus"></i> Solicitar Cita
+        </a>
+    </div>
+</div>
+
+<div class="mb-4" data-aos="fade-up">
+    <h5 class="mb-3"><i class="fa-solid fa-bolt me-2 text-warning"></i>¿Qué necesitas hoy?</h5>
+    <div class="row g-2">
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('sedes.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">🚨</div><small>Estoy varado</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('portal.solicitar_cita') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">📅</div><small>Agendar cita</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('portal.vehiculos') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">🚗</div><small>Mis vehículos</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('portal.ordenes') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">🔧</div><small>Mis reparaciones</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('portal.facturas') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">🧾</div><small>Mis facturas</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('sedes.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">📍</div><small>Buscar sede</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{{ url_for('assistant.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
+                <div class="fs-2 mb-1">🤖</div><small>Preguntar a SIAM</small>
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="row g-3 mb-4">
@@ -34,6 +80,15 @@
         </div>
     </div>
 </div>
+
+{% set ot_progreso = {
+    'recibido': 15, 'diagnostico': 35, 'esperando_repuestos': 55,
+    'en_reparacion': 75, 'listo_entrega': 100, 'entregado': 100
+} %}
+{% set ot_color = {
+    'recibido': 'success', 'diagnostico': 'primary', 'esperando_repuestos': 'warning',
+    'en_reparacion': 'warning', 'listo_entrega': 'success', 'entregado': 'success'
+} %}
 
 <div class="row g-3">
     <div class="col-lg-6">
@@ -67,25 +122,29 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Reparaciones en curso</strong>
+                <strong><i class="fa-solid fa-car me-2 text-primary"></i>Estado de mi vehículo</strong>
                 <a href="{{ url_for('portal.ordenes') }}" class="small">Ver todas</a>
             </div>
-            <div class="card-body p-0">
-                <ul class="list-group list-group-flush">
-                    {% for o in data.ordenes_activas %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <div><strong>{{ o.numero }}</strong></div>
-                            <small class="text-muted">{{ o.vehiculo.placa }} · {{ o.estado_display }}</small>
-                        </div>
-                        <a href="{{ url_for('portal.orden_detalle', orden_id=o.id) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item text-center text-muted">No tienes reparaciones en curso.</li>
-                    {% endfor %}
-                </ul>
+            <div class="card-body">
+                {% if data.ordenes_activas %}
+                <div class="small text-secondary mb-3 d-flex flex-wrap gap-2">
+                    <span>🟢 Recibido</span><span>🔵 Diagnóstico</span><span>🟡 En reparación</span><span>🟣 Esperando repuesto</span><span>🟢 Listo para entregar</span>
+                </div>
+                {% for o in data.ordenes_activas %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>{{ o.numero }}</strong>
+                        <span class="badge bg-{{ ot_color.get(o.estado, 'secondary') }}">{{ o.estado_display }}</span>
+                    </div>
+                    <small class="text-muted">{{ o.vehiculo.marca }} {{ o.vehiculo.modelo }} · {{ o.vehiculo.placa }}</small>
+                    <div class="progress mt-2" style="height: 10px;" role="progressbar" aria-valuenow="{{ ot_progreso.get(o.estado, 15) }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped {{ '' if o.estado in ('esperando_repuestos','en_reparacion') else 'progress-bar-animated' }}" style="width: {{ ot_progreso.get(o.estado, 15) }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-3">No tienes reparaciones en curso.</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -113,6 +172,32 @@
                     </li>
                     {% else %}
                     <li class="list-group-item text-center text-muted">Sin facturas pendientes.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Mantenimientos próximos</strong>
+                <a href="{{ url_for('portal.recordatorios') }}" class="small">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for r in data.proximos_recordatorios %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div><strong>{{ r.titulo }}</strong></div>
+                            <small class="text-muted">{{ r.vehiculo.placa }} · {{ r.tipo_label }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'warning' if r.estado == 'pendiente' else 'info' }}">{{ r.estado_label }}</span><br>
+                            <small class="text-muted">{{ r.fecha_programada.strftime('%d/%m/%Y') }}</small>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted">Sin mantenimientos programados.</li>
                     {% endfor %}
                 </ul>
             </div>

@@ -42,11 +42,17 @@ class AssistantService:
             "m\u00e9todos de pago", "metodos de pago", "formas de pago",
         ],
         "repuestos": [
-            "repuesto", "pieza", "parte", "accesorio", "para mi carro", "para mi moto",
+            "repuesto", "repuestos", "pieza", "piezas", "parte", "accesorio",
+            "para mi carro", "para mi moto", "para carros", "para motos",
         ],
         "saludo": [
             "hola", "buenas", "saludos", "buenos", "hey",
             "qu\u00e9 tal", "que tal",
+        ],
+        "facturacion": [
+            "facturaci\u00f3n", "facturacion", "facturo", "facturar", "c\u00f3mo facturo",
+            "como facturo", "c\u00f3mo facturar", "como facturar", "cu\u00e1ndo se factura",
+            "cuando se factura",
         ],
         "ayuda": [
             "ayuda", "help", "qu\u00e9 puedes", "que puedes",
@@ -93,7 +99,7 @@ class AssistantService:
         ],
         "consultar_inventario": [
             "inventario", "stock", "producto", "productos",
-            "repuesto", "pieza", "existencia",
+            "repuesto", "repuestos", "pieza", "piezas", "existencia",
         ],
         "buscar_cliente": [
             "cliente", "clientes", "due\u00f1o", "due\u00f1a",
@@ -113,15 +119,166 @@ class AssistantService:
         ],
     }
 
+    # Intents de peticiones concretas: se revisan antes que los síntomas y antes
+    # que los intents genéricos para no confundir, p. ej. "¿cuánto cuesta cambiar frenos?".
+    REQUEST_PATTERNS: list[tuple[str, list[str]]] = [
+        ("cita_agendar", [
+            "quiero una cita", "quiero cita", "agendar cita", "agendar una cita",
+            "reservar cita", "programar cita", "solicitar cita", "necesito una cita",
+            "pedir cita", "turno", "agendar",
+            "llevar mi carro", "llevar mi moto", "llevar mi veh\u00edculo", "llevar mi vehiculo",
+            "llevarlo al taller", "llevarla al taller", "llevar mi carro al taller",
+            "llevar mi moto al taller", "agendar una revisi\u00f3n", "agendar una revision",
+            "necesito una revisi\u00f3n", "necesito una revision", "quiere llevar mi carro",
+            "quiere llevar mi moto", "quiero llevar mi carro", "quiero llevar mi moto",
+        ]),
+        ("sedes_mas_cercana", [
+            "sede m\u00e1s cercana", "sede mas cercana", "m\u00e1s cercana", "mas cercana",
+            "m\u00e1s cerca", "mas cerca", "cerca de m\u00ed", "cerca de mi",
+            "como llegar", "c\u00f3mo llegar", "cu\u00e1l sede", "cual sede",
+            "qu\u00e9 sede", "que sede", "d\u00f3nde queda la sede", "donde queda la sede",
+        ]),
+        ("precio_servicio", [
+            "cu\u00e1nto cuesta cambiar", "cuanto cuesta cambiar",
+            "cu\u00e1nto cuesta un", "cuanto cuesta un", "cu\u00e1nto cuesta la",
+            "cuanto cuesta la", "cu\u00e1nto cuesta una", "cuanto cuesta una",
+            "precio del", "precio de la", "precio de un", "precio de una",
+            "valor del", "valor de un", "cu\u00e1nto cobran", "cuanto cobran",
+            "cotizaci\u00f3n", "cotizacion", "presupuesto",
+        ]),
+        ("mantenimiento_preventivo", [
+            "cambio de aceite", "cada cu\u00e1nto", "cada cuanto", "cada cuantos km",
+            "filtro de aire", "filtro de aceite", "filtros", "revisi\u00f3n general",
+            "revision general", "mantenimiento preventivo", "puesta a punto",
+            "calibraci\u00f3n de llantas", "calibracion de llantas",
+            "cu\u00e1ndo debo cambiar", "cuando debo cambiar", "cambiar el aceite",
+            "cu\u00e1ndo cambio aceite", "cuando cambio aceite", "debo cambiar aceite",
+            "cu\u00e1nto cambio el aceite", "cuanto cambio el aceite",
+        ]),
+        ("aceite_tipo", [
+            "qu\u00e9 aceite", "que aceite", "qu\u00e9 tipo de aceite", "que tipo de aceite",
+            "aceite usa", "aceite lleva", "aceite le echo", "aceite le hecho",
+            "aceite debo usar", "aceite para mi",
+        ]),
+    ]
+
+    # Síntomas mecánicos: se revisan antes que los intents genéricos.
+    SYMPTOM_PATTERNS: list[tuple[str, list[str]]] = [
+        ("diagnostico_arranque", [
+            "no prende", "no arranca", "no enciende", "no quiere prender",
+            "no da arranque", "no da motor", "quiere prender y no", "no prende nada",
+            "no quiere arrancar", "no enciende nada",
+        ]),
+        ("check_engine", [
+            "check engine", "testigo", "luz de motor", "luz del tablero",
+            "luz de aceite", "se\u00f1al de motor", "codigo de error", "c\u00f3digo de error",
+            "esc\u00e1ner", "escaner", "scanner", "prende el testigo",
+            "se encendi\u00f3 el testigo", "se encendio el testigo", "testigo del tablero",
+        ]),
+        ("diagnostico_calentamiento", [
+            "se calienta", "calienta mucho", "sobrecalienta", "botando vapor",
+            "echando vapor", "sale vapor", "temperatura alta", "fiebre",
+            "se est\u00e1 calentando", "se esta calentando", "est\u00e1 calentando",
+            "esta calentando", "se calentando", "calentando mucho",
+        ]),
+        ("diagnostico_humo", [
+            "echa humo", "botando humo", "saca humo", "sacando humo",
+            "humo blanco", "humo negro", "humo azul", "humo",
+            "est\u00e1 echando humo", "esta echando humo", "est\u00e1 botando humo",
+            "esta botando humo", "echando humo",
+            "olor a gasolina", "huele a gasolina", "olor a quemado", "huele a quemado",
+            "huele a humo", "olor a humo",
+        ]),
+        ("diagnostico_frenos", [
+            "no frena", "frena mal", "pedal blando", "pedal esponjoso",
+            "pedal duro", "frenada", "l\u00edquido de frenos", "liquido de frenos",
+            "pastillas de freno", "discos de freno", "chirr", "chirrido",
+        ]),
+        ("diagnostico_llanta", [
+            "pinchada", "pincho", "pinch\u00f3", "revent\u00f3", "reviento", "revienta",
+            "neum\u00e1tico", "neumatico", "v\u00e1lvula", "valvula", "perdida de aire",
+            "pierde aire", "llanta desinflada", "se pinch\u00f3", "se pincho",
+        ]),
+        ("bateria", [
+            "bater\u00eda descargada", "bateria descargada", "no carga la bateria",
+            "no carga la bater\u00eda", "alternador", "bornes", "terminales",
+            "pasacorriente", "pasa corriente", "cables de paso", "no me arranca",
+        ]),
+        ("diagnostico_apagado", [
+            "se apaga", "se muere", "se corta", "se apaga solo", "se apaga sola",
+            "se apaga en marcha", "se apaga cuando", "apaga y no prende",
+            "se est\u00e1 apagando", "se esta apagando", "se apagando",
+        ]),
+        ("diagnostico_aceleracion", [
+            "no acelera", "no responde", "sin potencia", "jalonea", "acelera mal",
+            "se ahoga", "no pasa de", "pierde fuerza", "no me acelera",
+        ]),
+        ("diagnostico_vibraciones", [
+            "vibra", "vibraci\u00f3n", "vibracion", "tiembla", "temblor",
+            "tronando", "truena", "hace ruido", "ruido raro", "ruido extra",
+            "sonido raro", "rueda dura", "est\u00e1 vibrando", "esta vibrando",
+            "vibrando", "vibra al frenar", "vibra cuando",
+        ]),
+    ]
+
+    # Intents de datos administrativos: solo personal del taller (no clientes).
+    BUSINESS_ONLY: set[str] = {
+        "buscar_cliente", "buscar_vehiculo", "buscar_factura",
+        "contar_clientes", "contar_vehiculos", "contar_facturas", "contar_ot",
+        "ingresos_hoy", "stock_bajo",
+    }
+
+    # Intents que un cliente puede usar, pero sin exponer el inventario del taller.
+    CLIENT_GENERIC: set[str] = {"consultar_inventario", "repuestos"}
+
     @staticmethod
-    def process_message(message: str) -> dict:
+    def process_message(message: str, usuario=None) -> dict:
         msg_lower = message.lower().strip()
         logger.debug("Procesando mensaje: %s", msg_lower)
 
         intent, entities = AssistantService._classify_intent(msg_lower)
 
+        es_cliente = bool(usuario and getattr(usuario, "es_cliente", False))
+
+        if es_cliente and intent in AssistantService.BUSINESS_ONLY:
+            return AssistantService._informacion_administrativa()
+        if es_cliente and intent in AssistantService.CLIENT_GENERIC:
+            return AssistantService._respuesta_repuestos_cliente()
+
         if intent == "saludo":
             return AssistantService._handle_saludo()
+        elif intent == "facturacion":
+            return AssistantService._facturacion(usuario)
+        elif intent == "cita_agendar":
+            return AssistantService._cita_agendar(usuario)
+        elif intent == "sedes_mas_cercana":
+            return AssistantService._sedes_mas_cercana()
+        elif intent == "precio_servicio":
+            return AssistantService._precio_servicio(entities)
+        elif intent == "mantenimiento_preventivo":
+            return AssistantService._mantenimiento_preventivo()
+        elif intent == "aceite_tipo":
+            return AssistantService._aceite_tipo()
+        elif intent == "diagnostico_arranque":
+            return AssistantService._diagnostico_arranque()
+        elif intent == "check_engine":
+            return AssistantService._check_engine()
+        elif intent == "diagnostico_calentamiento":
+            return AssistantService._diagnostico_calentamiento()
+        elif intent == "diagnostico_humo":
+            return AssistantService._diagnostico_humo()
+        elif intent == "diagnostico_frenos":
+            return AssistantService._diagnostico_frenos()
+        elif intent == "diagnostico_llanta":
+            return AssistantService._diagnostico_llanta()
+        elif intent == "bateria":
+            return AssistantService._bateria()
+        elif intent == "diagnostico_apagado":
+            return AssistantService._diagnostico_apagado()
+        elif intent == "diagnostico_aceleracion":
+            return AssistantService._diagnostico_aceleracion()
+        elif intent == "diagnostico_vibraciones":
+            return AssistantService._diagnostico_vibraciones()
         elif intent == "buscar_cliente":
             return AssistantService._buscar_cliente(entities)
         elif intent == "buscar_vehiculo":
@@ -167,7 +324,12 @@ class AssistantService:
 
     @staticmethod
     def _classify_intent(msg: str) -> tuple:
-        entities = {}
+        entities = {"query": msg}
+
+        for intent_name, keywords in AssistantService.REQUEST_PATTERNS + AssistantService.SYMPTOM_PATTERNS:
+            pattern = r'\b(?:' + '|'.join(re.escape(k) for k in keywords) + r')\b'
+            if re.search(pattern, msg):
+                return intent_name, entities
 
         for intent_name, keywords in AssistantService.INTENT_KEYWORDS.items():
             pattern = r'\b(?:' + '|'.join(re.escape(k) for k in keywords) + r')\b'
@@ -287,11 +449,35 @@ class AssistantService:
         return {
             "text": (
                 "\u00a1Hola! Soy el asistente virtual de SIAM. Puedo ayudarte con:\n\n"
-                "\u2022 \U0001f50d **Buscar** clientes, veh\u00edculos, facturas e inventario\n"
-                "\u2022 \U0001f4cb **Listar** registros del sistema\n"
-                "\u2022 \U0001f527 **Recomendar** mantenimientos seg\u00fan el veh\u00edculo\n"
-                "\u2022 \U0001f4ca **Responder** preguntas sobre el taller\n\n"
+                "\U0001f527 **Mec\u00e1nica y mantenimiento**: carros, motos y veh\u00edculos de carga\n"
+                "\U0001f50d **Diagn\u00f3stico**: s\u00edntomas como que no prende, se calienta, echa humo o vibra\n"
+                "\U0001f4cd **Sedes y asistencia**: sede m\u00e1s cercana o si est\u00e1s varado\n"
+                "\U0001f4c5 **Citas**: agendar o consultar servicios\n"
+                "\U0001f4cb **Gesti\u00f3n**: buscar clientes, veh\u00edculos, facturas e inventario (personal autorizado)\n\n"
                 "\u00bfEn qu\u00e9 puedo ayudarte?"
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _facturacion(usuario=None) -> dict:
+        es_cliente = bool(usuario and getattr(usuario, "es_cliente", False))
+        if es_cliente:
+            return {
+                "text": (
+                    "En tu portal de cliente puedes ver **tus facturas y pagos** "
+                    "en la secci\u00f3n **Mis Facturas**.\n"
+                    "Si necesitas el detalle de una factura espec\u00edfica o tienes dudas "
+                    "sobre un pago, cont\u00e1ctanos y te ayudamos."
+                ),
+                "tipo": "texto",
+            }
+        return {
+            "text": (
+                "La **facturaci\u00f3n** se gestiona desde el m\u00f3dulo **Facturas**: "
+                "crear facturas asociadas a \u00f3rdenes de trabajo, registrar pagos "
+                "parciales o totales y descargar el PDF.\n"
+                "Puedes pedirme cosas como *\u00abbuscar factura 12\u00bb* o *\u00abfacturas de hoy\u00bb*."
             ),
             "tipo": "texto",
         }
@@ -300,17 +486,20 @@ class AssistantService:
     def _ayuda() -> dict:
         return {
             "text": (
-                "**Comandos \u00fatiles:**\n\n"
-                "\U0001f50d `Buscar cliente [nombre/cedula]`\n"
-                "\U0001f50d `Buscar veh\u00edculo [placa/marca]`\n"
-                "\U0001f50d `Buscar factura [n\u00famero]`\n"
-                "\U0001f4e6 `Consultar inventario [producto]`\n"
-                "\U0001f527 `Recomendar mantenimiento para [marca] [modelo] [a\u00f1o]`\n"
-                "\U0001f4ca `\u00bfCu\u00e1ntos clientes hay?`\n"
-                "\U0001f4ca `\u00bfCu\u00e1les son los servicios?`\n"
-                "\u26a0\ufe0f `Stock bajo`\n"
-                "\U0001f4b0 `Ingresos hoy`\n\n"
-                "Tambi\u00e9n puedes preguntar en lenguaje natural. \u00a1Int\u00e9ntalo!"
+                "**Puedes preguntarme en lenguaje natural**, por ejemplo:\n\n"
+                "\U0001f697 \u00abMi carro no prende\u00bb\n"
+                "\U0001f3cd\ufe0f \u00ab\u00bfPor qu\u00e9 vibra mi carro?\u00bb\n"
+                "\U0001f9f1 \u00ab\u00bfQu\u00e9 significa el Check Engine?\u00bb\n"
+                "\U0001f32b\ufe0f \u00abLa moto echa humo blanco\u00bb\n"
+                "\U0001f321\ufe0f \u00abMi carro se est\u00e1 calentando\u00bb\n"
+                "\U0001f6de \u00abSe me pinch\u00f3 una llanta\u00bb\n"
+                "\U0001f527 \u00ab\u00bfCada cu\u00e1nto cambio el aceite?\u00bb\n"
+                "\U0001f4b0 \u00ab\u00bfCu\u00e1nto cuesta cambiar frenos?\u00bb\n"
+                "\U0001f4cd \u00ab\u00bfCu\u00e1l es la sede m\u00e1s cercana?\u00bb\n"
+                "\U0001f4c5 \u00abQuiero agendar una cita\u00bb\n"
+                "\U0001f6a8 \u00abEstoy varado\u00bb\n\n"
+                "Tambi\u00e9n, si eres personal autorizado: \u00abbuscar cliente Juan\u00bb, "
+                "\u00abconsultar inventario\u00bb, \u00abstock bajo\u00bb o \u00abingresos hoy\u00bb."
             ),
             "tipo": "texto",
         }
@@ -381,7 +570,7 @@ class AssistantService:
         items = []
         lines = [f"**Veh\u00edculos encontrados para \u00ab{query}\u00bb:**\n"]
         for v in vehiculos:
-            cliente = Cliente.query.get(v.cliente_id)
+            cliente = db.session.get(Cliente, v.cliente_id)
             nombre_cliente = cliente.nombre if cliente else "\u2014"
             items.append({"id": v.id, "placa": v.placa, "marca": v.marca, "modelo": v.modelo, "anio": v.anio or "\u2014", "cliente": nombre_cliente})
             lines.append(f"  \u2022 **{v.placa}** \u2014 {v.marca} {v.modelo} ({v.anio or 'A\u00f1o?'})")
@@ -709,11 +898,306 @@ class AssistantService:
         }
 
     @staticmethod
+    def _respuesta_diagnostico(titulo: str, causas: list, consejo: str, grave: bool = False) -> dict:
+        lines = [f"**{titulo}**\n", "Eso **podr\u00eda deberse a**:\n"]
+        for c in causas:
+            lines.append(f"  \u2022 {c}")
+        if grave:
+            lines.append(f"\n\u26a0\ufe0f **Seguridad:** {consejo}")
+        else:
+            lines.append(f"\n\U0001f527 **Lo recomendable:** {consejo}")
+        lines.append(
+            "\n\U0001f4a1 *No puedo dar un diagn\u00f3stico definitivo por chat. "
+            "Lo ideal es que un t\u00e9cnico revise el veh\u00edculo.*"
+        )
+        if grave:
+            lines.append("\nSi est\u00e1s varado o necesitas ayuda, comparte tu ubicaci\u00f3n.")
+        return {"text": "\n".join(lines), "tipo": "botones"}
+
+    @staticmethod
+    def _diagnostico_arranque() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f511 El veh\u00edculo no arranca",
+            [
+                "Bater\u00eda descargada o bornes flojos/corroidos.",
+                "Fallo en el motor de arranque o en el interruptor.",
+                "Problema de combustible: bomba, filtro o inyectores.",
+                "Buj\u00edas o bobinas de encendido en mal estado.",
+            ],
+            "revisar el estado de la bater\u00eda y, si no arranca, "
+            "solicitar asistencia para una revisi\u00f3n en el taller.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _check_engine() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f4a1 Testigo de motor (Check Engine)",
+            [
+                "Un sensor del motor (por ejemplo, ox\u00edgeno o temperatura).",
+                "Buj\u00edas o bobinas en mal estado.",
+                "Tapa de combustible floja (com\u00fan y sencillo de resolver).",
+                "Problema de combustible o de emisiones.",
+            ],
+            "escanear el c\u00f3digo de error con un equipo de diagn\u00f3stico "
+            "para conocer la causa exacta y revisarlo en el taller.",
+        )
+
+    @staticmethod
+    def _diagnostico_calentamiento() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f321\ufe0f El veh\u00edculo se calienta",
+            [
+                "Bajo nivel de l\u00edquido refrigerante o fuga.",
+                "Termostato da\u00f1ado (no abre correctamente).",
+                "Bomba de agua fallando.",
+                "Ventilador del radiador que no funciona.",
+            ],
+            "si el indicador llega a la zona roja o sale vapor, det\u00e9n el veh\u00edculo "
+            "en un lugar seguro, apaga el motor y espera a que enfr\u00ede. "
+            "No contin\u00faes conduciendo para evitar da\u00f1os graves al motor.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _diagnostico_humo() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f32b\ufe0f El veh\u00edculo echa humo",
+            [
+                "Humo **blanco**: podr\u00eda indicar l\u00edquido refrigerante quem\u00e1ndose "
+                "(empaque de culata o culata).",
+                "Humo **negro**: exceso de combustible (inyecci\u00f3n o filtro de aire sucio).",
+                "Humo **azul**: podr\u00eda ser aceite quem\u00e1ndose (aros o sellos de v\u00e1lvula).",
+            ],
+            "revisarlo en el taller para identificar el origen. "
+            "Si el humo es abundante o hay olor a gasolina, no contin\u00faes conduciendo "
+            "y solicita asistencia.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _diagnostico_frenos() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f6a8 Problema de frenos",
+            [
+                "Pastillas o discos desgastados.",
+                "Bajo nivel de l\u00edquido de frenos o fuga.",
+                "Aire en el sistema (pedal blando o esponjoso).",
+                "Pinzas o cilindros de freno da\u00f1ados.",
+            ],
+            "si sientes que el veh\u00edculo no frena o el pedal est\u00e1 blando, "
+            "det\u00e9n el veh\u00edculo en un lugar seguro y **no lo conduzcas**. "
+            "Solicita asistencia de inmediato.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _aceite_tipo() -> dict:
+        return {
+            "text": (
+                "El tipo de aceite correcto depende de la **marca, modelo y motor** "
+                "de tu veh\u00edculo.\n"
+                "Puedes verificarlo en el **manual del propietario** o en la tapa "
+                "de llenado del motor.\n\n"
+                "No te doy un grado de aceite exacto por chat para no recomendarte "
+                "algo equivocado. En el taller podemos verificar el aceite adecuado "
+                "y hacer el cambio."
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _diagnostico_llanta() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f6de Problema con la llanta",
+            [
+                "Pinchazo o perforaci\u00f3n.",
+                "P\u00e9rdida lenta de aire por la v\u00e1lvula o el rin.",
+                "Desgaste irregular o cortes en la llanta.",
+            ],
+            "si est\u00e1 desinflada, cambia por la de repuesto en un lugar seguro "
+            "o solicita asistencia. Revisa la presi\u00f3n de las cuatro llantas.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _bateria() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\U0001f50b Problema con la bater\u00eda",
+            [
+                "Bater\u00eda descargada o en fin de vida \u00fatil.",
+                "Bornes flojos o con corrosi\u00f3n.",
+                "El alternador no est\u00e1 cargando correctamente.",
+                "Consumo de corriente con el motor apagado.",
+            ],
+            "verificar el voltaje y el estado de los bornes. "
+            "Si quedaste varado, solicita asistencia para un paso de corriente o revisi\u00f3n.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _diagnostico_apagado() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\u26d4 El veh\u00edculo se apaga en marcha",
+            [
+                "Bomba de combustible o filtro obstruido.",
+                "Sensor de posici\u00f3n del cig\u00fce\u00f1al en mal estado.",
+                "Bobinas o buj\u00edas fallando.",
+                "Problema el\u00e9ctrico intermitente.",
+            ],
+            "revisarlo en el taller; si se apaga de forma intermitente, "
+            "podr\u00eda dejarte varado. Considera solicitar asistencia.",
+            grave=True,
+        )
+
+    @staticmethod
+    def _diagnostico_aceleracion() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\u26a1 Sin potencia o no acelera",
+            [
+                "Filtro de aire o de combustible sucios.",
+                "Inyectores obstruidos.",
+                "Buj\u00edas o cables de encendido en mal estado.",
+                "Sensor de ox\u00edgeno o de flujo de aire fallando.",
+            ],
+            "revisar filtros y encendido en el taller para descartar problemas mayores.",
+        )
+
+    @staticmethod
+    def _diagnostico_vibraciones() -> dict:
+        return AssistantService._respuesta_diagnostico(
+            "\u2699\ufe0f Vibraciones o ruidos",
+            [
+                "Neum\u00e1ticos desbalanceados o desalineados.",
+                "Soportes del motor desgastados.",
+                "Buj\u00edas o cables en mal estado (vibra al acelerar).",
+                "Si vibra al frenar, podr\u00edan ser los discos de freno.",
+            ],
+            "revisar balanceo, alineaci\u00f3n y soportes en el taller.",
+        )
+
+    @staticmethod
+    def _mantenimiento_preventivo() -> dict:
+        return {
+            "text": (
+                "\U0001f527 **Mantenimiento preventivo**\n\n"
+                "Como referencia general (consulta el manual de tu veh\u00edculo):\n"
+                "  \u2022 **Aceite y filtro**: cada 5,000 km o 6 meses.\n"
+                "  \u2022 **Frenos**: revisi\u00f3n cada 10,000 km.\n"
+                "  \u2022 **Filtro de aire**: cada 15,000 km.\n"
+                "  \u2022 **Rotaci\u00f3n de llantas**: cada 10,000 km.\n"
+                "  \u2022 **L\u00edquido de frenos y refrigerante**: revisi\u00f3n anual.\n\n"
+                "\U0001f4a1 Los intervalos exactos dependen de la marca y el modelo. "
+                "\u00bfQuieres agendar una cita para una revisi\u00f3n?"
+            ),
+            "tipo": "botones",
+        }
+
+    @staticmethod
+    def _cita_agendar(usuario) -> dict:
+        if usuario and getattr(usuario, "es_cliente", False):
+            ruta = "/portal/citas/solicitar"
+            extra = " desde tu portal de cliente (**Mis Citas**)."
+        else:
+            ruta = "/citas/"
+            extra = " desde el m\u00f3dulo de **Citas**."
+        return {
+            "text": (
+                "Claro. Puedes agendar una cita" + extra +
+                "\n\U0001f4c5 Ruta: " + ruta
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _sedes_mas_cercana() -> dict:
+        return {
+            "text": (
+                "\U0001f4cd Puedes ver nuestras sedes en **Sedes y Asistencia** (/sedes/).\n"
+                "Usa el bot\u00f3n **\u00abUsar mi ubicaci\u00f3n\u00bb** para calcular la distancia "
+                "a cada sede y te mostraremos autom\u00e1ticamente la **m\u00e1s cercana**.\n"
+                "Tambi\u00e9n puedes solicitar asistencia desde esa p\u00e1gina si est\u00e1s varado."
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _precio_servicio(entities: dict) -> dict:
+        msg = (entities.get("query") or "").lower()
+        servicios = Servicio.query.filter(Servicio.activo == True).all()
+        match = None
+        for s in servicios:
+            if s.nombre and s.nombre.lower() in msg:
+                match = s
+                break
+        if not match:
+            for kw in [
+                "frenos", "freno", "aceite", "revisi\u00f3n", "revision",
+                "mantenimiento", "suspensi\u00f3n", "suspension", "buj\u00edas", "bujias",
+                "filtro", "afinaci\u00f3n", "afinacion", "balanceo", "alineaci\u00f3n", "alineacion",
+                "transmisi\u00f3n", "transmision", "embrague", "amortiguadores",
+            ]:
+                match = Servicio.query.filter(
+                    Servicio.nombre.ilike(f"%{kw}%"), Servicio.activo == True
+                ).first()
+                if match:
+                    break
+        if match:
+            precio = f"${float(match.precio_estimado):,.0f}" if match.precio_estimado else "Consultar"
+            duracion = f" | {match.duracion_estimada} min" if match.duracion_estimada else ""
+            return {
+                "text": (
+                    f"**{match.nombre}**: {precio}{duracion}\n\n"
+                    "\u00bfDeseas agendar una cita para este servicio?"
+                ),
+                "tipo": "texto",
+            }
+        return {
+            "text": (
+                "No dispongo del precio exacto para eso en este momento. "
+                "Te recomiendo **contactar a SIAM** o solicitar una **cotizaci\u00f3n** "
+                "para confirmar el valor."
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _informacion_administrativa() -> dict:
+        return {
+            "text": (
+                "Esa informaci\u00f3n es administrativa del taller y solo est\u00e1 disponible "
+                "para el personal autorizado.\n"
+                "Para lo que necesites, puedes consultar tus **veh\u00edculos**, **citas**, "
+                "**\u00f3rdenes** y **facturas** en tu portal de cliente."
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
+    def _respuesta_repuestos_cliente() -> dict:
+        return {
+            "text": (
+                "S\u00ed, manejamos repuestos y accesorios para autom\u00f3viles, motos "
+                "y veh\u00edculos de carga en nuestras sedes.\n"
+                "Para confirmar **disponibilidad y precio** del repuesto que necesitas, "
+                "te recomiendo contactar a la sede m\u00e1s cercana."
+            ),
+            "tipo": "texto",
+        }
+
+    @staticmethod
     def _no_entiendo() -> dict:
         return {
             "text": (
-                "No entend\u00ed tu mensaje. Puedes pedir **ayuda** para ver mis funciones "
-                "o simplemente preguntar en lenguaje natural."
+                "No estoy seguro de c\u00f3mo responder a eso. Puedes preguntarme cosas como:\n\n"
+                "\U0001f697 *\u00abMi carro no prende\u00bb*\n"
+                "\U0001f3cd\ufe0f *\u00ab\u00bfPor qu\u00e9 vibra mi carro?\u00bb*\n"
+                "\U0001f32b\ufe0f *\u00abLa moto echa humo\u00bb*\n"
+                "\U0001f6de *\u00abNecesito cambiar una llanta\u00bb*\n"
+                "\U0001f527 *\u00ab\u00bfCada cu\u00e1nto cambio el aceite?\u00bb*\n"
+                "\U0001f4cd *\u00ab\u00bfCu\u00e1l es la sede m\u00e1s cercana?\u00bb*\n"
+                "\U0001f4c5 *\u00abQuiero agendar una cita\u00bb*\n\n"
+                "O pide **ayuda** para ver todas mis funciones."
             ),
             "tipo": "texto",
         }

@@ -11,9 +11,11 @@ from models.mecanico import Mecanico
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import CitaForm
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.citas")
 citas_bp = Blueprint("citas", __name__, url_prefix="/citas")
+citas_bp.before_request(staff_blueprint_guard)
 
 
 @citas_bp.route("/")
@@ -58,7 +60,7 @@ def crear() -> Any:
 @citas_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    cita = Cita.query.get_or_404(id)
+    cita = db.get_or_404(Cita, id)
     form = CitaForm(obj=cita)
     clientes = Cliente.query.order_by(Cliente.nombre).all()
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
@@ -84,7 +86,7 @@ def editar(id: int) -> Any:
 @login_required
 def eliminar(id: int) -> Any:
     try:
-        cita = Cita.query.get_or_404(id)
+        cita = db.get_or_404(Cita, id)
         db.session.delete(cita)
         safe_commit("No se pudo eliminar.")
         logger.info("Cita eliminada: #%s", id)
@@ -103,7 +105,7 @@ def eliminar(id: int) -> Any:
 @login_required
 def cambiar_estado(id: int, estado: str) -> Any:
     try:
-        cita = Cita.query.get_or_404(id)
+        cita = db.get_or_404(Cita, id)
         estados_validos = ("pendiente", "en_proceso", "completado", "cancelado")
         if estado in estados_validos:
             cita.estado = estado
@@ -114,7 +116,7 @@ def cambiar_estado(id: int, estado: str) -> Any:
                     HistorialService.registrar_desde_cita(cita, current_user.id if current_user.is_authenticated else None)
                 except Exception as e:
                     logger.warning("No se pudo registrar historial de cita %s: %s", id, e)
-            logger.info("Cita #%s cambió a estado: %s", id, estado)
+            logger.info("Cita #%s cambiÃ³ a estado: %s", id, estado)
     except Exception as e:
         db.session.rollback()
         if request.is_json:

@@ -1,8 +1,8 @@
 import pytest
-from datetime import date, time
+from datetime import date, time, timedelta
 from decimal import Decimal
 
-from models import Usuario, Cliente, Vehiculo, Servicio, Cita, Mecanico
+from models import Usuario, Cliente, Vehiculo, Servicio, Cita, Mecanico, Recordatorio
 from services.factura_service import FacturaService, FacturaInput
 
 
@@ -174,6 +174,46 @@ class TestPortalFacturas:
         _login(client, u.correo, "clave1234")
         resp = client.get(f"/portal/facturas/{factura.id}")
         assert resp.status_code == 302
+
+
+class TestPortalFase7:
+    def test_portal_muestra_recordatorios(self, client, db):
+        c, u = _crear_cliente(db)
+        v = Vehiculo(cliente_id=c.id, marca="Toyota", modelo="Corolla", placa="ABC-123")
+        db.session.add(v)
+        db.session.commit()
+        r = Recordatorio(
+            vehiculo_id=v.id, tipo="mantenimiento", servicio_mantenimiento="aceite",
+            titulo="Cambio de aceite", fecha_programada=date.today() + timedelta(days=7),
+            estado="pendiente",
+        )
+        db.session.add(r)
+        db.session.commit()
+        _login(client, u.correo, "clave1234")
+        resp = client.get("/portal/")
+        assert resp.status_code == 200
+        html = resp.data.decode("utf-8")
+        assert "Mantenimientos próximos" in html
+        assert "Cambio de aceite" in html
+
+    def test_portal_muestra_boton_asistencia(self, client, db):
+        c, u = _crear_cliente(db)
+        _login(client, u.correo, "clave1234")
+        resp = client.get("/portal/")
+        assert b"Asistencia / Sedes" in resp.data
+
+    def test_portal_sin_recordatorios(self, client, db):
+        c, u = _crear_cliente(db)
+        _login(client, u.correo, "clave1234")
+        resp = client.get("/portal/")
+        assert b"Sin mantenimientos programados" in resp.data
+
+    def test_admin_no_accede_al_portal(self, client, db):
+        _crear_admin(db)
+        _login(client, "admin@test.com", "admin123")
+        resp = client.get("/portal/", follow_redirects=False)
+        assert resp.status_code == 302
+        assert "dashboard" in resp.headers.get("Location", "")
 
 
 class TestPortalPerfil:

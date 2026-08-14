@@ -5,7 +5,7 @@ from decimal import Decimal
 from flask import Blueprint, render_template, redirect, url_for, request, flash, send_file
 from flask_login import login_required, current_user
 from flask_wtf.csrf import validate_csrf
-from decorators import admin_required
+from decorators import admin_required, staff_blueprint_guard
 
 from models.cita import Cita
 from models.servicio import Servicio
@@ -22,6 +22,7 @@ from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.facturas")
 facturas_bp = Blueprint("facturas", __name__, url_prefix="/facturas")
+facturas_bp.before_request(staff_blueprint_guard)
 
 
 @facturas_bp.route("/")
@@ -38,7 +39,7 @@ def listar() -> Any:
 @facturas_bp.route("/crear/<int:cita_id>", methods=["GET", "POST"])
 @login_required
 def crear(cita_id: int) -> Any:
-    cita = Cita.query.get_or_404(cita_id)
+    cita = db.get_or_404(Cita, cita_id)
     servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
 
     if request.method == "POST":
@@ -82,7 +83,7 @@ def crear(cita_id: int) -> Any:
 @facturas_bp.route("/crear-desde-ot/<int:ot_id>", methods=["GET", "POST"])
 @login_required
 def crear_desde_ot(ot_id: int) -> Any:
-    ot = OrdenTrabajo.query.get_or_404(ot_id)
+    ot = db.get_or_404(OrdenTrabajo, ot_id)
     servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
 
     if ot.cliente.citas:
@@ -132,7 +133,7 @@ def crear_desde_ot(ot_id: int) -> Any:
 @facturas_bp.route("/ver/<int:id>")
 @login_required
 def ver(id: int) -> Any:
-    factura = Factura.query.get_or_404(id)
+    factura = db.get_or_404(Factura, id)
     config = ConfiguracionTaller.get_config()
     return render_template("facturas/ver.html", factura=factura, config=config)
 
@@ -143,16 +144,16 @@ def pdf(id: int) -> Any:
     try:
         from weasyprint import HTML
     except ImportError:
-        flash("PDF no disponible: weasyprint no está instalado", "danger")
+        flash("PDF no disponible: weasyprint no estÃ¡ instalado", "danger")
         return redirect(url_for("facturas.ver", id=id))
 
-    factura = Factura.query.get_or_404(id)
+    factura = db.get_or_404(Factura, id)
     config = ConfiguracionTaller.get_config()
     html_str = render_template("facturas/pdf.html", factura=factura, config=config)
     try:
         pdf_bytes = HTML(string=html_str, base_url=request.host_url).write_pdf()
     except Exception:
-        flash("Error generando PDF. Verifique la impresión desde el navegador.", "warning")
+        flash("Error generando PDF. Verifique la impresiÃ³n desde el navegador.", "warning")
         return redirect(url_for("facturas.ver", id=id))
 
     import io
@@ -167,7 +168,7 @@ def pdf(id: int) -> Any:
 @facturas_bp.route("/pagar/<int:id>", methods=["GET", "POST"])
 @login_required
 def pagar(id: int) -> Any:
-    factura = Factura.query.get_or_404(id)
+    factura = db.get_or_404(Factura, id)
     if factura.estado == "anulado":
         flash("No se puede pagar una factura anulada", "danger")
         return redirect(url_for("facturas.ver", id=id))
@@ -211,9 +212,9 @@ def anular(id: int) -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validación. Intenta de nuevo.", "danger")
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.ver", id=id))
-    factura = Factura.query.get_or_404(id)
+    factura = db.get_or_404(Factura, id)
     if factura.monto_pagado > 0:
         if request.is_json:
             return json_error(message="No se puede anular: tiene pagos registrados")
@@ -269,10 +270,10 @@ def configuracion() -> Any:
 
         try:
             safe_commit()
-            logger.info("Configuración del taller actualizada")
+            logger.info("ConfiguraciÃ³n del taller actualizada")
             if request.is_json:
-                return json_success(message="Configuración guardada.")
-            flash("Configuración guardada", "success")
+                return json_success(message="ConfiguraciÃ³n guardada.")
+            flash("ConfiguraciÃ³n guardada", "success")
             return redirect(url_for("facturas.configuracion"))
         except Exception as e:
             db.session.rollback()
@@ -293,7 +294,7 @@ def quitar_logo() -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validación. Intenta de nuevo.", "danger")
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.configuracion"))
     config = ConfiguracionTaller.get_config()
     if config.logo_path:
@@ -319,13 +320,13 @@ def eliminar_pago(pago_id: int) -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validación. Intenta de nuevo.", "danger")
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.listar"))
-    pago = PagoFactura.query.get_or_404(pago_id)
+    pago = db.get_or_404(PagoFactura, pago_id)
     factura_id = pago.factura_id
     try:
         db.session.delete(pago)
-        factura = Factura.query.get(factura_id)
+        factura = db.session.get(Factura, factura_id)
         if factura.monto_pagado <= 0:
             factura.estado = "pendiente"
         elif factura.monto_pagado < factura.total:

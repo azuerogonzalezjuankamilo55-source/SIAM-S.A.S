@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Asistencias de Emergencia{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 380px; width: 100%; border-radius: 12px; z-index: 0; }
+    @media (max-width: 768px) { #map { height: 280px; } }
+    .leaflet-container { background: #0F172A; font-family: 'Inter', system-ui, sans-serif; }
+    .pin-sede, .pin-asistencia { border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #fff; box-shadow: 0 4px 14px rgba(2,6,23,.45); }
+    .pin-sede { width: 30px; height: 30px; font-size: 13px; background: #16A34A; color: #fff; }
+    .pin-asistencia { width: 30px; height: 30px; font-size: 13px; background: #EF4444; color: #fff; }
+    .accion-btn { min-width: 92px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" data-aos="fade-up">
+    <div>
+        <h4 class="mb-1"><i class="fa-solid fa-truck-medical me-2 text-danger"></i>Asistencias de Emergencia</h4>
+        <p class="text-secondary mb-0">Solicitudes de asistencia enviadas desde el mapa de sedes</p>
+    </div>
+    <a href="{{ url_for('sedes.index') }}" class="btn btn-sm btn-soft">
+        <i class="fa-solid fa-map-location-dot me-1"></i>Ver mapa de sedes
+    </a>
+</div>
+
+<div class="mb-3 d-flex gap-2 flex-wrap" data-aos="fade-up">
+    <a href="{{ url_for('sedes.asistencias') }}" class="btn btn-sm {{ 'btn-primary' if not estado else 'btn-soft' }}">Todas</a>
+    <a href="{{ url_for('sedes.asistencias', estado='pendiente') }}" class="btn btn-sm {{ 'btn-warning' if estado == 'pendiente' else 'btn-soft' }}">Pendientes</a>
+    <a href="{{ url_for('sedes.asistencias', estado='en_camino') }}" class="btn btn-sm {{ 'btn-info' if estado == 'en_camino' else 'btn-soft' }}">En camino</a>
+    <a href="{{ url_for('sedes.asistencias', estado='atendido') }}" class="btn btn-sm {{ 'btn-success' if estado == 'atendido' else 'btn-soft' }}">Atendidas</a>
+    <a href="{{ url_for('sedes.asistencias', estado='cancelado') }}" class="btn btn-sm {{ 'btn-secondary' if estado == 'cancelado' else 'btn-soft' }}">Canceladas</a>
+</div>
+
+<div class="row g-3 mb-3" data-aos="fade-up">
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header"><strong><i class="fa-solid fa-map me-2 text-primary"></i>Ubicaciones</strong></div>
+            <div class="card-body p-2"><div id="map"></div></div>
+            <div class="card-footer small text-secondary d-flex gap-3 flex-wrap">
+                <span><i class="fa-solid fa-location-dot me-1 text-success"></i>Sedes</span>
+                <span><i class="fa-solid fa-user me-1 text-danger"></i>Solicitudes</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong><i class="fa-solid fa-list-check me-2 text-info"></i>Solicitudes</strong>
+                <span class="badge text-bg-secondary">{{ asistencias|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Recibida</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in asistencias %}
+                            <tr class="fila-asistencia" data-id="{{ a.id }}" data-estado="{{ a.estado }}" data-lat="{{ a.latitud or '' }}" data-lng="{{ a.longitud or '' }}">
+                                <td>#{{ a.id }}</td>
+                                <td>
+                                    <strong>{{ a.cliente_nombre or "—" }}</strong><br>
+                                    <small class="text-secondary"><i class="fa-solid fa-phone me-1"></i>{{ a.telefono or "—" }}</small>
+                                </td>
+                                <td class="text-truncate" style="max-width:180px;">{{ a.descripcion or "Sin descripción" }}</td>
+                                <td>
+                                    <span class="badge text-bg-{{ 'warning' if a.estado == 'pendiente' else 'info' if a.estado == 'en_camino' else 'success' if a.estado == 'atendido' else 'secondary' }}" data-rol="estado">
+                                        {{ a.estado|replace("_", " ")|title }}
+                                    </span>
+                                </td>
+                                <td><small>{{ a.created_at.strftime('%d/%m/%Y %H:%M') if a.created_at }}</small></td>
+                                <td class="text-end">
+                                    {% if a.estado not in ('atendido', 'cancelado') %}
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <button class="btn btn-sm btn-info accion-btn" data-accion="en_camino">En camino</button>
+                                        <button class="btn btn-sm btn-success accion-btn" data-accion="atendido">Atendido</button>
+                                        <button class="btn btn-sm btn-outline-danger accion-btn" data-accion="cancelado">Cancelar</button>
+                                    </div>
+                                    {% else %}
+                                    <small class="text-secondary">Finalizada</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No hay solicitudes{% if estado %} en estado "{{ estado|replace('_', ' ')|title }}"{% endif %}.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+    var sedes = {{ sedes|tojson }};
+    var filas = Array.prototype.slice.call(document.querySelectorAll('.fila-asistencia'));
+    var map = null;
+
+    function initMap() {
+        var puntos = filas.map(function (f) {
+            return { lat: parseFloat(f.getAttribute('data-lat')), lng: parseFloat(f.getAttribute('data-lng')), id: f.getAttribute('data-id'), estado: f.getAttribute('data-estado') };
+        }).filter(function (p) { return !isNaN(p.lat) && !isNaN(p.lng); });
+        var centrado = (puntos.length ? [puntos[0].lat, puntos[0].lng] : (sedes.length ? [sedes[0].latitud, sedes[0].longitud] : [4.7110, -74.0721]));
+        map = L.map('map', { zoomControl: true }).setView(centrado, 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(map);
+        sedes.forEach(function (s) {
+            if (!s.latitud || !s.longitud) return;
+            L.marker([s.latitud, s.longitud], {
+                icon: L.divIcon({ html: '<div class="pin-sede"><i class="fa-solid fa-location-dot"></i></div>', iconSize: [30, 30], iconAnchor: [15, 30], className: 'bg-transparent' })
+            }).addTo(map).bindPopup('<strong>' + s.nombre + '</strong>');
+        });
+        var conLat = puntos.filter(function (p) { return p.estado !== 'cancelado' && p.estado !== 'atendido'; });
+        conLat.forEach(function (p) {
+            var marcador = L.marker([p.lat, p.lng], {
+                icon: L.divIcon({ html: '<div class="pin-asistencia"><i class="fa-solid fa-user"></i></div>', iconSize: [30, 30], iconAnchor: [15, 30], className: 'bg-transparent' })
+            }).addTo(map).bindPopup('Solicitud #' + p.id);
+            marcador.on('click', function () { verFila(p.id); });
+        });
+        if (conLat.length + sedes.filter(function (s) { return s.latitud && s.longitud; }).length > 1) {
+            var bounds = [];
+            conLat.forEach(function (p) { bounds.push([p.lat, p.lng]); });
+            sedes.forEach(function (s) { if (s.latitud && s.longitud) bounds.push([s.latitud, s.longitud]); });
+            map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+        }
+        setTimeout(function () { map.invalidateSize(); }, 300);
+    }
+
+    function verFila(id) {
+        var fila = document.querySelector('.fila-asistencia[data-id="' + id + '"]');
+        if (fila) {
+            fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            fila.style.transition = 'background-color .6s';
+            fila.style.backgroundColor = 'rgba(37,99,235,.15)';
+            setTimeout(function () { fila.style.backgroundColor = ''; }, 1200);
+        }
+    }
+
+    function marcarEstado(id, accion, btn) {
+        if (accion === 'cancelado' && !confirm('¿Cancelar la solicitud #' + id + '?')) return;
+        var original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        fetch('/sedes/asistencias/' + id + '/estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' },
+            body: JSON.stringify({ estado: accion })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            if (data.success) {
+                if (typeof showToast === 'function') showToast(data.message || 'Estado actualizado.', 'success');
+                setTimeout(function () { window.location.reload(); }, 500);
+            } else {
+                if (typeof showToast === 'function') showToast(data.error || 'No se pudo actualizar.', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }).catch(function () {
+            if (typeof showToast === 'function') showToast('Error de conexión.', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = original;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initMap();
+        document.querySelectorAll('[data-accion]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var fila = btn.closest('.fila-asistencia');
+                if (!fila) return;
+                marcarEstado(fila.getAttribute('data-id'), btn.getAttribute('data-accion'), btn);
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

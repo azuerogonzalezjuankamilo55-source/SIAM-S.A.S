@@ -7,8 +7,8 @@
         <small class="text-muted">Resumen general de la operación de tu taller</small>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-soft" onclick="location.reload()">
-            <i class="fa-solid fa-rotate-right"></i> Actualizar
+        <button class="btn btn-sm btn-soft" id="btnRefrescar" onclick="refrescarDashboard()">
+            <i class="fa-solid fa-rotate-right"></i> <span class="refresh-label">Actualizar</span>
         </button>
     </div>
 </div>
@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Clientes</h6>
-                        <h3 class="mb-0 text-white">{{ data.total_clientes }}</h3>
+                        <h3 class="mb-0 text-white" data-refresh="total_clientes">{{ data.total_clientes }}</h3>
                     </div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Vehículos</h6>
-                        <h3 class="mb-0 text-white">{{ data.total_vehiculos }}</h3>
+                        <h3 class="mb-0 text-white" data-refresh="total_vehiculos">{{ data.total_vehiculos }}</h3>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Servicios</h6>
-                        <h3 class="mb-0 text-white">{{ data.total_servicios }}</h3>
+                        <h3 class="mb-0 text-white" data-refresh="total_servicios">{{ data.total_servicios }}</h3>
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Citas</h6>
-                        <h3 class="mb-0 text-white">{{ data.citas_pendientes }}<small class="fs-6 text-white-50"> pend.</small></h3>
+                        <h3 class="mb-0 text-white"><span data-refresh="citas_pendientes">{{ data.citas_pendientes }}</span><small class="fs-6 text-white-50"> pend.</small></h3>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Facturas</h6>
-                        <h3 class="mb-0 text-white">{{ data.total_facturas }}</h3>
+                        <h3 class="mb-0 text-white" data-refresh="total_facturas">{{ data.total_facturas }}</h3>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Inventario</h6>
-                        <h3 class="mb-0 text-white">{{ data.inventario_bajo }}<small class="fs-6 text-white-50"> alertas</small></h3>
+                        <h3 class="mb-0 text-white"><span data-refresh="inventario_bajo">{{ data.inventario_bajo }}</span><small class="fs-6 text-white-50"> alertas</small></h3>
                     </div>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                     </div>
                     <div>
                         <h6 class="text-uppercase small text-white-50 mb-1">Mecánicos</h6>
-                        <h3 class="mb-0 text-white">{{ data.total_mecanicos }}</h3>
+                        <h3 class="mb-0 text-white" data-refresh="total_mecanicos">{{ data.total_mecanicos }}</h3>
                     </div>
                 </div>
             </div>
@@ -151,8 +151,8 @@
                 </span>
                 <div>
                     <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Ingresos del Mes</small>
-                    <h4 class="mb-0 fw-bold">${{ "{:,.0f}".format(data.ingresos_mes) }}</h4>
-                    <small class="text-muted"><i class="fa-solid fa-arrow-trend-up text-success"></i> {{ data.facturas_hoy }} facturas hoy</small>
+                    <h4 class="mb-0 fw-bold">$<span data-refresh="ingresos_mes">{{ "{:,.0f}".format(data.ingresos_mes) }}</span></h4>
+                    <small class="text-muted"><i class="fa-solid fa-arrow-trend-up text-success"></i> <span data-refresh="facturas_hoy">{{ data.facturas_hoy }}</span> facturas hoy</small>
                 </div>
             </div>
         </div>
@@ -165,8 +165,8 @@
                 </span>
                 <div>
                     <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Clientes</small>
-                    <h4 class="mb-0 fw-bold">{{ data.total_clientes }}</h4>
-                    <small class="text-muted"><i class="fa-solid fa-arrow-up text-success"></i> +{{ data.clientes_nuevos_mes }} este mes</small>
+                    <h4 class="mb-0 fw-bold" data-refresh="total_clientes">{{ data.total_clientes }}</h4>
+                    <small class="text-muted"><i class="fa-solid fa-arrow-up text-success"></i> +<span data-refresh="clientes_nuevos_mes">{{ data.clientes_nuevos_mes }}</span> este mes</small>
                 </div>
             </div>
         </div>
@@ -179,7 +179,7 @@
                 </span>
                 <div>
                     <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Vehículos</small>
-                    <h4 class="mb-0 fw-bold">{{ data.total_vehiculos }}</h4>
+                    <h4 class="mb-0 fw-bold" data-refresh="total_vehiculos">{{ data.total_vehiculos }}</h4>
                     <small class="text-muted"><i class="fa-solid fa-truck text-info"></i> Registrados</small>
                 </div>
             </div>
@@ -193,8 +193,8 @@
                 </span>
                 <div>
                     <small class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:.5px;">Por Cobrar</small>
-                    <h4 class="mb-0 fw-bold">${{ "{:,.0f}".format(data.por_cobrar) }}</h4>
-                    <small class="text-muted">{{ data.facturas_pendientes }} facturas sin pagar</small>
+                    <h4 class="mb-0 fw-bold">$<span data-refresh="por_cobrar">{{ "{:,.0f}".format(data.por_cobrar) }}</span></h4>
+                    <small class="text-muted"><span data-refresh="facturas_pendientes">{{ data.facturas_pendientes }}</span> facturas sin pagar</small>
                 </div>
             </div>
         </div>
@@ -208,7 +208,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">Citas Hoy</h6>
-                    <h3 class="text-warning mb-0">{{ data.citas_hoy }}</h3>
+                    <h3 class="text-warning mb-0" data-refresh="citas_hoy">{{ data.citas_hoy }}</h3>
                 </div>
                 <i class="fa-solid fa-calendar-check fs-2 text-warning"></i>
             </div>
@@ -219,7 +219,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">OT Activas</h6>
-                    <h3 class="text-info mb-0">{{ data.ordenes_activas }}</h3>
+                    <h3 class="text-info mb-0" data-refresh="ordenes_activas">{{ data.ordenes_activas }}</h3>
                 </div>
                 <i class="fa-solid fa-screwdriver-wrench fs-2 text-info"></i>
             </div>
@@ -230,7 +230,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">Stock Bajo</h6>
-                    <h3 class="text-danger mb-0">{{ data.inventario_bajo }}</h3>
+                    <h3 class="text-danger mb-0" data-refresh="inventario_bajo">{{ data.inventario_bajo }}</h3>
                 </div>
                 <i class="fa-solid fa-triangle-exclamation fs-2 text-danger"></i>
             </div>
@@ -256,7 +256,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">Ingresos Hoy</h6>
-                    <h3 class="text-success mb-0">${{ "{:,.0f}".format(data.ingresos_hoy) }}</h3>
+                    <h3 class="text-success mb-0">$<span data-refresh="ingresos_hoy">{{ "{:,.0f}".format(data.ingresos_hoy) }}</span></h3>
                     <small class="text-muted">Facturación del día</small>
                 </div>
                 <i class="fa-solid fa-coins fs-2 text-success"></i>
@@ -268,7 +268,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">Ticket Promedio</h6>
-                    <h3 class="text-primary mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h3>
+                    <h3 class="text-primary mb-0">$<span data-refresh="ticket_promedio">{{ "{:,.0f}".format(data.ticket_promedio) }}</span></h3>
                     <small class="text-muted">Por factura emitida</small>
                 </div>
                 <i class="fa-solid fa-receipt fs-2 text-primary"></i>
@@ -280,7 +280,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">OT Retrasadas</h6>
-                    <h3 class="text-warning mb-0">{{ data.ot_retrasadas_count }}</h3>
+                    <h3 class="text-warning mb-0" data-refresh="ot_retrasadas_count">{{ data.ot_retrasadas_count }}</h3>
                     <small class="text-muted">Pasada la fecha estimada</small>
                 </div>
                 <i class="fa-solid fa-bell fs-2 text-warning"></i>
@@ -292,7 +292,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="text-uppercase small text-muted mb-1">Citas Completadas</h6>
-                    <h3 class="text-success mb-0">{{ "{:.0f}".format(data.tasa_completacion_citas) }}%</h3>
+                    <h3 class="text-success mb-0"><span data-refresh="tasa_completacion_citas">{{ "{:.0f}".format(data.tasa_completacion_citas) }}</span>%</h3>
                     <small class="text-muted">Del total de citas</small>
                 </div>
                 <i class="fa-solid fa-circle-check fs-2 text-success"></i>
@@ -469,6 +469,45 @@
     {% endif %}
 </div>
 
+{% if data.asistencias_activas %}
+<div class="row g-3 mb-3">
+    <div class="col-12" data-aos="fade-up">
+        <div class="card h-100 border-danger">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fa-solid fa-truck-ramp-box me-2"></i>Asistencias de Emergencia Activas</h6>
+                <a href="{{ url_for('sedes.index') }}" class="btn btn-sm btn-light">Ver mapa</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>Teléfono</th>
+                                <th>Descripción</th>
+                                <th>Recibida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in data.asistencias_activas %}
+                            <tr>
+                                <td>#{{ a.id }}</td>
+                                <td>{{ a.cliente_nombre or "—" }}</td>
+                                <td>{{ a.telefono or "—" }}</td>
+                                <td class="text-truncate" style="max-width:280px;">{{ a.descripcion or "Sin descripción" }}</td>
+                                <td>{{ a.created_at.strftime('%d/%m/%Y %H:%M') if a.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% if data.ot_retrasadas or data.ot_en_proceso %}
 <div class="row g-3 mb-3">
     {% if data.ot_retrasadas %}
@@ -575,6 +614,33 @@
     </div>
 </div>
 {% endif %}
+
+<div class="row g-3 mt-1">
+    <div class="col-12" data-aos="fade-up">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fa-solid fa-bolt me-2 text-primary"></i>Actividad en tiempo real</h6>
+                <small class="text-muted"><i class="fa-solid fa-sync fa-fw" id="actividadSpinner"></i> <span id="actividadEstado">actualizado</span></small>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush" id="actividadLista">
+                    {% for e in eventos %}
+                    <li class="list-group-item d-flex align-items-center gap-3" data-tipo="{{ e.tipo }}">
+                        <span class="actividad-icon"><i class="fa-solid fa-{{ e.icono }}"></i></span>
+                        <div class="flex-grow-1">
+                            <span class="text-body">{{ e.texto }}</span>
+                            <small class="text-muted d-block">{{ e.cuando }}</small>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    {% if not eventos %}
+                    <li class="list-group-item text-muted text-center py-4" id="actividadVacio">Aún no hay actividad registrada.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -717,6 +783,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     {% endif %}
+
+    window.refrescarDashboard = function () {
+        var btn = document.getElementById('btnRefrescar');
+        var label = btn.querySelector('.refresh-label');
+        var icon = btn.querySelector('i');
+        var original = label ? label.textContent : '';
+        if (icon) icon.classList.add('fa-spin');
+        if (label) label.textContent = ' Actualizando...';
+        btn.disabled = true;
+        fetch('/dashboard/api/resumen', {
+            headers: { 'Accept': 'application/json' }
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            document.querySelectorAll('[data-refresh]').forEach(function (el) {
+                var k = el.getAttribute('data-refresh');
+                if (d[k] == null) return;
+                el.textContent = Number(d[k]).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+            });
+            if (typeof showToast === 'function') showToast('Datos actualizados.', 'success');
+        }).catch(function () {
+            if (typeof showToast === 'function') showToast('No se pudo actualizar.', 'danger');
+        }).finally(function () {
+            if (icon) icon.classList.remove('fa-spin');
+            if (label) label.textContent = original;
+            btn.disabled = false;
+        });
+    };
+
+    var actividadLista = document.getElementById('actividadLista');
+    var actividadEstado = document.getElementById('actividadEstado');
+    var actividadSpinner = document.getElementById('actividadSpinner');
+
+    function pintarActividad(eventos) {
+        if (!actividadLista) return;
+        if (!eventos || !eventos.length) {
+            actividadLista.innerHTML = '<li class="list-group-item text-muted text-center py-4">Aún no hay actividad registrada.</li>';
+            return;
+        }
+        var html = '';
+        eventos.forEach(function (e) {
+            html += '<li class="list-group-item d-flex align-items-center gap-3" data-tipo="' + e.tipo + '">' +
+                '<span class="actividad-icon"><i class="fa-solid fa-' + e.icono + '"></i></span>' +
+                '<div class="flex-grow-1"><span class="text-body">' + e.texto + '</span>' +
+                '<small class="text-muted d-block">' + e.cuando + '</small></div></li>';
+        });
+        actividadLista.innerHTML = html;
+    }
+
+    function cargarActividad() {
+        if (!actividadLista) return;
+        if (actividadSpinner) actividadSpinner.classList.add('fa-spin');
+        if (actividadEstado) actividadEstado.textContent = 'actualizando...';
+        fetch('/dashboard/api/actividad', {
+            headers: { 'Accept': 'application/json' }
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            pintarActividad(d.eventos);
+            if (actividadEstado) actividadEstado.textContent = 'actualizado';
+        }).catch(function () {
+            if (actividadEstado) actividadEstado.textContent = 'sin conexión';
+        }).finally(function () {
+            if (actividadSpinner) actividadSpinner.classList.remove('fa-spin');
+        });
+    }
+
+    if (actividadLista) setInterval(cargarActividad, 20000);
 
 });
 </script>

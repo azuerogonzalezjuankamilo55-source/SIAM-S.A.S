@@ -12,6 +12,7 @@ from models.factura import Factura, FacturaDetalle
 from models.orden_trabajo import OrdenTrabajo
 from models.pago_factura import PagoFactura
 from models.historial_vehiculo import HistorialVehiculo
+from models.recordatorio import Recordatorio
 
 logger = logging.getLogger("siam.portal_service")
 
@@ -24,6 +25,7 @@ class PortalData:
     ordenes_activas: list = field(default_factory=list)
     facturas_pendientes: list = field(default_factory=list)
     historial_reciente: list = field(default_factory=list)
+    proximos_recordatorios: list = field(default_factory=list)
 
 
 class PortalService:
@@ -101,6 +103,20 @@ class PortalService:
             .filter(Vehiculo.cliente_id == cliente.id)
             .order_by(HistorialVehiculo.fecha.desc(), HistorialVehiculo.created_at.desc())
             .limit(10)
+            .all()
+        )
+
+        vehiculos_ids = [
+            v.id for v in Vehiculo.query.filter_by(cliente_id=cliente.id).all()
+        ]
+        data.proximos_recordatorios = (
+            Recordatorio.query
+            .filter(
+                Recordatorio.vehiculo_id.in_(vehiculos_ids) if vehiculos_ids else False,
+                Recordatorio.estado.in_(["pendiente", "enviado"]),
+            )
+            .order_by(Recordatorio.fecha_programada.asc())
+            .limit(5)
             .all()
         )
 

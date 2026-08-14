@@ -11,9 +11,11 @@ from database.commit import safe_commit, json_success, json_error
 from forms import ServicioForm
 from exceptions import BusinessRuleException
 from services.image_service import ImageService, ImageError
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.servicios")
 servicios_bp = Blueprint("servicios", __name__, url_prefix="/servicios")
+servicios_bp.before_request(staff_blueprint_guard)
 
 
 def _procesar_imagen(form, servicio) -> None:
@@ -69,7 +71,7 @@ def crear() -> Any:
 @servicios_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    servicio = Servicio.query.get_or_404(id)
+    servicio = db.get_or_404(Servicio, id)
     form = ServicioForm(obj=servicio)
     if form.validate_on_submit():
         try:
@@ -98,11 +100,11 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF inválido"), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF invÃ¡lido"), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("servicios.listar"))
     try:
-        servicio = Servicio.query.get_or_404(id)
+        servicio = db.get_or_404(Servicio, id)
         db.session.delete(servicio)
         safe_commit("No se pudo eliminar.")
         logger.info("Servicio eliminado: %s", servicio.nombre)

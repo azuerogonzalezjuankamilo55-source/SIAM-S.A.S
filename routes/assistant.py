@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, jsonify, session
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from services.assistant_service import AssistantService
 from database.commit import safe_commit, json_success, json_error
@@ -16,8 +16,13 @@ assistant_bp = Blueprint("assistant", __name__, url_prefix="/asistente")
 def index():
     if "chat_history" not in session:
         session["chat_history"] = [
-            {"rol": "asistente", "texto": "¡Hola! Soy el asistente de SIAM. ¿En qué puedo ayudarte?", "hora": datetime.now().strftime("%H:%M")}
+            {
+                "rol": "asistente",
+                "texto": "\u00bfEn qu\u00e9 podemos ayudarte?\n\nPuedes preguntarme sobre mec\u00e1nica, mantenimiento, motos, carros, servicios o asistencia.",
+                "hora": datetime.now().strftime("%H:%M"),
+            }
         ]
+        session.modified = True
     return render_template("asistente/index.html", historial=session["chat_history"])
 
 
@@ -37,7 +42,7 @@ def ask():
         hora = datetime.now().strftime("%H:%M")
         session["chat_history"].append({"rol": "usuario", "texto": mensaje, "hora": hora})
 
-        respuesta = AssistantService.process_message(mensaje)
+        respuesta = AssistantService.process_message(mensaje, usuario=current_user)
         session["chat_history"].append({"rol": "asistente", "texto": respuesta["text"], "hora": datetime.now().strftime("%H:%M")})
 
         if len(session["chat_history"]) > 50:

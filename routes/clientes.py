@@ -9,9 +9,11 @@ from models.cliente import Cliente
 from database.db import db
 from forms import ClienteForm
 from database.commit import safe_commit, json_success, json_error
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.clientes")
 clientes_bp = Blueprint("clientes", __name__, url_prefix="/clientes")
+clientes_bp.before_request(staff_blueprint_guard)
 
 
 @clientes_bp.route("/")
@@ -53,7 +55,7 @@ def crear() -> Any:
 @clientes_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    cliente = Cliente.query.get_or_404(id)
+    cliente = db.get_or_404(Cliente, id)
     form = ClienteForm(obj=cliente)
     if form.validate_on_submit():
         form.populate_obj(cliente)
@@ -82,10 +84,10 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF inválido"}), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF invÃ¡lido"}), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("clientes.listar"))
-    cliente = Cliente.query.get_or_404(id)
+    cliente = db.get_or_404(Cliente, id)
     db.session.delete(cliente)
     try:
         safe_commit()

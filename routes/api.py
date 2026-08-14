@@ -23,12 +23,31 @@ def recibir_ubicacion() -> Any:
     latitud = data.get("latitude")
     longitud = data.get("longitude")
     precision = data.get("accuracy")
+    descripcion = (data.get("descripcion") or "").strip()[:500]
 
     if latitud is None or longitud is None:
         return jsonify({"success": False, "error": "Latitud y longitud requeridas"}), 400
 
-    logger.info("Ubicación recibida de usuario %s: lat=%s, lng=%s", current_user.id, latitud, longitud)
-    return jsonify({"success": True, "message": "Ubicación recibida correctamente."})
+    try:
+        asistencia = AsistenciaEmergencia(
+            usuario_id=current_user.id,
+            descripcion=descripcion or "Solicitud de asistencia por ubicación compartida",
+            latitud=latitud,
+            longitud=longitud,
+            precision_metros=precision,
+            estado="pendiente",
+        )
+        db.session.add(asistencia)
+        safe_commit()
+        logger.info("Asistencia creada desde ubicación: #%s (usuario %s)", asistencia.id, current_user.id)
+        return json_success(
+            {"id": asistencia.id, "estado": asistencia.estado},
+            "Ubicación recibida. SIAM está buscando asistencia cercana.",
+        )
+    except Exception as e:
+        db.session.rollback()
+        logger.error("Error al guardar ubicación/asistencia", exc_info=True)
+        return json_error("No se pudo guardar tu ubicación. Intenta nuevamente.")
 
 
 @api_bp.route("/asistencia", methods=["GET", "POST"])
@@ -69,3 +88,23 @@ def asistencia() -> Any:
         db.session.rollback()
         logger.error("Error al crear asistencia", exc_info=True)
         return json_error("No se pudo crear la solicitud de asistencia.")
+
+
+@api_bp.route("/asistencia/<int:asistencia_id>/cancelar", methods=["POST"])
+@login_required
+def cancelar_asistencia(asistencia_id: int) -> Any:
+    asistencia = AsistenciaEmergencia.query.filter_by(
+        id=asistencia_id, usuario_id=current_user.id
+    ).first()
+    if not asistencia:
+        return json_error("Solicitud de asistencia no encontrada.", status=404)
+    if asistencia.estado in ("atendido", "cancelado"):
+        return json_error("Esta solicitud ya no se puede cancelar.", status=400)
+    asistencia.estado = "cancelado"
+    try:
+        safe_commit()
+        logger.info("Asistencia #%s cancelada por usuario %s", asistencia.id, current_user.id)
+        return json_success({"id": asistencia.id, "estado": asistencia.estado}, "Asistencia cancelada.")
+    except Exception:
+        db.session.rollback()
+        return json_error("No se pudo cancelar la solicitud de asistencia.")

@@ -71,6 +71,13 @@
     <style>
         .hero-section { min-height: 100vh; padding: 130px 0 90px; }
         @media (max-width: 768px) { .hero-section { padding: 100px 0 50px; min-height: auto; } }
+        .quick-access-card { transition: all .2s ease; border-color: rgba(148,163,184,.2); background: rgba(15,23,42,.6); }
+        .quick-access-card:hover { border-color: rgba(37,99,235,.55) !important; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(2,6,23,.4); }
+        @media (prefers-reduced-motion: reduce) {
+            .landing-icon-bubble { animation: none !important; }
+            .quick-access-card, .landing-icon-bubble { transition: none !important; }
+            [data-aos] { transition: none !important; opacity: 1 !important; transform: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -93,6 +100,7 @@
             <div class="collapse navbar-collapse" id="navbarLanding">
                 <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
                     <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#experiencia">Experiencia</a></li>
                     <li class="nav-item"><a class="nav-link" href="#ventajas">Ventajas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#porque">Por qué SIAM</a></li>
                     <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
@@ -118,20 +126,23 @@
             <div class="row align-items-center g-5">
                 <div class="col-lg-6" data-aos="fade-right">
                     <span class="section-eyebrow mb-3">
-                        <i class="fa-solid fa-gears me-1"></i> Plataforma Profesional
+                        <i class="fa-solid fa-gears me-1"></i> SIAM · Taller y asistencia automotriz
                     </span>
                     <h1 class="display-4 fw-bold mb-3">
-                        Gestiona tu <span class="text-gradient">taller mecánico</span> con inteligencia
+                        Tu vehículo en <span class="text-gradient">buenas manos</span>
                     </h1>
                     <p class="lead mb-4">
-                        SIAM es el sistema integral que automatiza la administración de tu taller: clientes, vehículos, servicios, citas, facturación e inventario. Todo en un solo lugar.
+                        Diagnóstico, mantenimiento, reparación y asistencia automotriz desde un solo lugar.
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
                         <a href="{{ url_for('auth.register') }}" class="btn btn-lg px-4 landing-cta shadow">
-                            <i class="fa-solid fa-rocket me-2"></i>Comenzar Gratis
+                            <i class="fa-solid fa-wrench me-2"></i>Solicitar servicio
                         </a>
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">
-                            <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar Sesión
+                        <a href="{{ url_for('sedes.index') }}" class="btn btn-outline-danger btn-lg px-4">
+                            <i class="fa-solid fa-truck-medical me-2"></i>Estoy varado
+                        </a>
+                        <a href="#servicios" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fa-solid fa-arrow-down me-2"></i>Conocer SIAM
                         </a>
                     </div>
                     <div class="d-flex gap-4 mt-4 text-secondary small">
@@ -150,6 +161,129 @@
                             <i class="fa-solid fa-gears text-primary"></i>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Todo lo que necesitas para tu vehículo -->
+    <section class="py-5" id="vehiculos">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3">Nuestro servicio</span>
+                <h2 class="fw-bold mt-3">Todo lo que necesitas para <span class="text-primary">tu vehículo</span></h2>
+                <p class="text-secondary">Desde el diagnóstico hasta la asistencia en la vía, lo tenemos cubierto</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="0">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-car fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Automóviles</h6>
+                        <small class="text-secondary">Mantenimiento y reparación de tu carro</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="50">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-motorcycle fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Motocicletas</h6>
+                        <small class="text-secondary">Servicio especializado para tu moto</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-truck fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Vehículos de carga</h6>
+                        <small class="text-secondary">Camiones y vehículos pesados</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="150">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-stethoscope fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Diagnóstico</h6>
+                        <small class="text-secondary">Detección de fallas con precisión</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-screwdriver-wrench fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Reparación</h6>
+                        <small class="text-secondary">Repuestos y mano de obra calificada</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="250">
+                    <div class="card h-100 feature-card text-center p-3 p-md-4">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-truck-medical fs-1"></i></div>
+                        <h6 class="fw-semibold mb-1">Asistencia</h6>
+                        <small class="text-secondary">Ayuda en carretera si estás varado</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ¿Qué necesitas? -->
+    <section class="py-5 bg-dark bg-opacity-50" id="necesitas">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3"><i class="fa-solid fa-bolt me-1"></i> Accesos rápidos</span>
+                <h2 class="fw-bold mt-3">¿Qué <span class="text-primary">necesitas</span>?</h2>
+                <p class="text-secondary">Elige la opción que más se ajuste a lo que buscas hoy</p>
+            </div>
+            <div class="row g-3 justify-content-center">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="0">
+                    <a href="{{ url_for('assistant.index') }}" class="text-decoration-none quick-access-card card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-wrench fs-3"></i></div>
+                            <div>
+                                <h6 class="mb-1">🔧 Necesito mantenimiento</h6>
+                                <small class="text-secondary">Recibe una guía de mantenimiento según tu vehículo</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="50">
+                    <a href="{{ url_for('sedes.index') }}" class="text-decoration-none quick-access-card card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-truck-medical fs-3"></i></div>
+                            <div>
+                                <h6 class="mb-1">🚨 Estoy varado</h6>
+                                <small class="text-secondary">Comparte tu ubicación y solicita asistencia</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <a href="{% if current_user.is_authenticated %}{{ url_for('portal.solicitar_cita') }}{% else %}{{ url_for('auth.login') }}{% endif %}" class="text-decoration-none quick-access-card card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-calendar-check fs-3"></i></div>
+                            <div>
+                                <h6 class="mb-1">📅 Quiero agendar una cita</h6>
+                                <small class="text-secondary">Aparta tu visita al taller en pocos pasos</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="150">
+                    <a href="{{ url_for('sedes.index') }}" class="text-decoration-none quick-access-card card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-location-dot fs-3"></i></div>
+                            <div>
+                                <h6 class="mb-1">📍 Buscar una sede</h6>
+                                <small class="text-secondary">Encuentra la sede más cercana con distancias</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <a href="{{ url_for('assistant.index') }}" class="text-decoration-none quick-access-card card h-100">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-robot fs-3"></i></div>
+                            <div>
+                                <h6 class="mb-1">💬 Preguntar al asistente</h6>
+                                <small class="text-secondary">Resuelve tus dudas de mecánica con IA</small>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -228,8 +362,57 @@
         </div>
     </section>
 
+    <!-- Experiencia: mapa y asistencia -->
+    <section class="py-5 bg-dark bg-opacity-50" id="experiencia">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Nueva Experiencia</span>
+                <h2 class="fw-bold mt-3">Asistencia en tiempo real con <span class="text-primary">IA</span></h2>
+                <p class="text-secondary">Lleva tu taller a donde estén tus clientes: mapa de sedes, solicitud de asistencia y un asistente inteligente 24/7</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="0">
+                    <div class="card h-100 feature-card p-4">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-map-location-dot fs-1"></i>
+                        </div>
+                        <h5>Mapa de Sedes</h5>
+                        <p class="text-secondary small mb-0">Encuentra la sede más cercana con direcciones, horarios y servicios de cada punto de tu red.</p>
+                        <a href="{{ url_for('sedes.index') }}" class="btn btn-sm btn-soft mt-3 align-self-start">
+                            <i class="fa-solid fa-location-dot me-1"></i>Ver sedes
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 feature-card p-4">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-truck-ramp-box fs-1"></i>
+                        </div>
+                        <h5>Asistencia en Emergencia</h5>
+                        <p class="text-secondary small mb-0">¿Varado en la vía? Solicita asistencia con tu ubicación en un clic y el taller te localiza al instante.</p>
+                        <a href="{{ url_for('sedes.index') }}" class="btn btn-sm btn-soft mt-3 align-self-start">
+                            <i class="fa-solid fa-truck-pickup me-1"></i>Solicitar asistencia
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100 feature-card p-4">
+                        <div class="benefit-icon mb-3">
+                            <i class="fa-solid fa-robot fs-1"></i>
+                        </div>
+                        <h5>Asistente IA</h5>
+                        <p class="text-secondary small mb-0">Resuelve dudas de mecánica, agenda citas y orienta a tus clientes con inteligencia artificial 24/7.</p>
+                        <a href="{{ url_for('assistant.index') }}" class="btn btn-sm btn-soft mt-3 align-self-start">
+                            <i class="fa-solid fa-comment-dots me-1"></i>Probar asistente
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Ventajas -->
-    <section class="py-5 bg-dark bg-opacity-50" id="ventajas">
+    <section class="py-5" id="ventajas">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
                 <span class="section-eyebrow mb-3">Ventajas</span>
@@ -603,6 +786,16 @@
     <script>
     document.documentElement.classList.add('aos-ready');
     AOS.init({ duration: 600, once: true, offset: 50 });
+    window.addEventListener('load', function () {
+        setTimeout(function () {
+            if (typeof AOS === 'undefined' || !document.documentElement.classList.contains('aos-ready')) {
+                document.querySelectorAll('[data-aos]').forEach(function (el) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                });
+            }
+        }, 1500);
+    });
     if (typeof gsap !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         gsap.from('.hero-section .display-4', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' });
         gsap.from('.hero-section .lead', { opacity: 0, y: 30, duration: 0.8, delay: 0.2, ease: 'power3.out' });

@@ -5,11 +5,12 @@ from typing import Any
 
 from flask import Blueprint, flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
-from decorators import admin_required
+from decorators import admin_required, staff_blueprint_guard
 from services.reporte_service import ReporteService
 
 logger = logging.getLogger("siam.routes.reportes")
 reportes_bp = Blueprint("reportes", __name__, url_prefix="/reportes")
+reportes_bp.before_request(staff_blueprint_guard)
 
 
 def _filtros():

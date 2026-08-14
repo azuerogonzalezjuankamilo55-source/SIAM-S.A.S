@@ -8,9 +8,11 @@ from models.vehiculo import Vehiculo
 from models.cliente import Cliente
 from services.inteligencia_service import InteligenciaService
 from database.commit import json_success, json_error
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.inteligencia")
 ia_bp = Blueprint("ia", __name__, url_prefix="/ia")
+ia_bp.before_request(staff_blueprint_guard)
 
 
 @ia_bp.route("/")

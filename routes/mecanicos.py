@@ -11,9 +11,11 @@ from database.commit import safe_commit, json_success, json_error
 from forms import MecanicoForm
 from exceptions import BusinessRuleException
 from services.image_service import ImageService, ImageError
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.mecanicos")
 mecanicos_bp = Blueprint("mecanicos", __name__, url_prefix="/mecanicos")
+mecanicos_bp.before_request(staff_blueprint_guard)
 
 
 def _procesar_foto(form, mecanico) -> None:
@@ -52,10 +54,10 @@ def crear() -> Any:
             _procesar_foto(form, mecanico)
             db.session.add(mecanico)
             safe_commit()
-            logger.info("Mecánico creado: %s", mecanico.nombre)
+            logger.info("MecÃ¡nico creado: %s", mecanico.nombre)
             if request.is_json:
                 return json_success(message="Creado correctamente.")
-            flash("Mecánico registrado", "success")
+            flash("MecÃ¡nico registrado", "success")
             return redirect(url_for("mecanicos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -68,17 +70,17 @@ def crear() -> Any:
 @mecanicos_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    mecanico = Mecanico.query.get_or_404(id)
+    mecanico = db.get_or_404(Mecanico, id)
     form = MecanicoForm(obj=mecanico)
     if form.validate_on_submit():
         try:
             form.populate_obj(mecanico)
             _procesar_foto(form, mecanico)
             safe_commit()
-            logger.info("Mecánico actualizado: %s", mecanico.nombre)
+            logger.info("MecÃ¡nico actualizado: %s", mecanico.nombre)
             if request.is_json:
                 return json_success(message="Actualizado correctamente.")
-            flash("Mecánico actualizado", "success")
+            flash("MecÃ¡nico actualizado", "success")
             return redirect(url_for("mecanicos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -97,17 +99,17 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF inválido"), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF invÃ¡lido"), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("mecanicos.listar"))
     try:
-        mecanico = Mecanico.query.get_or_404(id)
+        mecanico = db.get_or_404(Mecanico, id)
         db.session.delete(mecanico)
         safe_commit("No se pudo eliminar.")
-        logger.info("Mecánico eliminado: %s", mecanico.nombre)
+        logger.info("MecÃ¡nico eliminado: %s", mecanico.nombre)
         if request.is_json:
             return json_success(message="Eliminado correctamente.")
-        flash("Mecánico eliminado", "success")
+        flash("MecÃ¡nico eliminado", "success")
     except Exception as e:
         db.session.rollback()
         if request.is_json:

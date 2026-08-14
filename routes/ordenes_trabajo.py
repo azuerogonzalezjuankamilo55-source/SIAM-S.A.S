@@ -20,9 +20,11 @@ from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
 from services.orden_trabajo_service import OrdenTrabajoService, NIVELES_COMBUSTIBLE
 from exceptions import BusinessRuleException, NotFoundException
+from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.ordenes_trabajo")
 ordenes_trabajo_bp = Blueprint("ordenes_trabajo", __name__, url_prefix="/ordenes-trabajo")
+ordenes_trabajo_bp.before_request(staff_blueprint_guard)
 
 
 def _generar_numero() -> str:
@@ -102,7 +104,7 @@ def crear() -> Any:
 @ordenes_trabajo_bp.route("/ver/<int:id>")
 @login_required
 def ver(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     inventario = Inventario.query.filter_by(activo=True).order_by(Inventario.nombre).all()
     return render_template(
         "ordenes_trabajo/ver.html", orden=orden, estados=ESTADOS_OT,
@@ -113,7 +115,7 @@ def ver(id: int) -> Any:
 @ordenes_trabajo_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     form = OrdenTrabajoForm(obj=orden)
     clientes = Cliente.query.order_by(Cliente.nombre).all()
     vehiculos = Vehiculo.query.order_by(Vehiculo.placa).all()
@@ -147,11 +149,11 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF inválido"), 403
-        flash("Error de validación. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF invÃ¡lido"), 403
+        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
         return redirect(url_for("ordenes_trabajo.listar"))
     try:
-        orden = OrdenTrabajo.query.get_or_404(id)
+        orden = db.get_or_404(OrdenTrabajo, id)
         db.session.delete(orden)
         safe_commit("No se pudo eliminar.")
         logger.info("OT eliminada: %s", orden.numero)
@@ -169,14 +171,14 @@ def eliminar(id: int) -> Any:
 @ordenes_trabajo_bp.route("/cambiar-estado/<int:id>", methods=["POST"])
 @login_required
 def cambiar_estado(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     estado_nuevo = request.form.get("estado", "")
     observacion = request.form.get("observacion", "")
 
     if estado_nuevo not in ESTADOS_OT:
         if request.is_json:
-            return json_error(message="Estado inválido")
-        flash("Estado inválido", "danger")
+            return json_error(message="Estado invÃ¡lido")
+        flash("Estado invÃ¡lido", "danger")
         return redirect(url_for("ordenes_trabajo.ver", id=id))
 
     try:
@@ -215,7 +217,7 @@ def obtener_vehiculos(cliente_id: int) -> Any:
 @ordenes_trabajo_bp.route("/items/agregar/<int:id>", methods=["POST"])
 @login_required
 def agregar_item(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     descripcion = request.form.get("descripcion", "").strip()
     tiempo = request.form.get("tiempo_minutos") or None
     try:
@@ -255,7 +257,7 @@ def toggle_item(item_id: int) -> Any:
 @login_required
 def eliminar_item(item_id: int) -> Any:
     try:
-        item = OrdenTrabajoItem.query.get_or_404(item_id)
+        item = db.get_or_404(OrdenTrabajoItem, item_id)
         orden_id = item.orden_trabajo_id
         OrdenTrabajoService.eliminar_item(item_id)
         if request.is_json:
@@ -273,7 +275,7 @@ def eliminar_item(item_id: int) -> Any:
 @ordenes_trabajo_bp.route("/repuestos/agregar/<int:id>", methods=["POST"])
 @login_required
 def agregar_repuesto(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     inventario_id = request.form.get("inventario_id")
     cantidad = request.form.get("cantidad", "1")
     precio = request.form.get("precio_unitario", "0")
@@ -302,7 +304,7 @@ def agregar_repuesto(id: int) -> Any:
 @login_required
 def eliminar_repuesto(repuesto_id: int) -> Any:
     try:
-        repuesto = OrdenTrabajoRepuesto.query.get_or_404(repuesto_id)
+        repuesto = db.get_or_404(OrdenTrabajoRepuesto, repuesto_id)
         orden_id = repuesto.orden_trabajo_id
         OrdenTrabajoService.eliminar_repuesto(
             repuesto_id,
@@ -323,7 +325,7 @@ def eliminar_repuesto(repuesto_id: int) -> Any:
 @ordenes_trabajo_bp.route("/fotos/agregar/<int:id>", methods=["POST"])
 @login_required
 def agregar_foto(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     archivo = request.files.get("foto")
     descripcion = request.form.get("descripcion", "")
     try:
@@ -346,7 +348,7 @@ def agregar_foto(id: int) -> Any:
 @login_required
 def eliminar_foto(foto_id: int) -> Any:
     try:
-        foto = OrdenTrabajoFoto.query.get_or_404(foto_id)
+        foto = db.get_or_404(OrdenTrabajoFoto, foto_id)
         orden_id = foto.orden_trabajo_id
         OrdenTrabajoService.eliminar_foto(foto_id, upload_root=current_app.root_path)
         if request.is_json:
@@ -364,7 +366,7 @@ def eliminar_foto(foto_id: int) -> Any:
 @ordenes_trabajo_bp.route("/firma/<int:id>", methods=["POST"])
 @login_required
 def subir_firma(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     tipo = request.form.get("tipo", "")
     archivo = request.files.get("firma")
     try:
@@ -385,7 +387,7 @@ def subir_firma(id: int) -> Any:
 @ordenes_trabajo_bp.route("/entregar/<int:id>", methods=["POST"])
 @login_required
 def entregar(id: int) -> Any:
-    orden = OrdenTrabajo.query.get_or_404(id)
+    orden = db.get_or_404(OrdenTrabajo, id)
     kms = request.form.get("kms_salida") or None
     combustible = request.form.get("nivel_combustible_salida") or None
     try:

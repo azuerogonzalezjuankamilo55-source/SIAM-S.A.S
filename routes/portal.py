@@ -13,8 +13,20 @@ from forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm
 from services.portal_service import PortalService
 from services.recordatorio_service import RecordatorioService
 
+from decorators import STAFF_ROLES
+
 logger = logging.getLogger("siam.routes.portal")
 portal_bp = Blueprint("portal", __name__, url_prefix="/portal")
+
+
+def _portal_guard():
+    """El portal es área del cliente: el personal del taller se envía al dashboard."""
+    if current_user.is_authenticated and current_user.rol in STAFF_ROLES:
+        return redirect(url_for("dashboard.index"))
+    return None
+
+
+portal_bp.before_request(_portal_guard)
 
 
 def _cliente_actual() -> Cliente | None:

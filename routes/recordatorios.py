@@ -6,12 +6,13 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from database.db import db
 from database.commit import safe_commit
-from decorators import admin_required
+from decorators import admin_required, staff_blueprint_guard
 from models import Vehiculo, Recordatorio, ESTADOS_RECORDATORIO, TIPOS_RECORDATORIO
 from services.recordatorio_service import RecordatorioService
 
 logger = logging.getLogger("siam.routes.recordatorios")
 recordatorios_bp = Blueprint("recordatorios", __name__, url_prefix="/recordatorios")
+recordatorios_bp.before_request(staff_blueprint_guard)
 
 
 @recordatorios_bp.route("/")
