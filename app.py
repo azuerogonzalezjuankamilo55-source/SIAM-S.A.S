@@ -84,7 +84,7 @@ def configure_security_headers(app: Flask) -> None:
         response.headers["X-Powered-By"] = "SIAM"
         if not app.debug:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-            response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com; img-src 'self' data:; font-src 'self' cdn.jsdelivr.net; connect-src 'self'"
+            response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com cdnjs.cloudflare.com fonts.googleapis.com; img-src 'self' data:; font-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.gstatic.com; connect-src 'self'"
         return response
 
 
