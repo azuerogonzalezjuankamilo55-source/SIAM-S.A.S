@@ -40,6 +40,14 @@ class Config:
     RATELIMIT_DEFAULT: str = "200/hour;20/minute"
     JSON_AS_ASCII: bool = False
 
+    # Límites de subida de archivos (MB), configurables por variables de entorno.
+    FILE_MAX_IMAGE_MB: float = float(os.getenv("FILE_MAX_IMAGE_MB", "5"))
+    FILE_MAX_VIDEO_MB: float = float(os.getenv("FILE_MAX_VIDEO_MB", "100"))
+    FILE_MAX_PDF_MB: float = float(os.getenv("FILE_MAX_PDF_MB", "15"))
+    MAX_CONTENT_LENGTH: int = int(
+        float(os.getenv("MAX_CONTENT_LENGTH_MB", "110")) * 1024 * 1024
+    )
+
 
 class DevelopmentConfig(Config):
     DEBUG: bool = True
@@ -56,7 +64,9 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SAMESITE: str = "Lax"
     PERMANENT_SESSION_LIFETIME: timedelta = timedelta(hours=8)
     PREFERRED_URL_SCHEME: str = "https"
-    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024
+    MAX_CONTENT_LENGTH: int = int(
+        float(os.getenv("MAX_CONTENT_LENGTH_MB", "110")) * 1024 * 1024
+    )
     SEND_FILE_MAX_AGE_DEFAULT: timedelta = timedelta(hours=1)
     RATELIMIT_STORAGE_URI: str = os.getenv(
         "RATELIMIT_STORAGE_URI", "memory://"

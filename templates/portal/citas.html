@@ -16,6 +16,7 @@
                         <th>#</th>
                         <th>Fecha</th>
                         <th>Hora</th>
+                        <th>Sede</th>
                         <th>Vehículo</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -27,6 +28,7 @@
                         <td>{{ c.id }}</td>
                         <td>{{ c.fecha }}</td>
                         <td>{{ c.hora }}</td>
+                        <td>{{ c.sede.nombre if c.sede else "—" }}</td>
                         <td>{{ c.vehiculo.placa }} - {{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
                         <td>
                             <span class="badge bg-{{ {
@@ -49,7 +51,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">No tienes citas registradas</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted">No tienes citas registradas</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

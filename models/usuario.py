@@ -20,10 +20,14 @@ class Usuario(UserMixin, db.Model):
     activo: bool = db.Column(db.Boolean, default=True)
     foto_path: str | None = db.Column(db.String(300))
     cliente_id: int | None = db.Column(db.Integer, db.ForeignKey("clientes.id"), nullable=True)
+    last_access_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     cliente: "Cliente | None" = db.relationship(
-        "Cliente", backref="usuario", uselist=False, lazy="joined"
+        "Cliente",
+        backref=db.backref("usuario", uselist=False, lazy="joined"),
+        uselist=False,
+        lazy="joined",
     )
 
     @property

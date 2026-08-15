@@ -26,3 +26,11 @@ from models.recordatorio import (
     TIPOS_MANTENIMIENTO,
     TIPOS_MANTENIMIENTO_LABELS,
 )
+from models.notificacion import Notificacion, TIPOS_NOTIFICACION, TIPOS_NOTIFICACION_LABELS
+from models.adjunto import Adjunto, TIPOS_ADJUNTO
+from models.sede import Sede
+from models.cotizacion import (
+    Cotizacion, ESTADOS_COTIZACION, ESTADOS_COTIZACION_LABELS,
+)
+from models.cotizacion_item import CotizacionItem
+from models.garantia import Garantia, ESTADOS_GARANTIA, ESTADOS_GARANTIA_LABELS

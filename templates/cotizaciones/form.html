@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if cotizacion else "Nueva" }} Cotización{% endblock %}
+{% block content %}
+<h4 class="mb-4">{{ "Editar" if cotizacion else "Nueva" }} Cotización</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Cliente *</label>
+                    <select name="cliente_id" id="cliente_id" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        {% for cl in clientes %}
+                        <option value="{{ cl.id }}" {{ "selected" if cotizacion and cotizacion.cliente_id == cl.id else "" }}>{{ cl.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Vehículo *</label>
+                    <select name="vehiculo_id" id="vehiculo_id" class="form-select" required>
+                        <option value="">Primero seleccione un cliente</option>
+                        {% if cotizacion %}
+                        <option value="{{ cotizacion.vehiculo_id }}" selected>{{ cotizacion.vehiculo.marca }} {{ cotizacion.vehiculo.modelo }} - {{ cotizacion.vehiculo.placa }}</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Sede</label>
+                    <select name="sede_id" class="form-select">
+                        {% for s in sedes %}
+                        <option value="{{ s.id }}" {{ "selected" if cotizacion and cotizacion.sede_id == s.id else "" }}>{{ s.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Días de validez</label>
+                    <input type="number" name="validez_dias" class="form-control" min="1" max="365" value="{{ cotizacion.validez_dias if cotizacion else 15 }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Descripción / alcance</label>
+                    <textarea name="descripcion" class="form-control" rows="3">{{ cotizacion.descripcion if cotizacion else '' }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="{{ url_for('cotizaciones.listar') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('cliente_id')?.addEventListener('change', function() {
+    const vehSelect = document.getElementById('vehiculo_id');
+    vehSelect.innerHTML = '<option value="">Cargando...</option>';
+    fetch('/cotizaciones/obtener-vehiculos/' + this.value)
+        .then(r => r.json())
+        .then(data => {
+            vehSelect.innerHTML = '<option value="">Seleccione un vehículo</option>';
+            data.forEach(v => {
+                vehSelect.innerHTML += `<option value="${v.id}">${v.texto}</option>`;
+            });
+        });
+});
+</script>
+{% endblock %}

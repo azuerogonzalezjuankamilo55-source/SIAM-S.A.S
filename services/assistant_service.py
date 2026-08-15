@@ -232,7 +232,7 @@ class AssistantService:
     CLIENT_GENERIC: set[str] = {"consultar_inventario", "repuestos"}
 
     @staticmethod
-    def process_message(message: str, usuario=None) -> dict:
+    def process_message(message: str, usuario=None, contexto: dict | None = None) -> dict:
         msg_lower = message.lower().strip()
         logger.debug("Procesando mensaje: %s", msg_lower)
 
@@ -240,11 +240,26 @@ class AssistantService:
 
         es_cliente = bool(usuario and getattr(usuario, "es_cliente", False))
 
+        if intent == "pregunta_sistema":
+            contextual = AssistantService._resolver_contexto(msg_lower, contexto or {})
+            if contextual:
+                return contextual
+
         if es_cliente and intent in AssistantService.BUSINESS_ONLY:
             return AssistantService._informacion_administrativa()
         if es_cliente and intent in AssistantService.CLIENT_GENERIC:
             return AssistantService._respuesta_repuestos_cliente()
 
+        resp = AssistantService._dispatch(intent, entities, usuario)
+        acciones = AssistantService._acciones_para(intent, usuario)
+        if acciones:
+            resp = dict(resp)
+            resp["acciones"] = acciones
+        resp["intent"] = intent
+        return resp
+
+    @staticmethod
+    def _dispatch(intent: str, entities: dict, usuario=None) -> dict:
         if intent == "saludo":
             return AssistantService._handle_saludo()
         elif intent == "facturacion":
@@ -321,6 +336,99 @@ class AssistantService:
             return AssistantService._repuestos(entities)
         else:
             return AssistantService._no_entiendo()
+
+    @staticmethod
+    def _resolver_contexto(msg_lower: str, contexto: dict) -> dict | None:
+        """Resuelve respuestas cortas apoyándose en el intent anterior."""
+        ultimo_intent = contexto.get("ultimo_intent")
+        if not ultimo_intent:
+            return None
+
+        afirmativo = re.search(
+            r"\b(si|sí|sip|yes|claro|dale|ok|okey|okay|perfecto|listo|confirmo|adelante|vamos|bueno|hagamoslo|hagámoslo)\b",
+            msg_lower,
+        )
+        negativo = re.search(r"\b(no|no\s+gracias|nada|olvida|cancelar|no\s+por\s+ahora)\b", msg_lower)
+
+        if afirmativo and not negativo:
+            return AssistantService._continuar_anterior(ultimo_intent)
+        if negativo:
+            return {
+                "text": "No hay problema. \u00bfHay algo m\u00e1s en lo que pueda ayudarte?",
+                "tipo": "texto",
+                "intent": ultimo_intent,
+            }
+
+        if re.search(r"\b(cuanto|cuesta|precio|valor|cobran|tarifa)\b", msg_lower):
+            return {
+                "text": (
+                    "El valor depende del servicio y del veh\u00edculo. "
+                    "Te recomiendo agendar una cita para una revisi\u00f3n "
+                    "y ah\u00ed te confirmamos el precio exacto sin compromiso."
+                ),
+                "tipo": "texto",
+                "intent": ultimo_intent,
+            }
+
+        if re.search(r"\b(donde|d\u00f3nde|ubicacion|ubicaci\u00f3n|queda|direccion|direcci\u00f3n|sede|sede)\b", msg_lower):
+            return {
+                "text": (
+                    "Puedes ver todas nuestras sedes y calcular la m\u00e1s cercana "
+                    "desde el bot\u00f3n **\u00abUsar mi ubicaci\u00f3n\u00bb** en **Sedes y Asistencia**."
+                ),
+                "tipo": "texto",
+                "intent": ultimo_intent,
+            }
+
+        return None
+
+    @staticmethod
+    def _continuar_anterior(ultimo_intent: str) -> dict:
+        mensajes = {
+            "cita_agendar": "\u00a1Perfecto! Puedes agendar tu cita de inmediato.",
+            "sedes_mas_cercana": "\u00a1Genial! Ve a **Sedes y Asistencia** y pulsa **\u00abUsar mi ubicaci\u00f3n\u00bb**.",
+            "ubicaciones": "\u00a1Genial! Ve a **Sedes y Asistencia** para ver todas nuestras sedes.",
+            "asistencia_emergencia": "\u00a1Claro! Desde **Sedes y Asistencia** puedes solicitar asistencia o compartir tu ubicaci\u00f3n.",
+            "asistencia_con_ubicacion": "\u00a1Perfecto! Comparte tu ubicaci\u00f3n desde el bot\u00f3n de abajo.",
+            "mantenimiento_preventivo": "\u00a1Excelente! Agendar una revisi\u00f3n es el mejor primer paso.",
+            "precio_servicio": "\u00a1Perfecto! Agenda una cita y te confirmamos el precio exacto.",
+            "vehiculos_carga_pesada": "\u00a1Genial! Podemos atenderte. Agenda una cita para revisar tu veh\u00edculo.",
+            "repuestos": "\u00a1Perfecto! Contacta la sede m\u00e1s cercana para confirmar disponibilidad.",
+            "facturacion": "\u00a1De acuerdo! Revisa tus facturas y pagos en tu portal.",
+        }
+        return {
+            "text": mensajes.get(ultimo_intent, "\u00a1Perfecto! \u00bfEn qu\u00e9 m\u00e1s puedo ayudarte?"),
+            "tipo": "texto",
+            "intent": ultimo_intent,
+        }
+
+    @staticmethod
+    def _acciones_para(intent: str, usuario=None) -> list[dict]:
+        es_cliente = bool(usuario and getattr(usuario, "es_cliente", False))
+        ruta_cita = "/portal/citas/solicitar" if es_cliente else "/citas/"
+        mapa: dict[str, list[dict]] = {
+            "cita_agendar": [{"texto": "Agendar cita", "url": ruta_cita, "icono": "fa-calendar-plus"}],
+            "sedes_mas_cercana": [{"texto": "Ver sedes", "url": "/sedes/", "icono": "fa-location-dot"}],
+            "ubicaciones": [{"texto": "Ver sedes", "url": "/sedes/", "icono": "fa-location-dot"}],
+            "asistencia_emergencia": [{"texto": "Solicitar asistencia", "url": "/sedes/", "icono": "fa-truck-medical"}],
+            "asistencia_con_ubicacion": [{"texto": "Compartir ubicaci\u00f3n", "tipo": "ubicacion", "icono": "fa-location-dot"}],
+            "mantenimiento_preventivo": [{"texto": "Agendar revisi\u00f3n", "url": ruta_cita, "icono": "fa-calendar-check"}],
+            "precio_servicio": [{"texto": "Agendar cita", "url": ruta_cita, "icono": "fa-calendar-plus"}],
+            "servicios_disponibles": [
+                {"texto": "Mis servicios" if es_cliente else "Cat\u00e1logo", "url": "/portal/historial" if es_cliente else "/servicios/", "icono": "fa-screwdriver-wrench"}
+            ],
+            "vehiculos_carga_pesada": [{"texto": "Agendar cita", "url": ruta_cita, "icono": "fa-calendar-plus"}],
+            "repuestos": [{"texto": "Ver sedes", "url": "/sedes/", "icono": "fa-location-dot"}],
+            "facturacion": (
+                [
+                    {"texto": "Mis facturas", "url": "/portal/facturas", "icono": "fa-file-lines"},
+                    {"texto": "Mis pagos", "url": "/portal/pagos", "icono": "fa-credit-card"},
+                ]
+                if es_cliente
+                else [{"texto": "M\u00f3dulo Facturas", "url": "/facturas/", "icono": "fa-file-invoice-dollar"}]
+            ),
+        }
+        return mapa.get(intent, [])
 
     @staticmethod
     def _classify_intent(msg: str) -> tuple:
@@ -446,16 +554,29 @@ class AssistantService:
 
     @staticmethod
     def _handle_saludo() -> dict:
+        texto = (
+            "\u00a1Hola! Soy el asistente virtual de SIAM. Puedo ayudarte con:\n\n"
+            "\U0001f527 **Mec\u00e1nica y mantenimiento**: carros, motos y veh\u00edculos de carga\n"
+            "\U0001f50d **Diagn\u00f3stico**: s\u00edntomas como que no prende, se calienta, echa humo o vibra\n"
+            "\U0001f4cd **Sedes y asistencia**: sede m\u00e1s cercana o si est\u00e1s varado\n"
+            "\U0001f4c5 **Citas**: agendar o consultar servicios\n"
+            "\U0001f4cb **Gesti\u00f3n**: buscar clientes, veh\u00edculos, facturas e inventario (personal autorizado)\n\n"
+            "\u00bfEn qu\u00e9 puedo ayudarte?"
+        )
+        try:
+            from models.configuracion_taller import ConfiguracionTaller
+
+            config = ConfiguracionTaller.query.first()
+            if config:
+                if config.ia_mensaje_bienvenida:
+                    texto = config.ia_mensaje_bienvenida
+                else:
+                    nombre = config.ia_nombre or "SIAM"
+                    texto = texto.replace("asistente virtual de SIAM", f"asistente virtual de {nombre}")
+        except Exception:
+            pass
         return {
-            "text": (
-                "\u00a1Hola! Soy el asistente virtual de SIAM. Puedo ayudarte con:\n\n"
-                "\U0001f527 **Mec\u00e1nica y mantenimiento**: carros, motos y veh\u00edculos de carga\n"
-                "\U0001f50d **Diagn\u00f3stico**: s\u00edntomas como que no prende, se calienta, echa humo o vibra\n"
-                "\U0001f4cd **Sedes y asistencia**: sede m\u00e1s cercana o si est\u00e1s varado\n"
-                "\U0001f4c5 **Citas**: agendar o consultar servicios\n"
-                "\U0001f4cb **Gesti\u00f3n**: buscar clientes, veh\u00edculos, facturas e inventario (personal autorizado)\n\n"
-                "\u00bfEn qu\u00e9 puedo ayudarte?"
-            ),
+            "text": texto,
             "tipo": "texto",
         }
 
@@ -836,7 +957,7 @@ class AssistantService:
     def _contar_ot() -> dict:
         total = OrdenTrabajo.query.count()
         activas = OrdenTrabajo.query.filter(
-            OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion"])
+            OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "pruebas"])
         ).count()
         listas = OrdenTrabajo.query.filter(OrdenTrabajo.estado == "listo_entrega").count()
         entregadas = OrdenTrabajo.query.filter(OrdenTrabajo.estado == "entregado").count()

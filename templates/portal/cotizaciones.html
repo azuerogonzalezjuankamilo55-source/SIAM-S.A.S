@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Mis Cotizaciones{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Mis Cotizaciones</h4>
+    <span class="text-muted">{{ cotizaciones|length }} en total</span>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Vehículo</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cotizaciones %}
+                    <tr>
+                        <td>{{ c.numero }}</td>
+                        <td>{{ c.vehiculo.marca }} {{ c.vehiculo.modelo }} ({{ c.vehiculo.placa }})</td>
+                        <td>{{ c.created_at.strftime('%d/%m/%Y') if c.created_at else "—" }}</td>
+                        <td class="text-nowrap">$ {{ "{:,.2f}".format(c.total) }}</td>
+                        <td>
+                            <span class="badge bg-{{
+                                {'pendiente': 'warning', 'aprobada': 'success', 'rechazada': 'danger', 'convertida': 'primary', 'vencida': 'secondary'}[c.estado]
+                            }}">{{ labels[c.estado] }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('portal.cotizacion_detalle', cotizacion_id=c.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted">No tienes cotizaciones</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

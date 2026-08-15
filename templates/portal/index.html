@@ -83,11 +83,11 @@
 
 {% set ot_progreso = {
     'recibido': 15, 'diagnostico': 35, 'esperando_repuestos': 55,
-    'en_reparacion': 75, 'listo_entrega': 100, 'entregado': 100
+    'en_reparacion': 75, 'pruebas': 90, 'listo_entrega': 100, 'entregado': 100
 } %}
 {% set ot_color = {
     'recibido': 'success', 'diagnostico': 'primary', 'esperando_repuestos': 'warning',
-    'en_reparacion': 'warning', 'listo_entrega': 'success', 'entregado': 'success'
+    'en_reparacion': 'warning', 'pruebas': 'info', 'listo_entrega': 'success', 'entregado': 'success'
 } %}
 
 <div class="row g-3">
@@ -128,7 +128,7 @@
             <div class="card-body">
                 {% if data.ordenes_activas %}
                 <div class="small text-secondary mb-3 d-flex flex-wrap gap-2">
-                    <span>🟢 Recibido</span><span>🔵 Diagnóstico</span><span>🟡 En reparación</span><span>🟣 Esperando repuesto</span><span>🟢 Listo para entregar</span>
+                    <span>🟢 Recibido</span><span>🔵 Diagnóstico</span><span>🟡 En reparación</span><span>🟣 Esperando repuesto</span><span>🔷 En pruebas</span><span>🟢 Listo para entregar</span>
                 </div>
                 {% for o in data.ordenes_activas %}
                 <div class="mb-3">

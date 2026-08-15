@@ -51,27 +51,3 @@ def index() -> Any:
 @login_required
 def api_actividad() -> Any:
     return jsonify({"eventos": DashboardService.get_actividad(10)})
-
-
-@dashboard_bp.route("/api/stats")
-@login_required
-def api_stats() -> Any:
-    data = DashboardService.get_data()
-    return jsonify({
-        "total_clientes": data.total_clientes,
-        "total_vehiculos": data.total_vehiculos,
-        "total_mecanicos": data.total_mecanicos,
-        "citas_hoy": data.citas_hoy,
-        "citas_pendientes": data.citas_pendientes,
-        "ordenes_activas": data.ordenes_activas,
-        "ordenes_listas": data.ordenes_listas,
-        "facturas_pendientes": data.facturas_pendientes,
-        "facturas_hoy": data.facturas_hoy,
-        "inventario_bajo": data.inventario_bajo,
-        "ingresos_hoy": data.ingresos_hoy,
-        "ingresos_mes": data.ingresos_mes,
-        "por_cobrar": data.por_cobrar,
-        "ticket_promedio": data.ticket_promedio,
-        "ot_retrasadas": data.ot_retrasadas_count,
-        "tasa_completacion_citas": round(data.tasa_completacion_citas, 1),
-    })

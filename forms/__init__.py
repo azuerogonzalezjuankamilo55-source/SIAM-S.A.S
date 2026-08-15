@@ -9,6 +9,14 @@ from forms.inventario_forms import InventarioForm, MovimientoInventarioForm, Cat
 from forms.orden_trabajo_forms import OrdenTrabajoForm, CambiarEstadoForm
 from forms.taller_forms import TallerConfigForm
 from forms.portal_forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm
+from forms.cotizacion_forms import CotizacionForm, CotizacionItemForm, GarantiaForm
+from forms.configuracion_forms import (
+    EmpresaConfigForm,
+    AparienciaForm,
+    CitasConfigForm,
+    NotificacionesConfigForm,
+    IAConfigForm,
+)
 
 __all__ = [
     "LoginForm",
@@ -30,4 +38,12 @@ __all__ = [
     "SolicitarCitaForm",
     "PerfilForm",
     "CambiarPasswordForm",
+    "CotizacionForm",
+    "CotizacionItemForm",
+    "GarantiaForm",
+    "EmpresaConfigForm",
+    "AparienciaForm",
+    "CitasConfigForm",
+    "NotificacionesConfigForm",
+    "IAConfigForm",
 ]

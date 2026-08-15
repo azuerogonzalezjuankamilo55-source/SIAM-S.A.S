@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Cotización {{ cotizacion.numero }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Cotización {{ cotizacion.numero }}</h4>
+    <a href="{{ url_for('portal.cotizaciones') }}" class="btn btn-secondary btn-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <h6 class="text-muted text-uppercase small">Vehículo</h6>
+                <p class="mb-0">{{ cotizacion.vehiculo.marca }} {{ cotizacion.vehiculo.modelo }} - {{ cotizacion.vehiculo.placa }}</p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-muted text-uppercase small">Estado</h6>
+                <span class="badge bg-{{
+                    {'pendiente': 'warning', 'aprobada': 'success', 'rechazada': 'danger', 'convertida': 'primary', 'vencida': 'secondary'}[cotizacion.estado]
+                }}">{{ labels[cotizacion.estado] }}</span>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-muted text-uppercase small">Validez</h6>
+                <p class="mb-0">{{ cotizacion.validez_dias }} días</p>
+            </div>
+        </div>
+        {% if cotizacion.descripcion %}
+        <hr>
+        <h6 class="text-muted text-uppercase small">Descripción</h6>
+        <p class="mb-0">{{ cotizacion.descripcion }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th class="text-center">Cant.</th>
+                    <th class="text-end">P. Unitario</th>
+                    <th class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cotizacion.items %}
+                <tr>
+                    <td>{{ item.descripcion }}</td>
+                    <td class="text-center">{{ item.cantidad }}</td>
+                    <td class="text-end">$ {{ "{:,.2f}".format(item.precio_unitario) }}</td>
+                    <td class="text-end">$ {{ "{:,.2f}".format(item.subtotal) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-muted">Sin ítems</td></tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><th colspan="3" class="text-end">Subtotal</th><th class="text-end">$ {{ "{:,.2f}".format(cotizacion.subtotal) }}</th></tr>
+                <tr><th colspan="3" class="text-end">IVA</th><th class="text-end">$ {{ "{:,.2f}".format(cotizacion.iva) }}</th></tr>
+                <tr><th colspan="3" class="text-end">Total</th><th class="text-end fs-5">$ {{ "{:,.2f}".format(cotizacion.total) }}</th></tr>
+            </tfoot>
+        </table>
+
+        {% if cotizacion.estado == "pendiente" %}
+        <div class="d-flex gap-2 justify-content-end">
+            <form method="POST" action="{{ url_for('portal.cotizacion_responder', cotizacion_id=cotizacion.id, estado='rechazada') }}" data-confirm-form="¿Rechazar esta cotización?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-xmark me-1"></i>Rechazar</button>
+            </form>
+            <form method="POST" action="{{ url_for('portal.cotizacion_responder', cotizacion_id=cotizacion.id, estado='aprobada') }}" data-confirm-form="¿Aprobar esta cotización?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Aprobar</button>
+            </form>
+        </div>
+        {% elif cotizacion.estado == "aprobada" %}
+        <div class="text-end">
+            <span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i>Has aprobado esta cotización</span>
+        </div>
+        {% elif cotizacion.estado == "rechazada" %}
+        <div class="text-end">
+            <span class="text-danger fw-bold"><i class="fa-solid fa-circle-xmark me-1"></i>Rechazaste esta cotización</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

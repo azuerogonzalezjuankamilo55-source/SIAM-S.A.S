@@ -19,6 +19,7 @@ ESTADOS_OT = [
     "diagnostico",
     "esperando_repuestos",
     "en_reparacion",
+    "pruebas",
     "listo_entrega",
     "entregado",
 ]
@@ -77,6 +78,7 @@ class OrdenTrabajo(db.Model):
             "diagnostico": "Diagnóstico",
             "esperando_repuestos": "Esperando Repuestos",
             "en_reparacion": "En Reparación",
+            "pruebas": "En Pruebas",
             "listo_entrega": "Listo para Entrega",
             "entregado": "Entregado",
         }

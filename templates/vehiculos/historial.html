@@ -3,9 +3,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Historial del vehículo</h4>
-    <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> Imprimir
+        </button>
+        <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+    </div>
 </div>
 
 <div class="card mb-3">
@@ -19,6 +24,56 @@
                     {{ vehiculo.cliente.nombre }} · Año: {{ vehiculo.anio or "—" }} · Color: {{ vehiculo.color or "—" }}
                     {% if vehiculo.vin %} · VIN: {{ vehiculo.vin }}{% endif %}
                 </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+        <div class="card h-100">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-primary"></i>
+                    <span class="small text-muted">Visitas</span>
+                </div>
+                <strong class="fs-4">{{ resumen.visitas }}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card h-100">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-gauge-high text-warning"></i>
+                    <span class="small text-muted">Último km</span>
+                </div>
+                <strong class="fs-4">{{ resumen.ultimo_kilometraje|default(0) }} <small class="text-muted fs-6">km</small></strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card h-100">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-money-bill-trend-up text-success"></i>
+                    <span class="small text-muted">Invertido</span>
+                </div>
+                <strong class="fs-4">${{ "{:,.0f}".format(resumen.total_gastado) }}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card h-100">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-screwdriver-wrench text-info"></i>
+                    <span class="small text-muted">Último servicio</span>
+                </div>
+                <strong class="fs-6">{{ resumen.ultimo_servicio_label or "Sin registros" }}</strong>
+                {% if resumen.ultimo_servicio_fecha %}
+                <div class="small text-muted">{{ resumen.ultimo_servicio_fecha }}</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -101,6 +156,36 @@
         </div>
     </div>
     <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header"><strong>Próximos mantenimientos</strong></div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for m in mantenimientos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            <div class="small fw-semibold">{{ m.label }}</div>
+                            {% if m.proximo_kilometraje %}
+                            <small class="text-muted">En {{ m.proximo_kilometraje }} km{% if m.ultima_fecha %} · última: {{ m.ultima_fecha }}{% endif %}</small>
+                            {% else %}
+                            <small class="text-muted">Sin datos de kilometraje</small>
+                            {% endif %}
+                        </div>
+                        {% if m.estado == "urgente" %}
+                        <span class="badge bg-danger">Urgente</span>
+                        {% elif m.estado == "proximo" %}
+                        <span class="badge bg-warning text-dark">Próximo</span>
+                        {% elif m.estado == "al_dia" %}
+                        <span class="badge bg-success">Al día</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Sin datos</span>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted small text-center py-3">Sin sugerencias disponibles.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
         <div class="card">
             <div class="card-header"><strong>Agregar registro manual</strong></div>
             <div class="card-body">

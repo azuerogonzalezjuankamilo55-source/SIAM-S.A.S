@@ -109,6 +109,7 @@ class TestPortalCitas:
         assert resp.status_code == 200
         resp = client.post("/portal/citas/solicitar", data={
             "vehiculo_id": v.id,
+            "sede_id": 1,
             "fecha": "2026-09-01",
             "hora": "10:00",
             "descripcion": "Ruido en motor",

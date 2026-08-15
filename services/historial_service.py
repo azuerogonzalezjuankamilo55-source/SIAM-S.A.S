@@ -1,6 +1,7 @@
 import logging
 from datetime import date
-from typing import TYPE_CHECKING
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from database.db import db
 from models.historial_vehiculo import HistorialVehiculo
@@ -33,6 +34,16 @@ KEYWORD_MAP = [
     ("reparac", "reparacion"),
     ("mantenim", "mantenimiento"),
 ]
+
+# Intervalos sugeridos de mantenimiento preventivo por kilometraje (km).
+INTERVALOS_MANTENIMIENTO: dict[str, dict[str, Any]] = {
+    "cambio_aceite": {"label": "Cambio de aceite y filtro", "intervalo_km": 5000},
+    "cambio_frenos": {"label": "Revisión de frenos", "intervalo_km": 15000},
+    "balanceo": {"label": "Balanceo de llantas", "intervalo_km": 10000},
+    "alineacion": {"label": "Alineación", "intervalo_km": 10000},
+    "llantas": {"label": "Rotación de neumáticos", "intervalo_km": 40000},
+    "bateria": {"label": "Prueba de batería", "intervalo_km": 30000},
+}
 
 
 class HistorialService:
@@ -169,3 +180,84 @@ class HistorialService:
             descripcion=descripcion,
             creado_por=creado_por,
         )
+
+    @staticmethod
+    def get_resumen(vehiculo_id: int) -> dict[str, Any]:
+        """Ficha técnica del vehículo: resumen de actividad, gasto y estado."""
+        registros = HistorialService.get_historial_vehiculo(vehiculo_id)
+
+        conteo: dict[str, int] = {}
+        for r in registros:
+            conteo[r.tipo] = conteo.get(r.tipo, 0) + 1
+
+        ultimo_kilometraje = max(
+            (r.kilometraje for r in registros if r.kilometraje), default=None
+        )
+
+        total_gastado: Decimal = Decimal("0")
+        try:
+            from models.factura import Factura
+            from models.cita import Cita
+
+            total_gastado = db.session.query(
+                db.func.coalesce(db.func.sum(Factura.total), 0)
+            ).join(Cita, Cita.id == Factura.cita_id).filter(
+                Cita.vehiculo_id == vehiculo_id,
+                Factura.estado != "anulado",
+            ).scalar() or Decimal("0")
+        except Exception:
+            logger.warning("No se pudo calcular total gastado del vehículo %s", vehiculo_id, exc_info=True)
+
+        visitas = conteo.get("factura", 0) + conteo.get("cita", 0)
+        ultimo = registros[0] if registros else None
+
+        return {
+            "total_registros": len(registros),
+            "visitas": visitas,
+            "ultimo_kilometraje": ultimo_kilometraje,
+            "ultimo_servicio": ultimo.tipo if ultimo else None,
+            "ultimo_servicio_label": ultimo.tipo_label if ultimo else None,
+            "ultimo_servicio_fecha": ultimo.fecha if ultimo else None,
+            "total_gastado": total_gastado,
+            "conteo_por_tipo": conteo,
+        }
+
+    @staticmethod
+    def get_proximos_mantenimientos(vehiculo_id: int) -> list[dict[str, Any]]:
+        """Sugerencias de mantenimiento preventivo según kilometraje y última vez."""
+        registros = HistorialService.get_historial_vehiculo(vehiculo_id)
+        ultimo_km = max(
+            (r.kilometraje for r in registros if r.kilometraje), default=None
+        )
+
+        ultimo_por_tipo: dict[str, HistorialVehiculo] = {}
+        for r in registros:
+            if r.tipo in INTERVALOS_MANTENIMIENTO and r.tipo not in ultimo_por_tipo:
+                ultimo_por_tipo[r.tipo] = r
+
+        resultado: list[dict[str, Any]] = []
+        for tipo, cfg in INTERVALOS_MANTENIMIENTO.items():
+            ultimo = ultimo_por_tipo.get(tipo)
+            km_base = ultimo.kilometraje if ultimo and ultimo.kilometraje else ultimo_km
+            proximo = km_base + cfg["intervalo_km"] if km_base is not None else None
+            restante = proximo - ultimo_km if (proximo is not None and ultimo_km is not None) else None
+
+            if restante is None:
+                estado = "sin_datos"
+            elif restante <= 500:
+                estado = "urgente"
+            elif restante <= 1500:
+                estado = "proximo"
+            else:
+                estado = "al_dia"
+
+            resultado.append({
+                "tipo": tipo,
+                "label": cfg["label"],
+                "ultima_fecha": ultimo.fecha if ultimo else None,
+                "ultimo_kilometraje": km_base,
+                "proximo_kilometraje": proximo,
+                "restante_km": restante,
+                "estado": estado,
+            })
+        return resultado

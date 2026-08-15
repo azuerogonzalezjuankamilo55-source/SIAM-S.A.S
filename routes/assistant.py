@@ -15,10 +15,19 @@ assistant_bp = Blueprint("assistant", __name__, url_prefix="/asistente")
 @login_required
 def index():
     if "chat_history" not in session:
+        bienvenida = "\u00bfEn qu\u00e9 podemos ayudarte?\n\nPuedes preguntarme sobre mec\u00e1nica, mantenimiento, motos, carros, servicios o asistencia."
+        try:
+            from models.configuracion_taller import ConfiguracionTaller
+
+            config = ConfiguracionTaller.query.first()
+            if config and config.ia_mensaje_bienvenida:
+                bienvenida = config.ia_mensaje_bienvenida
+        except Exception:
+            pass
         session["chat_history"] = [
             {
                 "rol": "asistente",
-                "texto": "\u00bfEn qu\u00e9 podemos ayudarte?\n\nPuedes preguntarme sobre mec\u00e1nica, mantenimiento, motos, carros, servicios o asistencia.",
+                "texto": bienvenida,
                 "hora": datetime.now().strftime("%H:%M"),
             }
         ]
@@ -42,7 +51,9 @@ def ask():
         hora = datetime.now().strftime("%H:%M")
         session["chat_history"].append({"rol": "usuario", "texto": mensaje, "hora": hora})
 
-        respuesta = AssistantService.process_message(mensaje, usuario=current_user)
+        contexto = session.get("chat_contexto") or {}
+        respuesta = AssistantService.process_message(mensaje, usuario=current_user, contexto=contexto)
+        session["chat_contexto"] = {"ultimo_intent": respuesta.get("intent") or contexto.get("ultimo_intent")}
         session["chat_history"].append({"rol": "asistente", "texto": respuesta["text"], "hora": datetime.now().strftime("%H:%M")})
 
         if len(session["chat_history"]) > 50:
@@ -57,6 +68,8 @@ def ask():
         "respuesta": respuesta["text"],
         "tipo": respuesta.get("tipo", "texto"),
         "items": respuesta.get("items"),
+        "acciones": respuesta.get("acciones") or [],
+        "intent": respuesta.get("intent"),
     })
 
 

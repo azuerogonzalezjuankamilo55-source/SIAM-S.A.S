@@ -15,3 +15,7 @@ from routes.portal import portal_bp
 from routes.inteligencia import ia_bp
 from routes.recordatorios import recordatorios_bp
 from routes.reportes import reportes_bp
+from routes.notificaciones import notificaciones_bp
+from routes.cotizaciones import cotizaciones_bp
+from routes.garantias import garantias_bp
+from routes.configuracion import configuracion_bp

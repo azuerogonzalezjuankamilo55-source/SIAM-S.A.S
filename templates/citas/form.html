@@ -35,6 +35,24 @@
                     </select>
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label">Sede</label>
+                    <select name="sede_id" class="form-select">
+                        <option value="">Sin sede</option>
+                        {% for s in sedes %}
+                        <option value="{{ s.id }}" {{ "selected" if cita and cita.sede_id == s.id else "" }}>{{ s.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Servicio</label>
+                    <select name="servicio_id" class="form-select">
+                        <option value="">Sin servicio específico</option>
+                        {% for sv in servicios %}
+                        <option value="{{ sv.id }}" {{ "selected" if cita and cita.servicio_id == sv.id else "" }}>{{ sv.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">Fecha *</label>
                     <input type="date" name="fecha" class="form-control" value="{{ cita.fecha if cita else '' }}" required>
                 </div>

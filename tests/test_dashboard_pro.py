@@ -115,11 +115,11 @@ class TestDashboardRoutes:
         assert resp.status_code == 200
         assert b"Por Cobrar" in resp.data
 
-    def test_api_stats(self, client, db):
+    def test_api_resumen(self, client, db):
         _crear_admin(db)
         _login(client)
-        resp = client.get("/dashboard/api/stats")
+        resp = client.get("/dashboard/api/resumen")
         assert resp.status_code == 200
         assert "por_cobrar" in resp.json
         assert "ticket_promedio" in resp.json
-        assert "ot_retrasadas" in resp.json
+        assert "ot_retrasadas_count" in resp.json

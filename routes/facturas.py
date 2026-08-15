@@ -15,6 +15,7 @@ from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
 from database.db import db
 from services.factura_service import FacturaService, FacturaInput
+from services.notification_service import NotificationService
 from services.image_service import ImageService, ImageError
 from forms import PagoForm, TallerConfigForm
 from exceptions import BusinessRuleException, NotFoundException
@@ -59,6 +60,15 @@ def crear(cita_id: int) -> Any:
             )
             FacturaService.generar(input_data)
             logger.info("Factura creada para cita %s", cita_id)
+            factura = Factura.query.filter_by(cita_id=cita_id).order_by(Factura.id.desc()).first()
+            if factura:
+                NotificationService.notify_cliente(
+                    cita.cliente_id,
+                    "factura",
+                    "Nueva factura",
+                    f"Tu factura {factura.numero} por ${factura.total:,.0f} está disponible.",
+                    url_for("portal.facturas"),
+                )
             if request.is_json:
                 return json_success(message="Factura generada exitosamente.")
             flash("Factura generada exitosamente", "success")
@@ -109,6 +119,15 @@ def crear_desde_ot(ot_id: int) -> Any:
             )
             FacturaService.generar(input_data)
             logger.info("Factura creada desde OT %s", ot_id)
+            factura = Factura.query.filter_by(cita_id=cita.id).order_by(Factura.id.desc()).first()
+            if factura:
+                NotificationService.notify_cliente(
+                    cita.cliente_id,
+                    "factura",
+                    "Nueva factura",
+                    f"Tu factura {factura.numero} por ${factura.total:,.0f} está disponible.",
+                    url_for("portal.facturas"),
+                )
             if request.is_json:
                 return json_success(message="Factura generada desde la orden de trabajo.")
             flash("Factura generada desde la orden de trabajo", "success")
@@ -144,7 +163,7 @@ def pdf(id: int) -> Any:
     try:
         from weasyprint import HTML
     except ImportError:
-        flash("PDF no disponible: weasyprint no estÃ¡ instalado", "danger")
+        flash("PDF no disponible: weasyprint no está instalado", "danger")
         return redirect(url_for("facturas.ver", id=id))
 
     factura = db.get_or_404(Factura, id)
@@ -153,7 +172,7 @@ def pdf(id: int) -> Any:
     try:
         pdf_bytes = HTML(string=html_str, base_url=request.host_url).write_pdf()
     except Exception:
-        flash("Error generando PDF. Verifique la impresiÃ³n desde el navegador.", "warning")
+        flash("Error generando PDF. Verifique la impresión desde el navegador.", "warning")
         return redirect(url_for("facturas.ver", id=id))
 
     import io
@@ -185,6 +204,16 @@ def pagar(id: int) -> Any:
                 notas=form.notas.data or "",
             )
             logger.info("Pago registrado en factura %s", factura.numero)
+            try:
+                NotificationService.notify_cliente(
+                    factura.cita.cliente_id,
+                    "pago",
+                    "Pago registrado",
+                    f"Recibimos tu pago de ${form.monto.data:,.0f} para la factura {factura.numero}. Saldo: ${factura.saldo_pendiente:,.0f}.",
+                    url_for("portal.facturas"),
+                )
+            except Exception as e:
+                logger.warning("No se pudo notificar el pago de la factura %s: %s", factura.numero, e)
             if request.is_json:
                 return json_success(message="Pago registrado exitosamente.")
             flash("Pago registrado exitosamente", "success")
@@ -212,7 +241,7 @@ def anular(id: int) -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.ver", id=id))
     factura = db.get_or_404(Factura, id)
     if factura.monto_pagado > 0:
@@ -270,10 +299,10 @@ def configuracion() -> Any:
 
         try:
             safe_commit()
-            logger.info("ConfiguraciÃ³n del taller actualizada")
+            logger.info("Configuración del taller actualizada")
             if request.is_json:
-                return json_success(message="ConfiguraciÃ³n guardada.")
-            flash("ConfiguraciÃ³n guardada", "success")
+                return json_success(message="Configuración guardada.")
+            flash("Configuración guardada", "success")
             return redirect(url_for("facturas.configuracion"))
         except Exception as e:
             db.session.rollback()
@@ -294,7 +323,7 @@ def quitar_logo() -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.configuracion"))
     config = ConfiguracionTaller.get_config()
     if config.logo_path:
@@ -320,7 +349,7 @@ def eliminar_pago(pago_id: int) -> Any:
         if csrf_token:
             validate_csrf(csrf_token)
     except Exception:
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("facturas.listar"))
     pago = db.get_or_404(PagoFactura, pago_id)
     factura_id = pago.factura_id

@@ -37,7 +37,7 @@ def historial(vehiculo_id: int) -> Any:
         descripcion = request.form.get("descripcion", "").strip()
         kilometraje = request.form.get("kilometraje") or None
         if not descripcion:
-            flash("La descripciÃ³n es obligatoria", "danger")
+            flash("La descripción es obligatoria", "danger")
         else:
             try:
                 HistorialService.registrar(
@@ -47,7 +47,7 @@ def historial(vehiculo_id: int) -> Any:
                     kilometraje=int(kilometraje) if kilometraje else None,
                     creado_por=current_user.id if current_user.is_authenticated else None,
                 )
-                logger.info("Historial manual agregado al vehÃ­culo %s", vehiculo.placa)
+                logger.info("Historial manual agregado al vehículo %s", vehiculo.placa)
                 flash("Registro de historial agregado", "success")
             except Exception as e:
                 db.session.rollback()
@@ -55,6 +55,8 @@ def historial(vehiculo_id: int) -> Any:
         return redirect(url_for("vehiculos.historial", vehiculo_id=vehiculo.id))
 
     registros = HistorialService.get_historial_vehiculo(vehiculo.id)
+    resumen = HistorialService.get_resumen(vehiculo.id)
+    mantenimientos = HistorialService.get_proximos_mantenimientos(vehiculo.id)
     tipos_colores = {
         "cita": "info",
         "factura": "primary",
@@ -75,6 +77,8 @@ def historial(vehiculo_id: int) -> Any:
         "vehiculos/historial.html",
         vehiculo=vehiculo,
         registros=registros,
+        resumen=resumen,
+        mantenimientos=mantenimientos,
         tipos=TIPOS_HISTORIAL,
         tipos_labels=TIPOS_HISTORIAL_LABELS,
         tipos_colores=tipos_colores,
@@ -91,7 +95,7 @@ def agregar_foto_historial(historial_id: int) -> Any:
     tipo = request.form.get("tipo", "antes")
     descripcion = request.form.get("descripcion", "").strip()
     if tipo not in TIPOS_FOTO_HISTORIAL:
-        flash("Tipo de foto invÃ¡lido", "danger")
+        flash("Tipo de foto inválido", "danger")
         return redirect(url_for("vehiculos.historial", vehiculo_id=registro.vehiculo_id))
     if not archivo or not getattr(archivo, "filename", ""):
         flash("Selecciona una imagen", "danger")
@@ -131,8 +135,8 @@ def eliminar_foto_historial(foto_id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF invÃ¡lido"), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF inválido"), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("vehiculos.listar"))
     foto = db.get_or_404(HistorialFoto, foto_id)
     vehiculo_id = foto.historial.vehiculo_id
@@ -170,10 +174,10 @@ def crear() -> Any:
         db.session.add(vehiculo)
         try:
             safe_commit()
-            logger.info("VehÃ­culo registrado: %s %s", vehiculo.marca, vehiculo.placa)
+            logger.info("Vehículo registrado: %s %s", vehiculo.marca, vehiculo.placa)
             if request.is_json:
-                return jsonify({"success": True, "message": "VehÃ­culo registrado"})
-            flash("VehÃ­culo registrado", "success")
+                return jsonify({"success": True, "message": "Vehículo registrado"})
+            flash("Vehículo registrado", "success")
             return redirect(url_for("vehiculos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -194,10 +198,10 @@ def editar(id: int) -> Any:
         form.populate_obj(vehiculo)
         try:
             safe_commit()
-            logger.info("VehÃ­culo actualizado: %s", vehiculo.placa)
+            logger.info("Vehículo actualizado: %s", vehiculo.placa)
             if request.is_json:
-                return jsonify({"success": True, "message": "VehÃ­culo actualizado"})
-            flash("VehÃ­culo actualizado", "success")
+                return jsonify({"success": True, "message": "Vehículo actualizado"})
+            flash("Vehículo actualizado", "success")
             return redirect(url_for("vehiculos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -217,17 +221,17 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF invÃ¡lido"}), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF inválido"}), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("vehiculos.listar"))
     vehiculo = db.get_or_404(Vehiculo, id)
     db.session.delete(vehiculo)
     try:
         safe_commit()
-        logger.info("VehÃ­culo eliminado: %s", vehiculo.placa)
+        logger.info("Vehículo eliminado: %s", vehiculo.placa)
         if request.is_json:
             return jsonify({"success": True})
-        flash("VehÃ­culo eliminado", "success")
+        flash("Vehículo eliminado", "success")
         return redirect(url_for("vehiculos.listar"))
     except Exception as e:
         db.session.rollback()

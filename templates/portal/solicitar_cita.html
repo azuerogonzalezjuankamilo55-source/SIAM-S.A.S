@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-header"><strong>Solicitar nueva cita</strong></div>
             <div class="card-body">
-                <form method="post" novalidate>
+                <form method="post" enctype="multipart/form-data" novalidate>
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
                         <label class="form-label">Vehículo *</label>
@@ -19,6 +19,31 @@
                             {% endfor %}
                         </select>
                         {% for err in form.vehiculo_id.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sede *</label>
+                        <select name="sede_id" class="form-select" required>
+                            <option value="">Selecciona una sede</option>
+                            {% for s in sedes %}
+                            <option value="{{ s.id }}" {% if form.sede_id.data == s.id %}selected{% endif %}>
+                                {{ s.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% for err in form.sede_id.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Servicio (opcional)</label>
+                        <select name="servicio_id" class="form-select">
+                            <option value="">Sin servicio específico</option>
+                            {% for sv in servicios %}
+                            <option value="{{ sv.id }}" {% if form.servicio_id.data == sv.id %}selected{% endif %}>
+                                {{ sv.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% for err in form.servicio_id.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                        <div class="form-text">Si tu problema no está en la lista, deja la opción en blanco.</div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
@@ -36,6 +61,12 @@
                         <label class="form-label">Descripción del problema</label>
                         {{ form.descripcion(class="form-control", rows=3) }}
                         {% for err in form.descripcion.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adjuntos (opcional)</label>
+                        {{ form.adjuntos(class="form-control") }}
+                        {% for err in form.adjuntos.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                        <div class="form-text">Fotos del daño, video o documento (máx. 5 MB imagen, 15 MB PDF, 100 MB video).</div>
                     </div>
                     {{ form.submit(class="btn btn-primary w-100") }}
                 </form>

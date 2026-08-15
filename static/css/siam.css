@@ -1188,3 +1188,64 @@ html.aos-fallback [data-aos] {
     opacity: 1 !important;
     transform: none !important;
 }
+
+
+/* ---------- Notificaciones ---------- */
+
+.notif-menu {
+    width: 340px;
+    max-width: calc(100vw - 24px);
+    max-height: 70vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background-color: var(--bs-body-bg);
+}
+
+.notif-lista {
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    padding: .65rem .85rem;
+    border-bottom: 1px solid rgba(148, 163, 184, .12);
+}
+
+.notif-item:last-child {
+    border-bottom: 0;
+}
+
+.notif-item.no-leida {
+    background-color: rgba(37, 99, 235, .06);
+}
+
+.notif-item:hover {
+    background-color: rgba(148, 163, 184, .1);
+}
+
+.notif-tipo {
+    font-size: .9rem;
+    line-height: 1;
+    padding: .45rem .5rem;
+    flex-shrink: 0;
+}
+
+.notif-punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #EF4444;
+    flex-shrink: 0;
+    margin-top: .3rem;
+}
+
+.notif-msg {
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+}

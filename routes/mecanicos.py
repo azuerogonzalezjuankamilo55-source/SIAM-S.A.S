@@ -54,10 +54,10 @@ def crear() -> Any:
             _procesar_foto(form, mecanico)
             db.session.add(mecanico)
             safe_commit()
-            logger.info("MecÃ¡nico creado: %s", mecanico.nombre)
+            logger.info("Mecánico creado: %s", mecanico.nombre)
             if request.is_json:
                 return json_success(message="Creado correctamente.")
-            flash("MecÃ¡nico registrado", "success")
+            flash("Mecánico registrado", "success")
             return redirect(url_for("mecanicos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -77,10 +77,10 @@ def editar(id: int) -> Any:
             form.populate_obj(mecanico)
             _procesar_foto(form, mecanico)
             safe_commit()
-            logger.info("MecÃ¡nico actualizado: %s", mecanico.nombre)
+            logger.info("Mecánico actualizado: %s", mecanico.nombre)
             if request.is_json:
                 return json_success(message="Actualizado correctamente.")
-            flash("MecÃ¡nico actualizado", "success")
+            flash("Mecánico actualizado", "success")
             return redirect(url_for("mecanicos.listar"))
         except Exception as e:
             db.session.rollback()
@@ -99,17 +99,17 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF invÃ¡lido"), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF inválido"), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("mecanicos.listar"))
     try:
         mecanico = db.get_or_404(Mecanico, id)
         db.session.delete(mecanico)
         safe_commit("No se pudo eliminar.")
-        logger.info("MecÃ¡nico eliminado: %s", mecanico.nombre)
+        logger.info("Mecánico eliminado: %s", mecanico.nombre)
         if request.is_json:
             return json_success(message="Eliminado correctamente.")
-        flash("MecÃ¡nico eliminado", "success")
+        flash("Mecánico eliminado", "success")
     except Exception as e:
         db.session.rollback()
         if request.is_json:

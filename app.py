@@ -136,6 +136,10 @@ def register_blueprints(app: Flask) -> None:
         ia_bp,
         recordatorios_bp,
         reportes_bp,
+        notificaciones_bp,
+        cotizaciones_bp,
+        garantias_bp,
+        configuracion_bp,
     )
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -154,6 +158,10 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(ia_bp)
     app.register_blueprint(recordatorios_bp)
     app.register_blueprint(reportes_bp)
+    app.register_blueprint(notificaciones_bp)
+    app.register_blueprint(cotizaciones_bp)
+    app.register_blueprint(garantias_bp)
+    app.register_blueprint(configuracion_bp)
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -227,6 +235,13 @@ def register_template_processors(app: Flask) -> None:
                 config = None
             g._taller_config = config
         return {"taller_config": config}
+
+    @app.context_processor
+    def inject_appearance():
+        from services.configuracion_service import ConfiguracionService
+
+        config = getattr(g, "_taller_config", None)
+        return {"css_vars": ConfiguracionService.css_vars(config)}
 
     @app.template_filter("img_thumb")
     def img_thumb_filter(ruta_publica: str | None) -> str | None:

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Notificaciones{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0">Notificaciones</h4>
+    <div class="d-flex gap-2">
+        {% if no_leidas > 0 %}
+        <form method="post" action="{{ url_for('notificaciones.api_leer_todas') }}" class="d-inline" data-ajax="true" data-redirect="{{ url_for('notificaciones.index') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="fa-solid fa-check-double me-1"></i> Marcar todas como leídas
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="{{ url_for('notificaciones.index') }}" class="btn btn-sm {{ 'btn-primary' if not filtro_tipo and not solo_no_leidas else 'btn-outline-secondary' }}">
+                Todas <span class="badge bg-secondary ms-1">{{ por_tipo.values()|sum }}</span>
+            </a>
+            <a href="{{ url_for('notificaciones.index', pendientes='1') }}" class="btn btn-sm {{ 'btn-primary' if solo_no_leidas else 'btn-outline-secondary' }}">
+                Sin leer <span class="badge bg-danger ms-1">{{ no_leidas }}</span>
+            </a>
+            {% for t in tipos %}
+            <a href="{{ url_for('notificaciones.index', tipo=t) }}" class="btn btn-sm {{ 'btn-primary' if filtro_tipo == t else 'btn-outline-secondary' }}">
+                {{ tipos_labels[t] }} <span class="badge bg-secondary ms-1">{{ por_tipo.get(t, 0) }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if items %}
+        <ul class="list-group list-group-flush">
+            {% for n in items %}
+            <li class="list-group-item d-flex align-items-start gap-2 {{ '' if n.leida else 'bg-body-tertiary' }}">
+                <span class="badge badge-soft-primary mt-1">
+                    <i class="fa-solid {{ {'cita': 'fa-calendar-check', 'orden': 'fa-screwdriver-wrench', 'factura': 'fa-file-lines', 'cotizacion': 'fa-file-invoice-dollar', 'garantia': 'fa-shield-halved', 'recordatorio': 'fa-bell', 'pago': 'fa-credit-card', 'sistema': 'fa-circle-info'}.get(n.tipo, 'fa-circle-info') }}"></i>
+                </span>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                        <span class="small fw-semibold">{{ n.titulo }}</span>
+                        <small class="text-muted text-nowrap">{{ n.created_at.strftime('%d/%m/%Y %H:%M') if n.created_at else '' }}</small>
+                    </div>
+                    {% if n.mensaje %}<div class="small text-muted">{{ n.mensaje }}</div>{% endif %}
+                    <div class="d-flex gap-2 align-items-center mt-1">
+                        <span class="badge bg-secondary">{{ n.tipo_label }}</span>
+                        {% if not n.leida %}<span class="badge bg-primary">Nueva</span>{% endif %}
+                        {% if n.url %}
+                        <a href="{{ n.url }}" class="small text-decoration-none">Ver detalle <i class="fa-solid fa-arrow-right"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                <form method="post" action="{{ url_for('notificaciones.eliminar', notificacion_id=n.id) }}" onsubmit="return confirm('¿Eliminar esta notificación?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state py-5">
+            <div class="empty-state-icon"><i class="fa-solid fa-bell-slash" aria-hidden="true"></i></div>
+            <h6 class="mb-1">No hay notificaciones</h6>
+            <p class="text-muted small mb-0">Las novedades de citas, órdenes, facturas y garantías aparecerán aquí.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

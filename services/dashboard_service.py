@@ -108,7 +108,7 @@ class DashboardService:
         )
 
         ordenes_activas = OrdenTrabajo.query.filter(
-            OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion"])
+            OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "pruebas"])
         ).count()
         ordenes_listas = OrdenTrabajo.query.filter(OrdenTrabajo.estado == "listo_entrega").count()
 
@@ -249,7 +249,7 @@ class DashboardService:
             OrdenTrabajo.query
             .filter(
                 OrdenTrabajo.estado.in_(
-                    ["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "listo_entrega"]
+                    ["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "pruebas", "listo_entrega"]
                 )
             )
             .order_by(OrdenTrabajo.created_at.asc())

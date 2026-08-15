@@ -14,6 +14,8 @@ class Cita(db.Model):
     cliente_id: int = db.Column(db.Integer, db.ForeignKey("clientes.id"), nullable=False)
     vehiculo_id: int = db.Column(db.Integer, db.ForeignKey("vehiculos.id"), nullable=False)
     mecanico_id: int | None = db.Column(db.Integer, db.ForeignKey("mecanicos.id"), nullable=True)
+    sede_id: int | None = db.Column(db.Integer, db.ForeignKey("sedes.id"), nullable=True)
+    servicio_id: int | None = db.Column(db.Integer, db.ForeignKey("servicios.id"), nullable=True)
     fecha = db.Column(db.Date, nullable=False)
     hora = db.Column(db.Time, nullable=False)
     estado: str = db.Column(db.String(20), nullable=False, default="pendiente")

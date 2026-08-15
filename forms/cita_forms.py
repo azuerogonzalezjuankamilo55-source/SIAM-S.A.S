@@ -14,6 +14,8 @@ class CitaForm(FlaskForm):
     cliente_id = IntegerField("Cliente", validators=[DataRequired()])
     vehiculo_id = IntegerField("Vehículo", validators=[DataRequired()])
     mecanico_id = IntegerField("Mecánico", validators=[Optional()])
+    sede_id = SelectField("Sede", coerce=int, validators=[Optional()])
+    servicio_id = SelectField("Servicio", coerce=int, validators=[Optional()])
     fecha = DateField("Fecha *", validators=[DataRequired()])
     hora = TimeField("Hora *", validators=[DataRequired()])
     estado = SelectField("Estado", choices=ESTADOS, default="pendiente")

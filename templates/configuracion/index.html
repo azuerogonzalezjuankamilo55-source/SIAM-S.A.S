@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Configuración del Sistema{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-lg-row gap-4">
+    <aside class="flex-lg-shrink-0" style="flex:0 0 260px;">
+        <div class="card shadow-sm">
+            <div class="card-body p-2">
+                <div class="px-2 pt-1 pb-2 small text-uppercase text-secondary fw-semibold">Configuración</div>
+                <nav class="nav nav-pills flex-column gap-1" aria-label="Secciones de configuración">
+                    <a class="nav-link {{ 'active' if seccion == 'empresa' }}" href="{{ url_for('configuracion.seccion', seccion='empresa') }}">
+                        <i class="fa-solid fa-building me-2" aria-hidden="true"></i> Empresa
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'sedes' }}" href="{{ url_for('configuracion.seccion', seccion='sedes') }}">
+                        <i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i> Sedes y Horarios
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'apariencia' }}" href="{{ url_for('configuracion.seccion', seccion='apariencia') }}">
+                        <i class="fa-solid fa-palette me-2" aria-hidden="true"></i> Apariencia
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'citas' }}" href="{{ url_for('configuracion.seccion', seccion='citas') }}">
+                        <i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i> Citas y Horarios
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'notificaciones' }}" href="{{ url_for('configuracion.seccion', seccion='notificaciones') }}">
+                        <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Notificaciones
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'archivos' }}" href="{{ url_for('configuracion.seccion', seccion='archivos') }}">
+                        <i class="fa-solid fa-folder-open me-2" aria-hidden="true"></i> Archivos
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'ia' }}" href="{{ url_for('configuracion.seccion', seccion='ia') }}">
+                        <i class="fa-solid fa-robot me-2" aria-hidden="true"></i> Asistente IA
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'seguridad' }}" href="{{ url_for('configuracion.seccion', seccion='seguridad') }}">
+                        <i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i> Seguridad
+                    </a>
+                    <a class="nav-link {{ 'active' if seccion == 'sistema' }}" href="{{ url_for('configuracion.seccion', seccion='sistema') }}">
+                        <i class="fa-solid fa-server me-2" aria-hidden="true"></i> Sistema
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </aside>
+
+    <div class="flex-grow-1" style="min-width:0;">
+        {% if not puede_editar and seccion in ['empresa', 'apariencia', 'citas', 'notificaciones', 'ia'] %}
+        <div class="alert alert-info" role="alert">
+            <i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>
+            Estás viendo esta sección en modo solo lectura. Solo un administrador puede modificar la configuración.
+        </div>
+        {% endif %}
+
+        {% if seccion == 'empresa' %}
+            {% include "configuracion/_empresa.html" %}
+        {% elif seccion == 'sedes' %}
+            {% include "configuracion/_sedes.html" %}
+        {% elif seccion == 'apariencia' %}
+            {% include "configuracion/_apariencia.html" %}
+        {% elif seccion == 'citas' %}
+            {% include "configuracion/_citas.html" %}
+        {% elif seccion == 'notificaciones' %}
+            {% include "configuracion/_notificaciones.html" %}
+        {% elif seccion == 'archivos' %}
+            {% include "configuracion/_archivos.html" %}
+        {% elif seccion == 'ia' %}
+            {% include "configuracion/_ia.html" %}
+        {% elif seccion == 'seguridad' %}
+            {% include "configuracion/_seguridad.html" %}
+        {% elif seccion == 'sistema' %}
+            {% include "configuracion/_sistema.html" %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if seccion == 'sistema' %}
+<script>
+(function () {
+    var btn = document.getElementById('btnComprobarSistema');
+    var cont = document.getElementById('resultadosSistema');
+    if (!btn || !cont) return;
+    btn.addEventListener('click', function () {
+        var btnText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Comprobando...';
+        fetch('{{ url_for("configuracion.sistema_comprobar") }}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            if (!data.success) {
+                showToast(data.error || 'No se pudo comprobar el sistema.', 'danger');
+                return;
+            }
+            var html = '';
+            data.resultados.forEach(function (item) {
+                var icono = item.estado === 'verde' ? 'fa-circle-check text-success'
+                    : (item.estado === 'amarillo' ? 'fa-triangle-exclamation text-warning' : 'fa-circle-xmark text-danger');
+                var emoji = item.estado === 'verde' ? '🟢' : (item.estado === 'amarillo' ? '🟡' : '🔴');
+                html += '<li class="list-group-item d-flex align-items-start gap-3">'
+                    + '<span class="fs-6">' + emoji + '</span>'
+                    + '<div><div class="fw-semibold">' + item.nombre + '</div>'
+                    + '<small class="text-secondary"><i class="fa-solid ' + icono + ' me-1"></i>' + item.detalle + '</small></div></li>';
+            });
+            cont.classList.remove('d-none');
+            cont.innerHTML = html || '<li class="list-group-item">Sin resultados</li>';
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            showToast('Error de conexión. Intenta nuevamente.', 'danger');
+        });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

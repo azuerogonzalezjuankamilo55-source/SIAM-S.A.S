@@ -84,8 +84,8 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF invÃ¡lido"}), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF inválido"}), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("clientes.listar"))
     cliente = db.get_or_404(Cliente, id)
     db.session.delete(cliente)

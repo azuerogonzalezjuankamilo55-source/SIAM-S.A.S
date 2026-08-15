@@ -39,8 +39,23 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ url_for('assistant.index') }}" class="nav-link">
+                <i class="fa-solid fa-robot me-2" aria-hidden="true"></i> Chat SIAM
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="{{ url_for('portal.ordenes') }}" class="nav-link">
                 <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Mis Reparaciones
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('portal.cotizaciones') }}" class="nav-link">
+                <i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i> Mis Cotizaciones
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('portal.garantias') }}" class="nav-link">
+                <i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i> Mis Garantías
             </a>
         </li>
         <li class="nav-item">
@@ -56,6 +71,11 @@
         <li class="nav-item">
             <a href="{{ url_for('portal.historial') }}" class="nav-link">
                 <i class="fa-solid fa-clock-rotate-left me-2" aria-hidden="true"></i> Historial
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('portal.documentos') }}" class="nav-link">
+                <i class="fa-solid fa-folder-open me-2" aria-hidden="true"></i> Mis Documentos
             </a>
         </li>
         <li class="nav-item">
@@ -76,11 +96,6 @@
         <li class="nav-item">
             <a href="{{ url_for('dashboard.index') }}" class="nav-link">
                 <i class="fa-solid fa-gauge-high me-2" aria-hidden="true"></i> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('assistant.index') }}" class="nav-link">
-                <i class="fa-solid fa-robot me-2" aria-hidden="true"></i> Asistente IA
             </a>
         </li>
         <li class="nav-item">
@@ -142,13 +157,23 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ url_for('cotizaciones.listar') }}" class="nav-link">
+                <i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i> Cotizaciones
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('garantias.listar') }}" class="nav-link">
+                <i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i> Garantías
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="{{ url_for('facturas.listar') }}" class="nav-link">
                 <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Facturas
             </a>
             <ul class="nav flex-column ms-3 mt-1 small">
                 <li class="nav-item">
-                    <a href="{{ url_for('facturas.configuracion') }}" class="nav-link py-0">
-                        <i class="fa-solid fa-gear me-1"></i> Configuración
+                    <a href="{{ url_for('configuracion.seccion', seccion='empresa') }}" class="nav-link py-0">
+                        <i class="fa-solid fa-gear me-1"></i> Configuración del Sistema
                     </a>
                 </li>
             </ul>
@@ -184,11 +209,6 @@
     {% endif %}
 
     <div class="mt-auto pt-3">
-        <button class="btn btn-soft btn-sm w-100 mb-2" id="darkModeToggleSidebar" title="Modo oscuro/claro">
-            <i class="fa-solid fa-moon me-1"></i> Modo Oscuro
-        </button>
-        <a href="{{ url_for('auth.logout') }}" class="nav-link">
-            <i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i> Cerrar sesión
-        </a>
+        <span class="text-secondary small d-block text-center px-2">La gestión de cuenta está en la barra superior.</span>
     </div>
 </nav>

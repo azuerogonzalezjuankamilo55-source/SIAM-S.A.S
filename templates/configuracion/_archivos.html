@@ -1,0 +1,39 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="fa-solid fa-folder-open me-2" aria-hidden="true"></i>Archivos</h5>
+        <small class="text-secondary">Límites de subida de archivos definidos por configuración del servidor. Solo lectura.</small>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="border rounded p-3 h-100">
+                    <div class="text-secondary small"><i class="fa-solid fa-image me-1" aria-hidden="true"></i> Imágenes</div>
+                    <div class="fs-5 fw-semibold">{{ datos_archivos.max_imagen_mb }} MB</div>
+                    <small class="text-muted">Formatos: {{ datos_archivos.formatos }}</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="border rounded p-3 h-100">
+                    <div class="text-secondary small"><i class="fa-solid fa-file-pdf me-1" aria-hidden="true"></i> PDF / Documentos</div>
+                    <div class="fs-5 fw-semibold">{{ datos_archivos.max_pdf_mb }} MB</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="border rounded p-3 h-100">
+                    <div class="text-secondary small"><i class="fa-solid fa-video me-1" aria-hidden="true"></i> Video</div>
+                    <div class="fs-5 fw-semibold">{{ datos_archivos.max_video_mb }} MB</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="border rounded p-3 h-100">
+                    <div class="text-secondary small"><i class="fa-solid fa-box me-1" aria-hidden="true"></i> Límite total por petición</div>
+                    <div class="fs-5 fw-semibold">{{ datos_archivos.max_total_mb }} MB</div>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-warning small mt-3 mb-0">
+            <i class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></i>
+            En el entorno de Render el almacenamiento de archivos es <strong>efímero</strong> (se pierde en cada reinicio). Para persistencia a largo plazo se requiere un servicio de almacenamiento externo (p. ej. S3), pendiente de integrar.
+        </div>
+    </div>
+</div>

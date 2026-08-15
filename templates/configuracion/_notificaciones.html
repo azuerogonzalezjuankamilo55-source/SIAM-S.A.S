@@ -1,0 +1,43 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="fa-solid fa-bell me-2" aria-hidden="true"></i>Notificaciones</h5>
+        <small class="text-secondary">Canales preferidos para avisos a clientes y recordatorios de mantenimiento.</small>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('configuracion.seccion', seccion='notificaciones') }}" data-ajax="true">
+            {{ form.hidden_tag() }}
+            <fieldset {{ 'disabled' if not puede_editar }}>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mt-2">
+                            {{ form.notif_email(class="form-check-input", role="switch") }}
+                            <label class="form-check-label">{{ form.notif_email.label.text }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mt-2">
+                            {{ form.notif_sms(class="form-check-input", role="switch") }}
+                            <label class="form-check-label">{{ form.notif_sms.label.text }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mt-2">
+                            {{ form.notif_whatsapp(class="form-check-input", role="switch") }}
+                            <label class="form-check-label">{{ form.notif_whatsapp.label.text }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.notif_recordatorio_dias.label.text }}</label>
+                        {{ form.notif_recordatorio_dias(class="form-control") }}
+                        {% for e in form.notif_recordatorio_dias.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" {{ 'disabled' if not puede_editar }}>
+                        <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i> Guardar
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

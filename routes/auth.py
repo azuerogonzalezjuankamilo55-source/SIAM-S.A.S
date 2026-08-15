@@ -30,6 +30,12 @@ def login() -> Any:
                 return render_template("auth/login.html", form=form)
             login_user(usuario)
             logger.info("Login exitoso: %s", correo)
+            try:
+                from datetime import datetime
+                usuario.last_access_at = datetime.now()
+                safe_commit()
+            except Exception as e:
+                logger.warning("No se pudo registrar último acceso: %s", e)
             if usuario.es_cliente:
                 return redirect(url_for("portal.index"))
             return redirect(url_for("dashboard.index"))

@@ -19,6 +19,7 @@ from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
 from services.orden_trabajo_service import OrdenTrabajoService, NIVELES_COMBUSTIBLE
+from services.notification_service import NotificationService
 from exceptions import BusinessRuleException, NotFoundException
 from decorators import staff_blueprint_guard
 
@@ -86,6 +87,21 @@ def crear() -> Any:
             _registrar_historial(orden, None, "Orden de trabajo creada")
             safe_commit()
             logger.info("OT creada: %s", orden.numero)
+            NotificationService.notify_cliente(
+                orden.cliente_id,
+                "orden",
+                "Nueva orden de trabajo",
+                f"Tu orden {orden.numero} fue registrada en el taller.",
+                url_for("portal.ordenes"),
+            )
+            if orden.mecanico_id:
+                NotificationService.notify_roles(
+                    ["mecanico"],
+                    "orden",
+                    "Orden asignada a taller",
+                    f"Nueva orden {orden.numero} asignada. Revisa el checklist.",
+                    url_for("ordenes_trabajo.ver", id=orden.id),
+                )
             if request.is_json:
                 return json_success(message="Creada correctamente.")
             flash(f"Orden {orden.numero} creada exitosamente", "success")
@@ -149,8 +165,8 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF invÃ¡lido"), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF inválido"), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("ordenes_trabajo.listar"))
     try:
         orden = db.get_or_404(OrdenTrabajo, id)
@@ -177,8 +193,8 @@ def cambiar_estado(id: int) -> Any:
 
     if estado_nuevo not in ESTADOS_OT:
         if request.is_json:
-            return json_error(message="Estado invÃ¡lido")
-        flash("Estado invÃ¡lido", "danger")
+            return json_error(message="Estado inválido")
+        flash("Estado inválido", "danger")
         return redirect(url_for("ordenes_trabajo.ver", id=id))
 
     try:
@@ -192,6 +208,25 @@ def cambiar_estado(id: int) -> Any:
                 HistorialService.registrar_desde_orden(orden, current_user.id if current_user.is_authenticated else None)
             except Exception as e:
                 logger.warning("No se pudo registrar historial de OT %s: %s", orden.numero, e)
+        try:
+            if estado_nuevo == "listo_entrega":
+                NotificationService.notify_cliente(
+                    orden.cliente_id,
+                    "orden",
+                    "Tu vehículo está listo",
+                    f"Tu orden {orden.numero} está lista para entrega. ¡Te esperamos!",
+                    url_for("portal.ordenes"),
+                )
+            elif estado_nuevo == "entregado":
+                NotificationService.notify_cliente(
+                    orden.cliente_id,
+                    "orden",
+                    "Vehículo entregado",
+                    f"Tu orden {orden.numero} fue entregada. ¡Gracias por confiar en nosotros!",
+                    url_for("portal.ordenes"),
+                )
+        except Exception as e:
+            logger.warning("No se pudo notificar al cliente de la OT %s: %s", orden.numero, e)
         logger.info("OT %s: %s -> %s", orden.numero, estado_anterior, estado_nuevo)
         if request.is_json:
             return json_success(message=f"Estado cambiado a: {orden.estado_display}")
@@ -397,6 +432,16 @@ def entregar(id: int) -> Any:
             nivel_combustible_salida=combustible,
             usuario_id=current_user.id if current_user.is_authenticated else None,
         )
+        try:
+            NotificationService.notify_cliente(
+                orden.cliente_id,
+                "orden",
+                "Vehículo entregado",
+                f"Tu orden {orden.numero} fue entregada. ¡Gracias por confiar en nosotros!",
+                url_for("portal.ordenes"),
+            )
+        except Exception as e:
+            logger.warning("No se pudo notificar la entrega de la OT %s: %s", orden.numero, e)
         if request.is_json:
             return json_success(message="Orden entregada.")
         flash(f"Orden {orden.numero} entregada", "success")

@@ -51,6 +51,7 @@ def crear() -> Any:
                 precio_estimado=form.precio_estimado.data,
                 duracion_estimada=form.duracion_estimada.data,
                 categoria=form.categoria.data,
+                garantia_meses=form.garantia_meses.data or None,
             )
             _procesar_imagen(form, servicio)
             db.session.add(servicio)
@@ -100,8 +101,8 @@ def eliminar(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return json_error(message="CSRF invÃ¡lido"), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return json_error(message="CSRF inválido"), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("servicios.listar"))
     try:
         servicio = db.get_or_404(Servicio, id)

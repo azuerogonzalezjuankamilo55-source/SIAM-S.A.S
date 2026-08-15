@@ -20,6 +20,7 @@
                         <th>#</th>
                         <th>Cliente</th>
                         <th>Vehículo</th>
+                        <th>Sede</th>
                         <th>Mecánico</th>
                         <th>Fecha</th>
                         <th>Hora</th>
@@ -33,6 +34,7 @@
                         <td>{{ c.id }}</td>
                         <td>{{ c.cliente.nombre }}</td>
                         <td>{{ c.vehiculo.placa }} - {{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
+                        <td>{{ c.sede.nombre if c.sede else "—" }}</td>
                         <td>{{ c.mecanico.nombre if c.mecanico else "Sin asignar" }}</td>
                         <td>{{ c.fecha }}</td>
                         <td>{{ c.hora }}</td>
@@ -76,7 +78,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8">
+                        <td colspan="9">
                             <div class="empty-state">
                                 <div class="empty-state-icon"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></div>
                                 <h6 class="mb-1">Aún no hay citas registradas</h6>

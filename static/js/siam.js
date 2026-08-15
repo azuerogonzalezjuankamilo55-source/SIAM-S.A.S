@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initLocationButton();
     initTableSearch();
     initFormLabels();
+    initNotificaciones();
 });
 
 function initTooltips() {
@@ -143,7 +144,7 @@ function initDeleteLinks() {
 }
 
 function initDarkMode() {
-    var toggles = document.querySelectorAll('#darkModeToggle, #darkModeToggleSidebar');
+    var toggles = document.querySelectorAll('#darkModeToggle');
     toggles.forEach(function (toggle) {
         if (toggle) {
             toggle.addEventListener('click', function () {
@@ -167,7 +168,7 @@ function toggleTheme(toggle) {
 }
 
 function updateToggleIcons(theme) {
-    var allToggles = document.querySelectorAll('#darkModeToggle, #darkModeToggleSidebar');
+    var allToggles = document.querySelectorAll('#darkModeToggle');
     allToggles.forEach(function (t) {
         var icon = t.querySelector('i');
         if (icon) {
@@ -423,27 +424,6 @@ function initFormLabels() {
 }
 
 /* ============================================================
-   Dashboard Auto-Refresh (polling ligero)
-   ============================================================ */
-
-if (document.getElementById('dashboardStats')) {
-    setInterval(function () {
-        var container = document.getElementById('dashboardStats');
-        if (!container) return;
-        var url = container.getAttribute('data-refresh-url') || '/dashboard/api/stats';
-        fetch(url, { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                Object.keys(data).forEach(function (key) {
-                    var el = document.getElementById('stat-' + key);
-                    if (el) el.textContent = data[key];
-                });
-            })
-            .catch(function () {});
-    }, 30000);
-}
-
-/* ============================================================
    Chat Assistant — Modern chat UI
    ============================================================ */
 
@@ -477,7 +457,7 @@ function initChat() {
             .then(function (data) {
                 hideTyping();
                 if (data.respuesta) {
-                    addChatMessage('assistant', data.respuesta, data.tipo, data.items);
+                    addChatMessage('assistant', data.respuesta, data.tipo, data.items, data.acciones);
                 } else if (data.error) {
                     addChatMessage('assistant', 'Error: ' + data.error);
                 }
@@ -494,7 +474,7 @@ function initChat() {
     initChatButtons();
 }
 
-function addChatMessage(role, text, type, items) {
+function addChatMessage(role, text, type, items, acciones) {
     var container = document.getElementById('chatMessages');
     if (!container) return;
 
@@ -522,7 +502,20 @@ function addChatMessage(role, text, type, items) {
         }
     }
 
-    if (type === 'botones' || text.includes('Compartir ubicación') || text.includes('Compartir mi ubicación')) {
+    if (acciones && acciones.length) {
+        html += '<div class="mt-2 d-flex gap-2 flex-wrap chat-actions">';
+        acciones.forEach(function (a) {
+            var icono = a.icono ? '<i class="fa-solid ' + a.icono + ' me-1"></i>' : '';
+            if (a.tipo === 'ubicacion') {
+                html += '<button class="btn btn-sm btn-outline-info" data-action="share-location">' + icono + escapeHtml(a.texto) + '</button>';
+            } else if (a.url) {
+                html += '<a class="btn btn-sm btn-outline-primary" href="' + escapeHtml(a.url) + '">' + icono + escapeHtml(a.texto) + '</a>';
+            } else {
+                html += '<button class="btn btn-sm btn-outline-primary" data-action="url" data-url="' + escapeHtml(a.url || '') + '">' + icono + escapeHtml(a.texto) + '</button>';
+            }
+        });
+        html += '</div>';
+    } else if (type === 'botones' || text.includes('Compartir ubicación') || text.includes('Compartir mi ubicación')) {
         html += '<div class="mt-2 d-flex gap-2 flex-wrap chat-actions">';
         if (text.includes('ubicación') || text.includes('Ubicación')) {
             html += '<button class="btn btn-sm btn-outline-info" data-action="share-location"><i class="fa-solid fa-location-dot me-1"></i> Compartir ubicación</button>';
@@ -622,4 +615,89 @@ function compartirUbicacionDesdeChat(btn) {
         addChatMessage('assistant', msgs[err.code] || 'Error de ubicación.');
         scrollChat();
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
+}
+
+/* ============================================================
+   Notificaciones — campana con badge y menú
+   ============================================================ */
+
+function initNotificaciones() {
+    var toggle = document.getElementById('notifToggle');
+    if (!toggle) return;
+
+    var badge = document.getElementById('notifBadge');
+    var lista = document.getElementById('notifLista');
+    var marcarTodas = document.getElementById('notifMarcarTodas');
+
+    function actualizarBadge(count) {
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : String(count);
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    }
+
+    function renderItems(items) {
+        if (!lista) return;
+        if (!items.length) {
+            lista.innerHTML = '<div class="px-3 py-4 text-muted small text-center">No tienes notificaciones.</div>';
+            return;
+        }
+        lista.innerHTML = items.map(function (n) {
+            var clase = n.leida ? 'notif-item leida' : 'notif-item no-leida';
+            var icono = { cita: 'fa-calendar-check', orden: 'fa-screwdriver-wrench', factura: 'fa-file-lines', cotizacion: 'fa-file-invoice-dollar', garantia: 'fa-shield-halved', recordatorio: 'fa-bell', pago: 'fa-credit-card', sistema: 'fa-circle-info' }[n.tipo] || 'fa-circle-info';
+            var badgeTipo = '<span class="badge badge-soft-primary notif-tipo me-2"><i class="fa-solid ' + icono + '"></i></span>';
+            var enlace = n.url ? (' href="' + n.url + '"') : '';
+            return '<a' + enlace + ' class="notif-item d-flex text-decoration-none text-reset" data-id="' + n.id + '"' + (enlace ? '' : ' role="button"') + '>' +
+                badgeTipo +
+                '<div class="flex-grow-1 min-w-0">' +
+                '<div class="d-flex justify-content-between align-items-start gap-2">' +
+                '<span class="small fw-semibold text-truncate">' + n.titulo + '</span>' +
+                (n.leida ? '' : '<span class="notif-punto"></span>') +
+                '</div>' +
+                (n.mensaje ? '<div class="small text-muted notif-msg">' + n.mensaje + '</div>' : '') +
+                '</div></a>';
+        }).join('');
+    }
+
+    function cargar() {
+        fetch('/notificaciones/api/listar', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || !data.items) return;
+                renderItems(data.items);
+                actualizarBadge(data.items.filter(function (n) { return !n.leida; }).length);
+            })
+            .catch(function () {});
+    }
+
+    function marcar(id) {
+        return fetch('/notificaciones/api/leer/' + id, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' }
+        }).then(function (r) { return r.json(); });
+    }
+
+    lista.addEventListener('click', function (e) {
+        var item = e.target.closest('.notif-item');
+        if (!item) return;
+        var id = item.getAttribute('data-id');
+        if (id) marcar(id);
+    });
+
+    if (marcarTodas) {
+        marcarTodas.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            fetch('/notificaciones/api/leer-todas', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' }
+            }).then(function () { cargar(); });
+        });
+    }
+
+    cargar();
+    setInterval(cargar, 60000);
 }

@@ -34,11 +34,46 @@ class RecordatorioService:
         return mapa
 
     @staticmethod
+    def _url_portal_recordatorios() -> str | None:
+        try:
+            from flask import url_for, has_request_context
+            if has_request_context():
+                return url_for("portal.recordatorios")
+        except Exception:
+            pass
+        return None
+
+    @staticmethod
+    def _notificar_cliente(vehiculo, tipo: str, titulo: str, mensaje: str) -> None:
+        if not vehiculo or not vehiculo.cliente_id:
+            return
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.notify_cliente(
+                vehiculo.cliente_id, tipo, titulo, mensaje,
+                url=RecordatorioService._url_portal_recordatorios(),
+            )
+        except Exception as e:
+            logger.warning("No se pudo notificar recordatorio al cliente: %s", e)
+
+    @staticmethod
+    def _dias_anticipacion() -> int:
+        """Días de antelación para la fecha programada desde la configuración central."""
+        try:
+            from models.configuracion_taller import ConfiguracionTaller
+            dias = ConfiguracionTaller.get_config().notif_recordatorio_dias
+            return int(dias) if dias and int(dias) > 0 else 3
+        except Exception:
+            return 3
+
+    @staticmethod
     def generar_mantenimientos(fecha_programada: date | None = None) -> int:
         """Genera recordatorios pendientes para mantenimientos vencidos o por vencer.
         No duplica los que ya existen en estado pendiente/enviado."""
-        fecha_programada = fecha_programada or date.today() + timedelta(days=3)
-        creados = 0
+        fecha_programada = fecha_programada or date.today() + timedelta(
+            days=RecordatorioService._dias_anticipacion()
+        )
+        creados: list[Recordatorio] = []
         for vehiculo in Vehiculo.query.order_by(Vehiculo.placa).all():
             mapa = RecordatorioService._mapa_mantenimientos(vehiculo.id)
             for clave, info in mapa.items():
@@ -52,7 +87,7 @@ class RecordatorioService:
                 ).first()
                 if ya_existe:
                     continue
-                db.session.add(Recordatorio(
+                rec = Recordatorio(
                     vehiculo_id=vehiculo.id,
                     tipo="mantenimiento",
                     servicio_mantenimiento=clave,
@@ -61,16 +96,23 @@ class RecordatorioService:
                     fecha_programada=fecha_programada,
                     estado="pendiente",
                     canal="portal",
-                ))
-                creados += 1
+                )
+                db.session.add(rec)
+                creados.append(rec)
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             logger.error("Error generando recordatorios: %s", str(e), exc_info=True)
             raise RuntimeError("No se pudieron generar los recordatorios.") from e
-        logger.info("Recordatorios de mantenimiento generados: %d", creados)
-        return creados
+        for r in creados:
+            RecordatorioService._notificar_cliente(
+                r.vehiculo, "recordatorio",
+                "Recordatorio de mantenimiento",
+                f"Te recordamos: {r.titulo} para el {r.fecha_programada.strftime('%d/%m/%Y')}.",
+            )
+        logger.info("Recordatorios de mantenimiento generados: %d", len(creados))
+        return len(creados)
 
     @staticmethod
     def crear_manual(vehiculo_id: int, titulo: str, descripcion: str | None,
@@ -93,6 +135,11 @@ class RecordatorioService:
         except Exception as e:
             db.session.rollback()
             raise RuntimeError("No se pudo crear el recordatorio.") from e
+        RecordatorioService._notificar_cliente(
+            vehiculo, "recordatorio",
+            "Nuevo recordatorio",
+            f"{recordatorio.titulo} — programado para el {recordatorio.fecha_programada.strftime('%d/%m/%Y')}.",
+        )
         return recordatorio
 
     @staticmethod

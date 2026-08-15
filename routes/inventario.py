@@ -112,7 +112,7 @@ def editar(id: int) -> Any:
                     tipo="ajuste",
                     cantidad=item.cantidad,
                     usuario_id=current_user.id,
-                    motivo="Ajuste por ediciÃ³n de producto",
+                    motivo="Ajuste por edición de producto",
                 )
             safe_commit()
             logger.info("Producto actualizado: %s", item.nombre)
@@ -281,8 +281,8 @@ def generar_alertas() -> Any:
         flash(str(e), "danger")
         return redirect(url_for("inventario.alertas"))
     if request.is_json:
-        return json_success(message=f"{creados} alertas de reposiciÃ³n generadas.")
-    flash(f"{creados} alertas de reposiciÃ³n generadas.", "success" if creados else "info")
+        return json_success(message=f"{creados} alertas de reposición generadas.")
+    flash(f"{creados} alertas de reposición generadas.", "success" if creados else "info")
     return redirect(url_for("inventario.alertas"))
 
 
@@ -306,10 +306,10 @@ def crear_categoria() -> Any:
             )
             db.session.add(cat)
             safe_commit()
-            logger.info("CategorÃ­a creada: %s", cat.nombre)
+            logger.info("Categoría creada: %s", cat.nombre)
             if request.is_json:
-                return json_success(message="CategorÃ­a creada.")
-            flash("CategorÃ­a creada", "success")
+                return json_success(message="Categoría creada.")
+            flash("Categoría creada", "success")
             return redirect(url_for("inventario.listar_categorias"))
         except Exception as e:
             db.session.rollback()
@@ -330,10 +330,10 @@ def editar_categoria(id: int) -> Any:
             cat.descripcion = form.descripcion.data
             cat.padre_id = form.padre_id.data or None
             safe_commit()
-            logger.info("CategorÃ­a actualizada: %s", cat.nombre)
+            logger.info("Categoría actualizada: %s", cat.nombre)
             if request.is_json:
-                return json_success(message="CategorÃ­a actualizada.")
-            flash("CategorÃ­a actualizada", "success")
+                return json_success(message="Categoría actualizada.")
+            flash("Categoría actualizada", "success")
             return redirect(url_for("inventario.listar_categorias"))
         except Exception as e:
             db.session.rollback()
@@ -352,15 +352,15 @@ def eliminar_categoria(id: int) -> Any:
             validate_csrf(csrf_token)
     except Exception:
         if request.is_json:
-            return jsonify({"error": "CSRF invÃ¡lido"}), 403
-        flash("Error de validaciÃ³n. Intenta de nuevo.", "danger")
+            return jsonify({"error": "CSRF inválido"}), 403
+        flash("Error de validación. Intenta de nuevo.", "danger")
         return redirect(url_for("inventario.listar_categorias"))
     cat = db.get_or_404(CategoriaInventario, id)
     items_asociados = Inventario.query.filter(Inventario.categoria_id == id).count()
     if items_asociados > 0:
         if request.is_json:
-            return json_error(message=f"No se puede eliminar: {items_asociados} producto(s) usan esta categorÃ­a")
-        flash(f"No se puede eliminar: {items_asociados} producto(s) usan esta categorÃ­a", "danger")
+            return json_error(message=f"No se puede eliminar: {items_asociados} producto(s) usan esta categoría")
+        flash(f"No se puede eliminar: {items_asociados} producto(s) usan esta categoría", "danger")
         return redirect(url_for("inventario.listar_categorias"))
     try:
         CategoriaInventario.query.filter(CategoriaInventario.padre_id == id).update(
@@ -368,10 +368,10 @@ def eliminar_categoria(id: int) -> Any:
         )
         db.session.delete(cat)
         safe_commit()
-        logger.info("CategorÃ­a eliminada: %s", cat.nombre)
+        logger.info("Categoría eliminada: %s", cat.nombre)
         if request.is_json:
-            return json_success(message="CategorÃ­a eliminada.")
-        flash("CategorÃ­a eliminada", "success")
+            return json_success(message="Categoría eliminada.")
+        flash("Categoría eliminada", "success")
         return redirect(url_for("inventario.listar_categorias"))
     except Exception as e:
         db.session.rollback()

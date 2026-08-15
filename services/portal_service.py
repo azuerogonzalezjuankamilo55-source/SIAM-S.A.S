@@ -73,7 +73,7 @@ class PortalService:
             OrdenTrabajo.query
             .filter(
                 OrdenTrabajo.cliente_id == cliente.id,
-                OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion"]),
+                OrdenTrabajo.estado.in_(["recibido", "diagnostico", "esperando_repuestos", "en_reparacion", "pruebas"]),
             )
             .order_by(OrdenTrabajo.created_at.desc())
             .limit(5)

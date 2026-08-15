@@ -1,0 +1,39 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i>Citas y Horarios</h5>
+        <small class="text-secondary">Reglas generales para la programación de citas. Los horarios de cada sede se administran en <a href="{{ url_for('sedes.index') }}">Sedes</a>.</small>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('configuracion.seccion', seccion='citas') }}" data-ajax="true">
+            {{ form.hidden_tag() }}
+            <fieldset {{ 'disabled' if not puede_editar }}>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.citas_intervalo_min.label.text }}</label>
+                        {{ form.citas_intervalo_min(class="form-control") }}
+                        {% for e in form.citas_intervalo_min.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.citas_min_anticipacion_horas.label.text }}</label>
+                        {{ form.citas_min_anticipacion_horas(class="form-control") }}
+                        {% for e in form.citas_min_anticipacion_horas.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{{ form.citas_cancelar_limite_horas.label.text }}</label>
+                        {{ form.citas_cancelar_limite_horas(class="form-control") }}
+                        {% for e in form.citas_cancelar_limite_horas.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="alert alert-light border small mt-3 mb-0">
+                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+                    Los valores en 0 desactivan la regla correspondiente (sin anticipación mínima ni límite de cancelación).
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" {{ 'disabled' if not puede_editar }}>
+                        <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i> Guardar
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

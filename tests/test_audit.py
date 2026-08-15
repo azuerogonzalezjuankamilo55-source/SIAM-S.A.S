@@ -36,11 +36,11 @@ class TestSecurityFixes:
         resp = client.get("/citas/cambiar-estado/1/completado", follow_redirects=True)
         assert resp.status_code in (405,), f"Expected 405, got {resp.status_code}"
 
-    def test_dashboard_api_stats_endpoint(self, client, db):
-        """DASH-1: /dashboard/api/stats must exist and return valid JSON."""
+    def test_dashboard_api_resumen_endpoint(self, client, db):
+        """DASH-1: /dashboard/api/resumen must exist and return valid JSON."""
         _crear_admin(db)
         _login(client)
-        resp = client.get("/dashboard/api/stats")
+        resp = client.get("/dashboard/api/resumen")
         assert resp.status_code == 200
         data = resp.get_json()
         assert isinstance(data, dict)

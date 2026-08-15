@@ -24,6 +24,26 @@
             {% if current_user.is_authenticated %}
             <span class="badge badge-soft-primary d-none d-md-inline">{{ current_user.rol }}</span>
             {% endif %}
+            {% if current_user.is_authenticated %}
+            <div class="dropdown" id="notificacionesDropdown">
+                <button class="btn btn-soft btn-icon position-relative" id="notifToggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge">0</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="notifToggle">
+                    <div class="px-3 py-2 fw-semibold border-bottom d-flex justify-content-between align-items-center">
+                        Notificaciones
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="notifMarcarTodas">Marcar leídas</button>
+                    </div>
+                    <div id="notifLista" class="notif-lista">
+                        <div class="px-3 py-3 text-muted small text-center">Cargando...</div>
+                    </div>
+                    <a href="{{ url_for('notificaciones.index') }}" class="d-block text-center small py-2 border-top text-decoration-none">
+                        Ver todas
+                    </a>
+                </div>
+            </div>
+            {% endif %}
             <button class="btn btn-soft btn-icon" id="darkModeToggle" title="Modo oscuro/claro">
                 <i class="fa-solid fa-moon"></i>
             </button>

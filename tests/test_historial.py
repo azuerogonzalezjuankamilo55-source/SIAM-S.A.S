@@ -71,6 +71,50 @@ class TestHistorialService:
         assert h.tipo == "observacion"
 
 
+class TestResumenYFicha:
+    def test_get_resumen_vacio(self, db):
+        _, v = _crear_cliente_vehiculo(db)
+        resumen = HistorialService.get_resumen(v.id)
+        assert resumen["total_registros"] == 0
+        assert resumen["visitas"] == 0
+        assert resumen["ultimo_kilometraje"] is None
+        assert resumen["total_gastado"] == 0
+
+    def test_get_resumen_con_datos(self, db):
+        c, v = _crear_cliente_vehiculo(db)
+        HistorialService.registrar(v.id, "cambio_aceite", "Cambio de aceite", kilometraje=20000)
+        HistorialService.registrar(v.id, "observacion", "ok", kilometraje=22000)
+        _crear_factura(db, c, v)
+        resumen = HistorialService.get_resumen(v.id)
+        assert resumen["ultimo_kilometraje"] == 22000
+        assert resumen["visitas"] >= 1
+        assert resumen["total_gastado"] > 0
+        assert resumen["conteo_por_tipo"].get("factura", 0) >= 1
+
+    def test_get_resumen_ignora_facturas_anuladas(self, db):
+        c, v = _crear_cliente_vehiculo(db)
+        cita, factura = _crear_factura(db, c, v)
+        factura.estado = "anulado"
+        db.session.commit()
+        resumen = HistorialService.get_resumen(v.id)
+        assert resumen["total_gastado"] == 0
+
+    def test_get_proximos_mantenimientos(self, db):
+        _, v = _crear_cliente_vehiculo(db)
+        HistorialService.registrar(v.id, "cambio_aceite", "Aceite", kilometraje=20000)
+        mantenimientos = HistorialService.get_proximos_mantenimientos(v.id)
+        aceite = next(m for m in mantenimientos if m["tipo"] == "cambio_aceite")
+        assert aceite["proximo_kilometraje"] == 25000
+        assert aceite["restante_km"] == 5000
+        assert aceite["estado"] == "al_dia"
+
+    def test_get_proximos_mantenimientos_sin_datos(self, db):
+        _, v = _crear_cliente_vehiculo(db)
+        mantenimientos = HistorialService.get_proximos_mantenimientos(v.id)
+        assert all(m["estado"] == "sin_datos" for m in mantenimientos)
+        assert all(m["proximo_kilometraje"] is None for m in mantenimientos)
+
+
 class TestAutoRegistro:
     def test_factura_autoregistra_historial(self, db):
         c, v = _crear_cliente_vehiculo(db)

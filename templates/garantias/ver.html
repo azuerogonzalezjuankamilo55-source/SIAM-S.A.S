@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Garantía {{ garantia.codigo }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Garantía {{ garantia.codigo }}</h4>
+    <a href="{{ url_for('garantias.listar') }}" class="btn btn-secondary btn-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Cliente</h6>
+                <p class="mb-1">{{ garantia.cliente.nombre }}</p>
+                <p class="mb-0 small text-muted">{{ garantia.cliente.telefono or "" }} {{ garantia.cliente.correo or "" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Vehículo</h6>
+                <p class="mb-1">{{ garantia.vehiculo.marca }} {{ garantia.vehiculo.modelo }} - {{ garantia.vehiculo.placa }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Vigencia</h6>
+                <p class="mb-0">Inicio: {{ garantia.fecha_inicio.strftime('%d/%m/%Y') }}</p>
+                <p class="mb-0">Vence: {{ garantia.fecha_fin.strftime('%d/%m/%Y') }} ({{ garantia.meses_validez }} meses)</p>
+                {% if garantia.estado == "activa" %}
+                <span class="badge bg-{{ 'success' if garantia.dias_restantes > 15 else 'warning' }} mt-2">{{ garantia.dias_restantes }} días restantes</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Estado</h6>
+                <span class="badge bg-{{
+                    {'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'dark'}[garantia.estado]
+                }}">{{ labels[garantia.estado] }}</span>
+                {% if garantia.orden_trabajo_id %}
+                <p class="small mt-2 mb-0">
+                    OT: <a href="{{ url_for('ordenes_trabajo.ver', id=garantia.orden_trabajo_id) }}">{{ garantia.orden_trabajo.numero if garantia.orden_trabajo else garantia.orden_trabajo_id }}</a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Descripción</h6>
+                <p class="mb-0">{{ garantia.descripcion }}</p>
+                {% if garantia.nota_reclamacion %}
+                <hr>
+                <h6 class="text-muted text-uppercase small">Nota de reclamación</h6>
+                <p class="mb-0">{{ garantia.nota_reclamacion }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if garantia.estado in ("activa",) %}
+<div class="mt-3">
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#reclamarModal">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i>Registrar reclamación
+    </button>
+</div>
+<div class="modal fade" id="reclamarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('garantias.cambiar_estado', id=garantia.id, estado='reclamada') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar reclamación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label class="form-label">Nota de reclamación</label>
+                    <textarea name="nota" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

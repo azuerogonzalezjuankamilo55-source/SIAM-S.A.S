@@ -7,422 +7,323 @@ automotrices. Se actualiza al finalizar cada fase.
 - **Producción**: Render + Neon PostgreSQL (Linux).
 - **Regla de oro**: no romper funcionalidad existente; cada fase deja todos los tests en verde.
 
+**Estados usados:**
+- ✅ **COMPLETADA** — implementada y verificada por tests.
+- 🟡 **PARCIAL** — existe una base, falta funcionalidad importante.
+- 🔴 **PENDIENTE** — no iniciada.
+- ⚠️ **REQUIERE REVISIÓN** — implementada pero necesita revisión/validación.
+
+**Prioridades:**
+- **P0 — crítico** · **P1 — importante** · **P2 — mejora** · **P3 — futuro**
+
 ---
 
-## Estado del proyecto
+## ESTADO ACTUAL DEL PROYECTO
+
+**Tests: `374 passed, 1 skipped`** — la suite completa está **verde**.
+
+- El único skip corresponde al PDF de WeasyPrint en Windows (faltan libs nativas pango/gobject);
+  tiene fallback en runtime y debe validarse en Linux/Render.
+- Las últimas fases implementadas (Decimal/migraciones, historial/ficha técnica, cotizaciones,
+  garantías, notificaciones por rol, panel de configuración) no rompieron ninguna prueba previa.
+- Queda documentado en `FINAL_AUDIT.md`, `docs/PRE_PRODUCTION_CHECKLIST.md` y `docs/auditoria.md`
+  el estado de auditoría y pre-producción (seguridad, rendimiento, SEO, accesibilidad).
+
+**Módulos activos en producción de código** (blueprints registrados en `app.py`):
+`auth`, `dashboard`, `clientes`, `vehiculos`, `servicios`, `mecanicos`, `citas`, `facturas`,
+`inventario`, `ordenes_trabajo`, `assistant` (chat IA), `sedes` (mapa/asistencias), `api`
+(asistencia por ubicación), `portal` (cliente), `inteligencia` (IA 2.0), `recordatorios`,
+`reportes`, `notificaciones`, `cotizaciones`, `garantias`, `configuracion` (panel).
+
+---
+
+## Tabla de fases
 
 | Fase | Descripción | Estado | Tests |
 |------|-------------|--------|-------|
-| 0 | Dependencias de reportes/PDF | ✅ Completa | 37/37 |
-| 1 | Portal del Cliente | ✅ Completa | 51/51 |
-| 2 | Historial del Vehículo | ✅ Completa | 63/63 |
-| 3 | Órdenes de Trabajo Profesionales | ✅ Completa | 81/81 |
-| 4 | Dashboard Pro | ✅ Completa | 89/89 |
-| 5 | IA 2.0 | ✅ Completa | 102/102 |
-| 6 | Recordatorios | ✅ Completa | 120/120 |
-| 7 | Inventario 2.0 | ✅ Completa | 147/147 |
-| 8 | Reportes | ✅ Completa | 160/160 |
-| 9 | Mejora Visual (imágenes, logo, dashboard, login, landing) | ✅ Completa | 161/161 |
-| 10 | Panel de Configuración | ⏳ Pendiente | — |
-| 11 | Multisucursal (sedes con foto) | ⏳ Pendiente | — |
-| 12 | PWA | ⏳ Pendiente | — |
-| 13 | Calidad (QA integral) | ⏳ Pendiente | — |
+| FASE 1 | Decimal/migraciones | ✅ COMPLETADA | suite verde |
+| FASE 10 | Historial / ficha técnica | ✅ COMPLETADA | `test_historial.py` |
+| FASE 11 | Cotizaciones | ✅ COMPLETADA | `test_fase11_cotizaciones.py` |
+| FASE 12 | Garantías | ✅ COMPLETADA | `test_fase12_garantias.py` |
+| FASE 14 | Notificaciones por rol | ✅ COMPLETADA | `test_notificaciones.py` |
+| FASE 15 | Panel de Configuración centralizado | ✅ COMPLETADA | `test_fase15_configuracion.py` |
+| — | Bloques anteriores (mapa, IA, archivos, permisos, AJAX, etc.) | ✅ COMPLETADAS | `test_fase*.py` |
+| — | Panel de Configuración | ✅ COMPLETADA | `test_fase15_configuracion.py` |
+| — | Multisucursal (operación por sede) | 🟡 PARCIAL | `test_fase3_sedes.py` |
+| — | PWA | 🟡 PARCIAL | — |
+| — | Calidad (QA integral y cierre) | ⚠️ REQUIERE REVISIÓN | — |
+| — | Fases 2–9, 13, 16–22 del plan maestro | 🔴 PENDIENTE | — |
 
 ---
 
-## FASE 0 — Dependencias
+## Fases completadas
 
-### Cambios
-- `requirements.txt`: se agregaron `openpyxl==3.1.5`, `weasyprint==69.0`, `cffi==1.17.1`.
+### FASE 1 — Decimal/migraciones — ✅ COMPLETADA · P0
 
-### Notas
-- openpyxl ya estaba instalado en el venv (3.1.5) → reportes Excel listos para renderizar en Linux.
-- WeasyPrint instalado (v69.0) pero **roto en Windows** (faltan libs nativas pango/gobject).
-  El PDF tiene fallback en runtime: si falla, muestra mensaje flash y redirige. Debe validarse en Render/Linux.
+**Objetivo:** garantizar precisión monetaria (evitar errores de flotantes) y un esquema de
+base de datos estable y migrado.
 
----
+**Funcionalidades existentes**
+- Montos monetarios con `Decimal` y columnas `db.Numeric(10,2)` / `Numeric(4,2)` (IVA) en:
+  `models/factura.py` (+ `facturas_detalle`), `pago_factura.py`, `cotizacion.py`,
+  `cotizacion_item.py`, `inventario.py` (costo promedio ponderado), `servicio.py`,
+  `configuracion_taller.py` (IVA configurable), `orden_trabajo.py` y `orden_trabajo_repuesto.py`.
+- Cálculos de IVA y totales con `Decimal.quantize` (cotizaciones, facturas).
+- Corrección del import `Decimal` (commit `2abe911`).
+- Migraciones de esquema aplicadas (ver `migrations/versions/`).
 
-## FASE 1 — Portal del Cliente
+**Qué falta:** verificación/aplicación de las migraciones contra la base de Neon en producción.
 
-### Objetivo
-Un portal web donde el cliente registra su vehículo, agenda/cancela citas, consulta facturas,
-pagos, órdenes y su historial, y gestiona su perfil.
-
-### Modelos modificados
-- `models/Usuario.py`:
-  - Nuevo `cliente_id` (FK a `clientes.id`, nullable).
-  - Relación `cliente` → `Cliente`.
-  - Propiedades `es_cliente` / `es_admin` (por rol o vínculo).
-  - Rol por defecto ahora `"cliente"`.
-
-### Modelos nuevos
-- `models/historial_vehiculo.py` → `HistorialVehiculo` (usado por la Fase 2):
-  - `TIPOS_HISTORIAL` / `TIPOS_HISTORIAL_LABELS`.
-  - Backrefs únicos (`historial`, `historial_vehicular` ×3) para evitar conflictos de mapeo
-    con `OrdenTrabajo.historial`.
-
-### Formularios nuevos
-- `forms/portal_forms.py`: `SolicitarCitaForm`, `PerfilForm`, `CambiarPasswordForm`.
-
-### Servicios nuevos
-- `services/portal_service.py`:
-  - `PortalData` (dataclass) + `PortalService` (dashboard, vehículos, facturas, pagos, órdenes, historial).
-
-### Rutas nuevas
-- `routes/portal.py` (Blueprint `portal_bp`):
-  - `/portal/` (dashboard), `/vehiculos`, `/vehiculos/<id>`, `/citas`, `/citas/solicitar`,
-    `/citas/<id>/cancelar`, `/facturas`, `/facturas/<id>`, `/facturas/<id>/pdf`,
-    `/pagos`, `/ordenes`, `/ordenes/<id>`, `/historial`, `/perfil`, `/perfil/password`.
-
-### Rutas modificadas
-- `routes/auth.py`: login con redirección según rol (cliente → portal, admin → dashboard);
-  el registro crea o vincula un `Cliente` por correo.
-- `routes/__init__.py` y `app.py`: registro de `portal_bp`.
-
-### Plantillas
-- `templates/partials/sidebar.html`: menú según rol (`es_cliente` → portal, si no → admin).
-- Portal: `vinculo_pendiente.html`, `index.html`, `vehiculos.html`, `vehiculo_detalle.html`,
-  `citas.html`, `solicitar_cita.html`, `facturas.html`, `factura_detalle.html`, `pagos.html`,
-  `ordenes.html`, `orden_detalle.html`, `historial.html`, `perfil.html`.
-
-### Tests
-- `tests/test_portal.py`: 14 tests (registro/login por rol, dashboard, vehículos propios/ajenos,
-  citas, facturas, perfil, contraseña).
-
-### Migración
-- `migrations/versions/77ac884306b6_portal_cliente_historial_vehiculo.py`
-  (crea `historial_vehiculo`, agrega `usuarios.cliente_id` + FK). Aplicada a Neon.
+**Prioridad:** P0 — crítico.
 
 ---
 
-## FASE 2 — Historial del Vehículo
+### FASE 10 — Historial / ficha técnica — ✅ COMPLETADA · P1
 
-### Objetivo
-Historial técnico por vehículo con **registro automático** desde el flujo de negocio
-(citas, facturas, órdenes) y línea de tiempo visible para el admin.
+**Objetivo:** ficha técnica por vehículo con resumen de actividad, inversión acumulada y
+mantenimientos preventivos sugeridos.
 
-### Servicios nuevos
-- `services/historial_service.py` → `HistorialService`:
-  - `registrar(...)`: crea entrada validando `tipo` (ver `TIPOS_HISTORIAL`).
-  - `_tipo_para_servicio(...)`: mapea por palabras clave (aceite, frenos, alineación,
-    balanceo, llantas, batería, revisión, diagnóstico, reparación, mantenimiento).
-  - `registrar_desde_factura(factura)`: una entrada por servicio + entrada resumen `factura`.
-  - `registrar_desde_orden(orden)`: entrada `reparacion` al entregar la OT.
-  - `registrar_desde_cita(cita)`: entrada `cita` al completarla.
-  - `get_historial_vehiculo(vehiculo_id)`: orden descendente por `fecha` + `created_at`.
-  - `agregar_observacion(...)`: registro manual tipo `observacion`.
+**Funcionalidades existentes** (`services/historial_service.py`, `routes/vehiculos.py`,
+`templates/vehiculos/historial.html`)
+- `HistorialService.get_resumen(vehiculo_id)` → visitas, último kilometraje, último servicio,
+  total invertido (facturas no anuladas) y conteo por tipo de registro.
+- `HistorialService.get_proximos_mantenimientos(vehiculo_id)` con `INTERVALOS_MANTENIMIENTO`
+  (aceite 5.000 km, frenos 15.000, balanceo/alineación 10.000, llantas 40.000, batería 30.000)
+  y estados `urgente` / `proximo` / `al_dia` / `sin_datos`.
+- Vista con 4 tarjetas de ficha técnica, tarjetas de próximos mantenimientos con badges de
+  estado y botón de imprimir (usa el print CSS existente en `static/css/siam.css`).
+- Auto-registro del historial desde factura, OT entregada y cita completada.
 
-### Rutas modificadas (auto-registro)
-- `routes/citas.py` → `cambiar_estado`: al pasar a `completado` registra historial de cita.
-- `routes/ordenes_trabajo.py` → `cambiar_estado`: al pasar a `entregado` registra la OT.
-- `services/factura_service.py` → `FacturaService.generar()`: registra historial de factura
-  tras el commit (con `try/except` que no bloquea la factura si falla el historial).
+**Qué falta:** exportación PDF/Excel de la ficha técnica (mejora P3, no bloqueante).
 
-### Rutas nuevas
-- `routes/vehiculos.py` → `/vehiculos/historial/<vehiculo_id>` (GET/POST):
-  - GET: línea de tiempo del vehículo.
-  - POST: alta manual de registro (tipo, descripción, kilometraje).
-
-### Plantillas nuevas
-- `templates/vehiculos/historial.html`: línea de tiempo con badges por tipo, foto si existe,
-  y formulario de registro manual.
-- `templates/vehiculos/listar.html`: botón "Historial" por vehículo.
-
-### Tests
-- `tests/test_historial.py`: 12 tests (service, tipos inválidos, orden de timeline,
-  auto-registro por factura/cita/OT, rutas, alta manual, 404).
+**Prioridad:** P1 — importante.
 
 ---
 
-## FASE 3 — Órdenes de Trabajo Profesionales
+### FASE 11 — Cotizaciones — ✅ COMPLETADA · P1
 
-### Objetivo
-Convertir la OT en un documento profesional: checklist de tareas con tiempos, repuestos
-asociados con control de inventario, fotos del trabajo, firmas de mecánico/cliente y
-registro de entrega (kms y combustible de salida).
+**Objetivo:** presupuestos con ítems, aprobación del cliente y conversión en orden de trabajo.
 
-### Modelos nuevos
-- `models/orden_trabajo_item.py` → `OrdenTrabajoItem` (checklist): descripción, `completado`,
-  `tiempo_minutos`, `posicion`.
-- `models/orden_trabajo_foto.py` → `OrdenTrabajoFoto`: `path`, `descripcion`.
-- `models/orden_trabajo_repuesto.py` → `OrdenTrabajoRepuesto`: `inventario_id`, `cantidad`,
-  `precio_unitario`, `nota`, propiedad `subtotal`.
+**Funcionalidades existentes**
+- `models/cotizacion.py` + `models/cotizacion_item.py`: estados
+  `pendiente / aprobada / rechazada / convertida / vencida`.
+- `services/cotizacion_service.py`: crear cotización, agregar ítem desde servicio o ítem libre,
+  eliminar ítem, recálculo de IVA/descuento, cambiar estado, `convertir_a_ot` (genera la OT con
+  los ítems de servicio), `marcar_vencidas`, consulta por cliente/vehículo.
+- `routes/cotizaciones.py` (`/cotizaciones/`) y vistas en `templates/cotizaciones/`.
+- Portal del cliente: ver, aprobar y rechazar cotizaciones (`templates/portal/cotizaciones.html`).
+- Notificaciones al cliente al crear/enviar y al aprobar/rechazar.
+- Migración `a8c4d2f6e1b9_cotizaciones_garantias.py`.
 
-### Modelo modificado
-- `models/orden_trabajo.py` (OrdenTrabajo):
-  - Columnas nuevas: `kms_ingreso`, `nivel_combustible_ingreso`, `kms_salida`,
-    `nivel_combustible_salida`, `fecha_entrega`, `firma_mecanico_path`, `firma_cliente_path`.
-  - Relaciones `items`, `fotos`, `repuestos` (cascade delete-orphan, sin backrefs para
-    evitar conflictos de mapeo).
-  - Propiedades: `items_completados`, `tiempo_total_minutos`, `total_repuestos`.
+**Qué falta:** vista imprimible/PDF de la cotización (mejora P3).
 
-### Servicios nuevos
-- `services/orden_trabajo_service.py` → `OrdenTrabajoService`:
-  - Checklist: `agregar_item`, `toggle_item`, `actualizar_item`, `eliminar_item`.
-  - Repuestos: `agregar_repuesto` (valida stock, descuenta inventario y registra
-    `MovimientoInventario` tipo `salida` con referencia a la OT), `eliminar_repuesto`
-    (devuelve stock con movimiento `entrada`).
-  - Fotos: `guardar_foto` (valida extensión, guarda en `static/uploads/ot/`),
-    `eliminar_foto`.
-  - Firmas: `guardar_firma` (mecánico/cliente en `static/uploads/firmas/`).
-  - Entrega: `entregar` (fija estado `entregado`, `fecha_entrega`, kms y combustible de
-    salida; registra historial del vehículo).
-
-### Formularios modificados
-- `forms/orden_trabajo_forms.py`: `OrdenTrabajoForm` con `kms_ingreso` y
-  `nivel_combustible_ingreso`.
-
-### Rutas nuevas (Blueprint `ordenes_trabajo`)
-- `/items/agregar/<id>`, `/items/toggle/<item_id>`, `/items/eliminar/<item_id>`.
-- `/repuestos/agregar/<id>`, `/repuestos/eliminar/<repuesto_id>`.
-- `/fotos/agregar/<id>`, `/fotos/eliminar/<foto_id>`.
-- `/firma/<id>` (subir firma mecánico/cliente).
-- `/entregar/<id>` (finalizar entrega).
-
-### Rutas modificadas
-- `ver/<id>`: pasa inventario y niveles de combustible a la plantilla.
-- `crear`: persiste `kms_ingreso` y `nivel_combustible_ingreso`.
-
-### Plantillas
-- `templates/ordenes_trabajo/ver.html`: tarjeta de checklist (progreso, toggle, tiempos),
-  repuestos (tabla + alta/eliminación), fotos (grid + subida/borrado), firmas
-  (subida y vista previa) y tarjeta de entrega con datos de salida.
-
-### Tests
-- `tests/test_ot_profesional.py`: 18 tests (checklist, stock/repuestos, fotos, firmas,
-  entrega con historial de vehículo, rutas).
-
-### Migración
-- `migrations/versions/3a1c9d55b0e2_ot_profesional_checklist_fotos_firmas_repuestos.py`
-  (tablas `ordenes_trabajo_items/fotos/repuestos` + columnas nuevas en `ordenes_trabajo`).
-  Aplicada a Neon (`3a1c9d55b0e2` head).
+**Prioridad:** P1 — importante.
 
 ---
 
-## FASE 4 — Dashboard Pro
+### FASE 12 — Garantías — ✅ COMPLETADA · P1
 
-### Objetivo
-Ampliar el dashboard con indicadores de gestión del taller (cartera, ticket promedio,
-cumplimiento, productividad).
+**Objetivo:** registro de garantías, generación automática desde OT/servicio y gestión de
+reclamaciones.
 
-### Servicios modificados
-- `services/dashboard_service.py` → `DashboardData` y `DashboardService.get_data()`:
-  - `por_cobrar`: saldo total de facturas pendientes/parciales.
-  - `ticket_promedio`: facturación total / número de facturas (excluye anuladas).
-  - `ot_retrasadas_count` / `ot_retrasadas`: OTs con `fecha_estimada_entrega` vencida
-    y sin entregar.
-  - `tasa_completacion_citas`: % de citas completadas.
-  - `ingresos_por_metodo`: total por método de pago.
-  - `ot_por_mecanico`: OTs entregadas por mecánico.
-  - `ot_en_proceso`: OTs activas ordenadas por antigüedad.
+**Funcionalidades existentes**
+- `models/garantia.py`: estados `activa / caducada / reclamada / anulada`, con código
+  secuencial (`GAR-000001`), fechas de inicio/fin y nota de reclamación.
+- `services/garantia_service.py`: `crear`, `crear_para_ot`, `crear_desde_servicio` (usa
+  `servicio.garantia_meses`), `cambiar_estado`, `actualizar_estados_vencidas`, consulta por
+  cliente/vehículo.
+- `routes/garantias.py` (`/garantias/`) y vistas en `templates/garantias/`.
+- Portal del cliente: consulta de garantías (`templates/portal/garantias.html`).
+- Notificaciones: cliente al crear la garantía; personal al reclamarla.
+- Migración `a8c4d2f6e1b9_cotizaciones_garantias.py`.
 
-### Rutas modificadas
-- `routes/dashboard.py` `/dashboard/api/stats`: expone los nuevos KPIs.
+**Qué falta:** aviso/agendamiento programado de vencimiento fuera del refresco de listado (P3).
 
-### Plantilla
-- `templates/dashboard/index.html`: fila de KPIs Pro (por cobrar, ticket promedio,
-  OT retrasadas, % citas completadas), gráficas de ingresos por método de pago y
-  productividad por mecánico, tablas de OTs retrasadas y en proceso.
-
-### Tests
-- `tests/test_dashboard_pro.py`: 8 tests (métricas vacías, cartera/ticket, retrasadas,
-  tasa de completación, métodos de pago, productividad, rutas index/api).
-
-### Nota
-- Sin cambios de esquema → sin migración nueva.
+**Prioridad:** P1 — importante.
 
 ---
 
-## FASE 5 — IA 2.0 ✅ Implementada
+### FASE 14 — Notificaciones por rol — ✅ COMPLETADA · P1
 
-Asistencia inteligente sobre datos del taller: diagnóstico por síntomas, plan de
-mantenimiento predictivo y resumen del taller en lenguaje natural.
+**Objetivo:** notificaciones in-app dirigidas por rol (cliente y personal), con página propia
+de consulta.
 
-### Archivos nuevos
-- `services/inteligencia_service.py`: `InteligenciaService` con `BASE_CONOCIMIENTO`
-  (10 reglas de síntomas: motor, frenos, vibración, aceite, batería, temperatura,
-  dirección, suspensión, humo, llantas). Métodos `diagnosticar(vehiculo_id, sintomas)`,
-  `recomendar_mantenimiento(vehiculo_id)` y `resumen_taller()`.
-- `routes/inteligencia.py`: blueprint `ia_bp` en `/ia/` (página, POST diagnóstico,
-  plan de mantenimiento por vehículo).
-- `templates/ia/index.html` y `templates/ia/mantenimiento.html`.
+**Funcionalidades existentes**
+- `models/notificacion.py`: `Notificacion` con 8 tipos (`cita, orden, factura, cotizacion,
+  garantia, recordatorio, pago, sistema`) y label legible.
+- `services/notification_service.py`: `notify`, `notify_roles`, `notify_cliente`, `notify_staff`,
+  `unread_count`, `list_for`, `list_all`, `eliminar`, `mark_read`, `mark_all_read`, `to_dict`.
+  Protección **IDOR**: marcar/eliminar solo por el dueño de la notificación.
+- `routes/notificaciones.py` (`/notificaciones/`): página con filtros por tipo y pendientes,
+  borrado (JSON o redirect), y API AJAX (`/api/no-leidas`, `/api/listar`, `/api/leer`,
+  `/api/leer-todas`).
+- `templates/notificaciones/index.html` + campanilla con contador y "Ver todas" en el navbar.
+- Disparadores por rol:
+  - OT creada → cliente; OT creada con mecánico → notifica al mecánico
+    (`notify_roles(["mecanico"], ...)`); OT `listo_entrega` / `entregado` → cliente.
+  - Factura creada → cliente; pago registrado en factura → cliente (`tipo "pago"`).
+  - Cita creada → cliente; cita completada → cliente.
+  - Nueva solicitud de cita en el portal → personal; cita cancelada en el portal → personal.
+  - Cotización creada → cliente; aprobación/rechazo por el cliente → personal y cliente.
+  - Garantía creada → cliente; garantía reclamada → personal.
+  - Recordatorio generado/creado → cliente.
+- Migración `c1a9d4f2e6b8_notificaciones.py`.
 
-### Lógica
-- `diagnosticar`: empareja el texto libre contra las keywords; devuelve causas
-  probables, urgencia (baja/media/alta), servicios activos sugeridos del catálogo
-  y un consejo (prioridad alta → no circular y cita inmediata).
-- `recomendar_mantenimiento`: lee el historial del vehículo y clasifica cada ítem
-  (aceite/frenos/balanceo/alineación/rotación/batería) como `al_dia`, `pendiente`,
-  `vencido` o `sin_dato` según antigüedad y kilometraje.
-- `resumen_taller`: construye un párrafo con los KPIs del `DashboardService`.
+**Qué falta:** canal externo (email/WhatsApp/push) para las notificaciones (P3).
 
-### Integración
-- Blueprint registrado en `app.py`; enlace "IA 2.0 — Inteligencia" en el sidebar.
-
-### Tests
-- `tests/test_inteligencia.py`: 13 tests (diagnóstico por síntoma, urgencias,
-  mantenimiento con/sin historial, resumen, rutas con login y POST).
-
-### Suite completa
-- 102/102 pruebas pasando.
+**Prioridad:** P1 — importante.
 
 ---
 
-## FASE 6 — Recordatorios ✅ Implementada
+### FASE 15 — Panel de Configuración centralizado — ✅ COMPLETADA · P1
 
-Mantenimientos programados y notificaciones a clientes: el sistema detecta
-mantenimientos vencidos/por vencer desde el historial y los muestra tanto al admin
-como al cliente en su portal.
+**Objetivo:** panel exclusivo para administradores en `/configuracion/` que centralice la
+configuración del taller (empresa, apariencia, citas, notificaciones, archivos, asistente IA,
+seguridad y sistema), reutilizando la base existente de `ConfiguracionTaller`.
 
-### Archivos nuevos
-- `models/recordatorio.py`: modelo `Recordatorio` (vehiculo, tipo, servicio de
-  mantenimiento, título, descripción, fecha programada, estado, canal) más constantes
-  `TIPOS_RECORDATORIO`, `ESTADOS_RECORDATORIO`, `TIPOS_MANTENIMIENTO` y labels.
-- `services/recordatorio_service.py`: `RecordatorioService` con `generar_mantenimientos()`
-  (reusa `InteligenciaService.recomendar_mantenimiento`, no duplica pendientes/enviados),
-  `crear_manual()`, `cambiar_estado()`, `get_todos()` y `get_para_cliente()`.
-- `routes/recordatorios.py`: blueprint `recordatorios_bp` en `/recordatorios/` (listado
-  con filtros, generar automático, crear manual, cambiar estado). Solo admin.
-- `templates/recordatorios/index.html` (admin) y `templates/portal/recordatorios.html`
-  (cliente, con botón "Agendar cita").
+**Funcionalidades existentes**
+- `routes/configuracion.py` (blueprint `/configuracion/`, guard `staff_blueprint_guard`):
+  `index` redirige a `empresa`; `seccion/<seccion>` para las 9 secciones
+  (`empresa, sedes, apariencia, citas, notificaciones, archivos, ia, seguridad, sistema`);
+  POST de lectura aborta 405; `sistema_comprobar` (POST → JSON) y `quitar_logo` (POST).
+- **Permisos:** solo `admin` escribe (`_admin_o_403`, AJAX → 403 JSON / form → redirect);
+  staff (`recepcion`, `mecanico`) lee; `cliente` redirigido a `/portal/`.
+- **AJAX:** guardado con `Accept: application/json` + `X-CSRFToken`; `_es_ajax()` distingue
+  peticiones JSON (comprueba `request.mimetype` o cabecera `Accept`) porque `request.is_json`
+  es `False` para FormData.
+- **Empresa:** contacto completo (nombre, NIT, ciudad, dirección, teléfono, WhatsApp, email,
+  sitio web, redes), facturación (régimen, prefijo, resolución DIAN, IVA) y logo con
+  `ImageService` (guardar/eliminar).
+- **Apariencia:** colores HEX validados (`validar_hex()`, `#RRGGBB`/`#RGB`, normalizados a
+  mayúsculas) inyectados como variables CSS en `base.html` vía context processor
+  `inject_appearance` (`--siam-primary`, `--siam-primary-strong`, `--siam-primary-soft`,
+  `--siam-accent`, `--siam-gradient`; fallbacks `#2563EB`, `#1D4ED8`, `#DBEAFE`, `#0F766E`).
+- **Citas:** duración de cita (15–240 min), anticipación mínima (0–720 h) y límite de
+  cancelación (0–720 h). La anticipación y el intervalo se **aplican** en `routes/citas.py`
+  (crear/editar) y `routes/portal.py` (`solicitar_cita`) vía
+  `ConfiguracionService.hora_en_intervalo()`.
+- **Notificaciones:** toggles email/SMS/WhatsApp y días de antelación de recordatorios
+  (1–90). El parámetro queda centralizado y listo para el scheduler externo (pendiente P3).
+- **Archivos:** sección de solo lectura con límites configurables por entorno
+  (`FILE_MAX_*`, `MAX_CONTENT_LENGTH`) y almacenamiento efímero documentado (Render).
+- **IA:** configuración del asistente existente (activado, nombre, tono
+  Profesional/Amigable/Técnico, mensaje de bienvenida — ya usado por
+  `routes/assistant.py`/`assistant_service.py` —, preguntas sugeridas en JSON una por línea,
+  contacto y mensaje de emergencia). Sin API externa nueva.
+- **Seguridad:** tarjetas de sesión (8 h), CSRF, rate limit, roles; tabla de usuarios con
+  último acceso (`usuario.last_access_at`, registrado al login). **Nunca** muestra
+  `SECRET_KEY`, `DATABASE_URL` ni tokens.
+- **Sistema:** versión (2.0.0), entorno, estado de BD, migración actual de `alembic_version`
+  y botón "Comprobar sistema" (`sistema_comprobar`) con 🟢/🟡/🔴.
+- `services/configuracion_service.py` (aplicación de secciones, validación HEX, `css_vars`,
+  `preguntas`, `estado_sistema`, `datos_sistema`, `datos_seguridad`) y formularios en
+  `forms/configuracion_forms.py` (Empresa/Apariencia/Citas/Notificaciones/IA).
+- Migración `b5d7e9a2c1f6_panel_configuracion_centralizado.py` (nuevas columnas en
+  `ConfiguracionTaller`, `last_access_at` en `usuario`).
+- Las rutas heredadas `/facturas/configuracion` y `/facturas/configuracion/quitar-logo` se
+  conservan intactas; el nuevo panel reutiliza la lógica de logo.
+- Auditado en `docs/CONFIGURATION_PANEL_AUDIT.md`.
 
-### Integración
-- Ruta `/portal/recordatorios` en `routes/portal.py` para el cliente.
-- Enlaces en el sidebar (admin y portal).
-- Migración `a4f2c8e6d1b3` (tabla `recordatorios` + índices) aplicada en Neon.
+**Qué falta (mejoras P3, no bloqueantes):** canal externo de notificaciones con scheduler que
+consuma `notif_recordatorio_dias`, backup/restore, previsualización de marca en vivo.
 
-### Tests
-- `tests/test_recordatorios.py`: 18 tests (generación con/sin historial, sin duplicados,
-  manual, estados, filtros, aislamiento por cliente, rutas admin y portal).
-
-### Suite completa
-- 120/120 pruebas pasando.
-
----
-
-## FASE 7 — Inventario 2.0 ✅ Implementada
-
-Control de stock, bajas de producto, kardex global, valorización y alertas de
-reposición integradas con el módulo de recordatorios.
-
-### Archivos nuevos
-- `services/inventario_service.py`: `InventarioService` con `registrar_movimiento()`
-  (valida tipo/cantidad y actualiza costo promedio ponderado), `dar_baja()`,
-  `restaurar()`, `valorizacion()` (valor total por cantidad×costo y por categoría),
-  `get_kardex()` (filtros por producto/tipo/rango) y `generar_alertas_reposicion()`
-  (crea `Recordatorio` tipo `reposicion` sin duplicar).
-- `templates/inventario/kardex.html`: libro de movimientos global con filtros.
-
-### Modelo
-- `models/inventario.py`: columnas nuevas `motivo_baja`, `fecha_baja`, `usuario_baja_id`;
-  propiedades `es_baja`, `stock_bajo`/`stock_critico_alcanzado` que ignoran dados de baja;
-  `registrar_movimiento` soporta tipo `baja` (stock → 0).
-- `models/movimiento_inventario.py`: tipo `baja` añadido a constantes/labels.
-- `models/recordatorio.py`: `vehiculo_id` ahora nullable y tipo `reposicion`
-  (alertas de stock sin vehículo asociado).
-
-### Rutas (inventario)
-- `listar`: oculta bajas por defecto (filtro "Incluir dados de baja"), cards de valorización.
-- Nuevas: `kardex`, `baja/<id>` (motivo obligatorio), `restaurar/<id>`,
-  `alertas/generar-recordatorios`.
-- `movimiento` y `editar` ahora pasan por `InventarioService`.
-
-### Integración
-- Alertas de reposición visibles en `/recordatorios/` (admin) y filtro tipo `reposicion`.
-- Enlace "Kardex" en el sidebar (submenú Inventario).
-- Migración `b7d3f1a2c9e4` (columnas de baja + `recordatorios.vehiculo_id` nullable) aplicada en Neon.
-
-### Tests
-- `tests/test_inventario.py`: 27 tests (movimientos entrada/salida/baja, costo promedio
-  ponderado, bajas/restauración, valorización, kardex, alertas de reposición con/sin
-  duplicado, rutas admin y visibilidad en recordatorios).
-
-### Suite completa
-- 147/147 pruebas pasando.
+**Prioridad:** P1 — importante.
 
 ---
 
-## FASE 8 — Reportes ✅ Implementada
+## Bloques anteriores implementados — ✅ COMPLETADAS
 
-Exportación de indicadores del taller a Excel (openpyxl) y PDF (WeasyPrint) con filtro
-por rango de fechas.
+Bloques construidos en iteraciones previas y verificados por la suite
+(`tests/test_fase*.py`, `test_portal.py`, `test_inventario.py`, `test_reportes.py`, etc.):
 
-### Archivos nuevos
-- `services/reporte_service.py`: `ReporteService.build_resumen(desde, hasta)` construye
-  un `ReporteData` con:
-  - KPIs: ingresos (facturas pagado/parcial, excluye anuladas), facturas del período,
-    ticket promedio, cartera pendiente, OTs entregadas, valor del inventario.
-  - Ingresos por día y por método de pago (con filtro de rango).
-  - Facturación por cliente (top 10) y servicios más vendidos (top 10 por cantidad).
-  - OTs por estado, productividad por mecánico y movimientos de inventario por tipo.
-  - Todo el filtrado/grupo usa `func.date(created_at)` — misma convención que el dashboard.
-- `routes/reportes.py`: blueprint `reportes_bp` en `/reportes/` (solo admin):
-  - `index` con formulario de rango de fechas (default: últimos 30 días).
-  - `excel`: genera libro con 7 hojas (Resumen, Ingresos por día, Métodos de pago,
-    Clientes, Servicios, Mecánicos, Inventario) y lo descarga como `.xlsx`.
-  - `pdf`: renderiza `reportes/pdf.html` con WeasyPrint; si falla (p. ej. Windows sin
-    libs nativas) muestra flash y redirige — patrón idéntico a `facturas/pdf`.
-- `templates/reportes/index.html` (vista con cards y tablas) y `templates/reportes/pdf.html`.
-
-### Integración
-- Blueprint importado y registrado en `routes/__init__.py` y `app.py`.
-- Enlace "Reportes" en el sidebar (staff).
-
-### Tests
-- `tests/test_reportes.py`: 14 tests (ingresos excluye anuladas, cartera, métodos de pago,
-  clientes, servicios, OTs/mecánicos, movimientos de inventario, filtro por fechas, rutas
-  admin/cliente, Excel con 7 hojas, PDF con skip si WeasyPrint no genera en el entorno).
-
-### Suite completa
-- 160/160 pruebas pasando (1 skip de PDF en Windows por libs nativas).
+| Bloque | Funcionalidades existentes | Verificación |
+|--------|---------------------------|--------------|
+| Separación empresa/cliente | Roles (`admin/recepcion/mecanico/cliente`), `usuarios.cliente_id`, portal separado del panel administrativo, configuración del taller (`ConfiguracionTaller`). | `test_fase6_permisos.py`, `test_portal.py` |
+| Dashboard empresarial | KPIs (ingresos, por cobrar, ticket promedio, OT retrasadas, % citas completadas, productividad por mecánico, asistencias activas) + actividad reciente. | `test_dashboard_pro.py`, `test_fase8_empresa.py` |
+| Dashboard cliente (portal) | Vehículos, citas, facturas, pagos, órdenes, historial, perfil, documentos. | `test_portal.py` |
+| Actividad en tiempo real | `/dashboard/api/actividad` + refresco AJAX sin recargar la página. | `test_fase9_ajax.py` |
+| Sistema de citas | Agenda con sede, servicio y validación de horarios. | `test_fase3_sedes.py` |
+| Órdenes de trabajo | Checklist, repuestos con inventario, fotos, firmas, entrega (kms/combustible), estado "pruebas". | `test_fase4_ordenes.py`, `test_ot_profesional.py` |
+| Mapa / sedes | Modelo `Sede`, mapa público, citas y cotizaciones con sede. | `test_fase1_mapa.py`, `test_fase3_sedes.py` |
+| Asistencia de emergencia | Solicitudes con ubicación (lat/lon), panel de gestión del personal (en camino/atendido/cancelado), cancelación del cliente. | `test_fase1_mapa.py`, `test_fase10_gestor_asistencias.py` |
+| Chat / asistente IA | Chat con memoria de contexto, intents (mecánica, agendar cita, sedes, precios, búsqueda), acciones clicables, IA 2.0 (diagnóstico y mantenimiento predictivo). | `test_fase3_asistente.py`, `test_fase67_chat_contexto.py`, `test_inteligencia.py` |
+| Búsqueda | Intents `buscar_cliente`, `buscar_vehiculo`, `buscar_factura`, `consultar_inventario`, stock bajo. | `test_fase3_asistente.py` |
+| AJAX | Refresco del dashboard, campanilla de notificaciones, operaciones JSON con `X-CSRFToken`. | `test_fase9_ajax.py` |
+| Sistema de imágenes | `ImageService` (validación extensión/mime/tamaño, orientación EXIF, optimización, miniaturas), logo del taller. | `test_fase5_archivos.py` |
+| Fotos y archivos | `StorageService` + `Adjunto`, fotos de historial (antes/durante/después), fotos y firmas de OT, portal de documentos. | `test_fase5_archivos.py` |
+| Sistema visual | Landing moderna, login con imagen lateral, dashboard con cards/iconos, modo oscuro, print CSS. | `test_fase2_landing.py` |
+| Responsive | Sidebar/navbar y vistas adaptadas a móvil (css/js propios). | suite general |
+| Seguridad | Decoradores por rol, guarda por blueprint, CSRF en todos los POST, headers de seguridad (CSP, HSTS), rate limiting, validación de entrada. | `test_fase6_permisos.py`, `test_audit.py` |
+| Tests | Suite completa de 345 tests + 1 skip, con fixtures de app/db/client. | — |
 
 ---
 
-## FASE 9 — Mejora Visual ✅ Implementada
+## Backlog — Fases pendientes
 
-Sistema de imágenes seguro (validación, optimización, miniaturas), logo dinámico
-del taller, imágenes en servicios/perfil/mecánicos, galerías antes/durante/después
-del historial, dashboard con iconos, login con imagen lateral y landing moderna.
+### Panel de Configuración — ✅ COMPLETADA · P1
 
-### Archivos nuevos
-- `services/image_service.py`: `ImageService` + `ImageError` (ver `docs/IMAGE_SYSTEM.md`).
-- `models/historial_foto.py`: `HistorialFoto` (tipo `antes/durante/despues`, path,
-  descripcion) + constantes `TIPOS_FOTO_HISTORIAL` y labels.
+- **Objetivo:** panel centralizado de configuración del taller por parte del admin.
+- **Funcionalidades existentes:** módulo propio `/configuracion/` con 9 secciones
+  (empresa, sedes, apariencia, citas, notificaciones, archivos, IA, seguridad, sistema),
+  permisos solo-admin de escritura, guardado AJAX con CSRF, apariencia por variables CSS,
+  validación de citas aplicada en agenda y portal, estado del sistema, y conservación de las
+  rutas heredadas de `/facturas/configuracion`. Ver `docs/CONFIGURATION_PANEL_AUDIT.md`.
+- **Qué falta (P3):** scheduler de recordatorios externos, backup/restore, previsualización
+  de marca en vivo.
+- **Prioridad:** P1.
 
-### Archivos modificados
-- `requirements.txt`: Pillow en sección `# Images`.
-- `app.py`: filtro Jinja `img_thumb` y `taller_config` global (`ConfiguracionTaller`).
-- `services/orden_trabajo_service.py`: fotos/firmas delegadas a `ImageService`.
-- `routes/facturas.py`: logo del taller vía `ImageService` + endpoint `quitar-logo`.
-- `routes/servicios.py`, `routes/mecanicos.py`, `routes/portal.py`: subida de
-  imagen/foto (subcarpetas `servicios`, `mecanicos`, `perfiles`).
-- `routes/vehiculos.py`: agregar/eliminar fotos del historial (subcarpeta `historial`).
-- `services/dashboard_service.py`: `DashboardData` con `total_servicios` y `total_facturas`.
-- Modelos: `servicios.imagen_path`, `usuarios.foto_path`, `mecanicos.foto_path`,
-  relación `HistorialVehiculo.fotos` (cascade delete-orphan).
-- Forms: `ServicioForm.imagen`, `MecanicoForm.foto`, `PerfilForm.foto`,
-  `TallerConfigForm.logo` (sin SVG).
-- Templates: dashboard con 8 mod-cards con iconos, login split con imagen lateral,
-  landing con hero/mockup, sidebar/navbar con logo/avatar, galerías con lightbox
-  en historial y OT, listados/forms de servicios y mecánicos con imagen/foto.
+### Multisucursal — 🟡 PARCIAL · P1
 
-### Migración
-- `migrations/versions/e6f2b7a3c9d1_mejora_visual_imagenes.py` (columnas
-  `imagen_path`/`foto_path` + tabla `historial_foto`). Aplicada a Neon
-  (`e6f2b7a3c9d1` head).
+- **Objetivo:** operación multi-taller con datos por sede.
+- **Funcionalidades existentes:** modelo `Sede` (dirección, teléfono, horario, lat/lon,
+  servicios en JSON), mapa público `/sedes`, citas con sede y validación de horarios
+  (`SedeService.sede_ocupada`), cotizaciones con sede, `seed_sedes`.
+- **Qué falta:** CRUD de sedes (admin), foto por sede, facturas/reportes por sede y
+  operación segmentada por sede.
+- **Prioridad:** P1.
 
-### Suite completa
-- 161/161 pruebas pasando (1 skip de PDF en Windows por libs nativas).
+### PWA — 🟡 PARCIAL · P2
+
+- **Objetivo:** aplicación instalable con soporte offline.
+- **Funcionalidades existentes:** `manifest.json`, iconos 192/512, theme color,
+  apple touch icon.
+- **Qué falta:** service worker, cache offline, instalación completa.
+- **Prioridad:** P2.
+
+### Calidad (QA integral y cierre) — ⚠️ REQUIERE REVISIÓN · P0
+
+- **Objetivo:** auditoría y validación integral pre-producción.
+- **Funcionalidades existentes:** suite 345 tests verde, `FINAL_AUDIT.md` (78/100 global),
+  checklist de pre-producción, auditoría de BD.
+- **Qué falta:** revisar/validar PDF WeasyPrint en Linux (Render), aplicar migraciones y
+  verificar en Neon, Redis para rate limiting (`RATELIMIT_STORAGE_URI`), corregir los ítems
+  pendientes de FINAL_AUDIT (pool, métodos de pago hardcodeados, SEO/accessibilidad).
+- **Prioridad:** P0.
+
+### Fases 2–9, 13, 15–22 del plan maestro — 🔴 PENDIENTE · por definir
+
+- El plan maestro (22 fases) no está versionado en el repositorio; las definiciones de estas
+  fases están pendientes de confirmar/detallar.
+- El trabajo ya implementado que podría corresponder a parte de esas fases está documentado
+  en "Bloques anteriores implementados" y **no se marca como fase completa hasta validar la
+  numeración oficial**.
+- **Prioridad:** a definir (P1–P3 según definición).
 
 ---
 
-## Pendientes (Fases 10-13)
+## PRÓXIMA FASE RECOMENDADA
 
-- **FASE 10 — Panel de Configuración**: parámetros del taller por admin.
-- **FASE 11 — Multisucursal**: soporte multi-taller (sedes, incluida foto por sede;
-  hoy la data de sedes es estática en `routes/sedes.py`).
-- **FASE 12 — PWA**: instalable, offline.
-- **FASE 13 — Calidad**: auditoría integral y cierre.
+**Completar la fase de Calidad/QA integral (P0)** o, en paralelo, **Multisucursal (P1).**
+
+Razones:
+1. El Panel de Configuración (FASE 15) quedó **completada**: módulo propio `/configuracion/`,
+   permisos solo-admin, apariencia, citas, notificaciones, IA, seguridad y sistema, con la
+   suite en 374 tests verde.
+2. La fase de **Calidad/QA integral** es requisito para producción: validación de PDF
+   (WeasyPrint) en Linux/Render, aplicación de migraciones en Neon y cierre de pendientes de
+   `FINAL_AUDIT.md`.
+3. **Multisucursal** es la siguiente candidata funcional (P1): CRUD de sedes (admin),
+   foto por sede y facturas/reportes por sede, apoyada en la base de `test_fase3_sedes.py`.
 
 ---
 
@@ -431,3 +332,6 @@ del historial, dashboard con iconos, login con imagen lateral y landing moderna.
   En configuración de pruebas el CSRF del test client está desactivado.
 - PDF (WeasyPrint): implementado con fallback; requiere validación en Linux (Render).
 - Gunicorn no corre en Windows (limitación histórica); producción usa Render/Linux.
+- El panel de configuración guarda solo colores HEX validados; nunca CSS arbitrario.
+- Números de fase del plan maestro: FASE 1, 10, 11, 12, 14, 15 ya verificadas; los números 2–9,
+  13 y 16–22 están pendientes de confirmación oficial antes de marcarse como completadas.

@@ -1,0 +1,57 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="fa-solid fa-robot me-2" aria-hidden="true"></i>Asistente IA</h5>
+        <small class="text-secondary">Personalización del chat virtual. Solo se configuran los elementos que el sistema ya implementa (mensajes, nombre, tono y preguntas sugeridas).</small>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('configuracion.seccion', seccion='ia') }}" data-ajax="true">
+            {{ form.hidden_tag() }}
+            <fieldset {{ 'disabled' if not puede_editar }}>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch mt-1">
+                            {{ form.ia_activado(class="form-check-input", role="switch") }}
+                            <label class="form-check-label">{{ form.ia_activado.label.text }}</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.ia_nombre.label.text }}</label>
+                        {{ form.ia_nombre(class="form-control") }}
+                        {% for e in form.ia_nombre.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.ia_tono.label.text }}</label>
+                        {{ form.ia_tono(class="form-select") }}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">{{ form.ia_mensaje_bienvenida.label.text }}</label>
+                        {{ form.ia_mensaje_bienvenida(class="form-control", rows="4") }}
+                        <small class="text-muted">{{ form.ia_mensaje_bienvenida.description }}</small>
+                        {% for e in form.ia_mensaje_bienvenida.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">{{ form.ia_mensaje_emergencia.label.text }}</label>
+                        {{ form.ia_mensaje_emergencia(class="form-control", rows="3") }}
+                        {% for e in form.ia_mensaje_emergencia.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.ia_contacto.label.text }}</label>
+                        {{ form.ia_contacto(class="form-control") }}
+                        {% for e in form.ia_contacto.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.ia_preguntas_sugeridas.label.text }}</label>
+                        {{ form.ia_preguntas_sugeridas(class="form-control", rows="6") }}
+                        <small class="text-muted">{{ form.ia_preguntas_sugeridas.description }}</small>
+                        {% for e in form.ia_preguntas_sugeridas.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" {{ 'disabled' if not puede_editar }}>
+                        <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i> Guardar
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

@@ -55,6 +55,7 @@
                         <option value="diagnostico" {{ "selected" if orden.estado == "diagnostico" else "" }}>Diagnóstico</option>
                         <option value="esperando_repuestos" {{ "selected" if orden.estado == "esperando_repuestos" else "" }}>Esperando Repuestos</option>
                         <option value="en_reparacion" {{ "selected" if orden.estado == "en_reparacion" else "" }}>En Reparación</option>
+                        <option value="pruebas" {{ "selected" if orden.estado == "pruebas" else "" }}>En Pruebas</option>
                         <option value="listo_entrega" {{ "selected" if orden.estado == "listo_entrega" else "" }}>Listo para Entrega</option>
                         <option value="entregado" {{ "selected" if orden.estado == "entregado" else "" }}>Entregado</option>
                     </select>

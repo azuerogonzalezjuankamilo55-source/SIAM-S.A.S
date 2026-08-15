@@ -99,7 +99,7 @@ Modelo detectó tabla faltante → Migration 005 generada y aplicada:
 | Ruta | Status | Notas |
 |------|--------|-------|
 | `/dashboard/` | 200 | Redirige a login si no autenticado |
-| `/dashboard/api/stats` | 200 | JSON con estadísticas |
+| `/dashboard/api/resumen` | 200 | JSON con estadísticas |
 | `/clientes/` | 200 | Lista clientes |
 | `/vehiculos/` | 200 | Lista vehículos |
 | `/servicios/` | 200 | Lista servicios |
@@ -134,9 +134,9 @@ Modelo detectó tabla faltante → Migration 005 generada y aplicada:
 
 | Verificación | Resultado |
 |-------------|-----------|
-| `/dashboard/api/stats` - Status 200 | OK |
-| `/dashboard/api/stats` - Content-Type application/json | OK |
-| `/dashboard/api/stats` - Estructura (total_clientes, ingresos_hoy, etc.) | OK |
+| `/dashboard/api/resumen` - Status 200 | OK |
+| `/dashboard/api/resumen` - Content-Type application/json | OK |
+| `/dashboard/api/resumen` - Estructura (total_clientes, ingresos_hoy, etc.) | OK |
 | `/sedes/api` - Status 200, JSON array | OK |
 | Error 401 (no autenticado) | Redirect a login |
 | Error 403 (sin permisos) | Template rendered |

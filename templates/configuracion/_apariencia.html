@@ -1,0 +1,52 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="fa-solid fa-palette me-2" aria-hidden="true"></i>Apariencia</h5>
+        <small class="text-secondary">Define los colores de la marca. Solo se aceptan colores hexadecimales válidos; el sistema los aplica automáticamente en todo el sitio.</small>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('configuracion.seccion', seccion='apariencia') }}" data-ajax="true">
+            {{ form.hidden_tag() }}
+            <fieldset {{ 'disabled' if not puede_editar }}>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.color_primario.label.text }}</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" value="{{ form.color_primario.data or '#2563EB' }}" oninput="document.getElementById('color_primario').value = this.value;" aria-label="Selector de color">
+                            {{ form.color_primario(class="form-control") }}
+                        </div>
+                        {% for e in form.color_primario.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.color_primario_fuerte.label.text }}</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" value="{{ form.color_primario_fuerte.data or '#1D4ED8' }}" oninput="document.getElementById('color_primario_fuerte').value = this.value;" aria-label="Selector de color">
+                            {{ form.color_primario_fuerte(class="form-control") }}
+                        </div>
+                        {% for e in form.color_primario_fuerte.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.color_primario_soft.label.text }}</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" value="{{ form.color_primario_soft.data or '#DBEAFE' }}" oninput="document.getElementById('color_primario_soft').value = this.value;" aria-label="Selector de color">
+                            {{ form.color_primario_soft(class="form-control") }}
+                        </div>
+                        {% for e in form.color_primario_soft.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.color_acento.label.text }}</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" value="{{ form.color_acento.data or '#0F766E' }}" oninput="document.getElementById('color_acento').value = this.value;" aria-label="Selector de color">
+                            {{ form.color_acento(class="form-control") }}
+                        </div>
+                        {% for e in form.color_acento.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" {{ 'disabled' if not puede_editar }}>
+                        <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i> Guardar
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

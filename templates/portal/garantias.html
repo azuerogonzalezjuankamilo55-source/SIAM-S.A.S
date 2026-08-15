@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Mis Garantías{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Mis Garantías</h4>
+    <span class="text-muted">{{ garantias|length }} en total</span>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Vehículo</th>
+                        <th>Descripción</th>
+                        <th>Vence</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in garantias %}
+                    <tr>
+                        <td>{{ g.codigo }}</td>
+                        <td>{{ g.vehiculo.marca }} {{ g.vehiculo.modelo }} ({{ g.vehiculo.placa }})</td>
+                        <td>{{ g.descripcion | truncate(40) }}</td>
+                        <td>{{ g.fecha_fin.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <span class="badge bg-{{
+                                {'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'dark'}[g.estado]
+                            }}">
+                                {% if g.estado == 'activa' %}
+                                Activa ({{ g.dias_restantes }} días)
+                                {% else %}
+                                {{ {'activa': 'Activa', 'caducada': 'Caducada', 'reclamada': 'Reclamada', 'anulada': 'Anulada'}[g.estado] }}
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No tienes garantías registradas</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
