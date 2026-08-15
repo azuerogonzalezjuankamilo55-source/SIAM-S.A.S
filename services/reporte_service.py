@@ -54,18 +54,46 @@ class ReporteService:
         return q
 
     @staticmethod
+    def ingresos(desde: date | None = None, hasta: date | None = None) -> float:
+        """Suma de facturas pagadas/parciales (ingresos reconocidos)."""
+        facturas = ReporteService._facturas_filtradas(desde, hasta).all()
+        validas = [f for f in facturas if f.estado in ("pagado", "parcial")]
+        return float(sum((f.total for f in validas), Decimal("0")))
+
+    @staticmethod
+    def cartera() -> float:
+        """Cuentas por cobrar actuales (pendiente + parcial)."""
+        pendientes = Factura.query.filter(Factura.estado.in_(["pendiente", "parcial"])).all()
+        return float(sum((f.saldo_pendiente for f in pendientes), Decimal("0")))
+
+    @staticmethod
+    def ingresos_por_metodo(desde: date | None = None, hasta: date | None = None) -> list:
+        """Ingresos reconocidos agrupados por método de pago."""
+        q = db.session.query(
+            Factura.metodo_pago,
+            func.coalesce(func.sum(Factura.total), 0).label("total"),
+        ).filter(Factura.estado.in_(["pagado", "parcial"]), Factura.metodo_pago.isnot(None))
+        if desde:
+            q = q.filter(func.date(Factura.created_at) >= desde)
+        if hasta:
+            q = q.filter(func.date(Factura.created_at) <= hasta)
+        return [
+            (row.metodo_pago, float(row.total))
+            for row in q.group_by(Factura.metodo_pago).order_by(func.sum(Factura.total).desc()).all()
+        ]
+
+    @staticmethod
     def build_resumen(desde: date | None = None, hasta: date | None = None) -> ReporteData:
         data = ReporteData(desde=desde, hasta=hasta)
         facturas = ReporteService._facturas_filtradas(desde, hasta).all()
 
         facturas_validas = [f for f in facturas if f.estado in ("pagado", "parcial")]
         data.facturas_periodo = len(facturas)
-        data.ingresos = float(sum((f.total for f in facturas_validas), Decimal("0")))
+        data.ingresos = ReporteService.ingresos(desde, hasta)
         data.ots_entregadas = OrdenTrabajo.query.filter(OrdenTrabajo.estado == "entregado").count()
         data.ticket_promedio = data.ingresos / len(facturas_validas) if facturas_validas else 0.0
 
-        pendientes = Factura.query.filter(Factura.estado.in_(["pendiente", "parcial"])).all()
-        data.cartera = float(sum((f.saldo_pendiente for f in pendientes), Decimal("0")))
+        data.cartera = ReporteService.cartera()
 
         d, h = ReporteService._rango(desde, hasta)
         q = db.session.query(
@@ -81,18 +109,7 @@ class ReporteService:
             for row in q.group_by(func.date(Factura.created_at)).order_by(func.date(Factura.created_at)).all()
         ]
 
-        q_metodo = db.session.query(
-            Factura.metodo_pago,
-            func.coalesce(func.sum(Factura.total), 0).label("total"),
-        ).filter(Factura.estado.in_(["pagado", "parcial"]), Factura.metodo_pago.isnot(None))
-        if d:
-            q_metodo = q_metodo.filter(func.date(Factura.created_at) >= d)
-        if h:
-            q_metodo = q_metodo.filter(func.date(Factura.created_at) <= h)
-        data.ingresos_por_metodo = [
-            (row.metodo_pago, float(row.total))
-            for row in q_metodo.group_by(Factura.metodo_pago).order_by(func.sum(Factura.total).desc()).all()
-        ]
+        data.ingresos_por_metodo = ReporteService.ingresos_por_metodo(d, h)
 
         q_clientes = db.session.query(
             Cliente.nombre,

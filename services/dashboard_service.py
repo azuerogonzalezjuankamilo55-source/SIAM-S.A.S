@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import func, extract
@@ -16,6 +16,7 @@ from models.servicio import Servicio
 from models.mecanico import Mecanico
 from models.asistencia import AsistenciaEmergencia
 from models.pago_factura import PagoFactura
+from services.reporte_service import ReporteService
 
 logger = logging.getLogger("siam.dashboard_service")
 
@@ -67,24 +68,15 @@ class DashboardService:
         current_month = today.month
         current_year = today.year
 
-        ingresos_hoy = float(
-            db.session.query(func.coalesce(func.sum(Factura.total), 0))
-            .filter(
-                Factura.estado.in_(["pagado", "parcial"]),
-                func.date(Factura.created_at) == today,
-            )
-            .scalar() or 0
-        )
+        ingresos_hoy = ReporteService.ingresos(today, today)
 
-        ingresos_mes = float(
-            db.session.query(func.coalesce(func.sum(Factura.total), 0))
-            .filter(
-                Factura.estado.in_(["pagado", "parcial"]),
-                extract("month", Factura.created_at) == current_month,
-                extract("year", Factura.created_at) == current_year,
-            )
-            .scalar() or 0
-        )
+        primer_dia_mes = date(current_year, current_month, 1)
+        ultimo_dia_mes = date(
+            current_year + (current_month // 12),
+            (current_month % 12) + 1,
+            1,
+        ) - timedelta(days=1)
+        ingresos_mes = ReporteService.ingresos(primer_dia_mes, ultimo_dia_mes)
 
         citas_recientes = (
             Cita.query
@@ -181,10 +173,7 @@ class DashboardService:
         )
         citas_semana_list = [(str(row.dia), int(row.total)) for row in citas_semana]
 
-        facturas_activas = Factura.query.filter(
-            Factura.estado.in_(["pendiente", "parcial"])
-        ).all()
-        por_cobrar = float(sum((f.saldo_pendiente for f in facturas_activas), Decimal("0")))
+        por_cobrar = ReporteService.cartera()
 
         facturas_validadas = Factura.query.filter(Factura.estado != "anulado").all()
         total_facturado = float(sum((f.total for f in facturas_validadas), Decimal("0")))
@@ -219,17 +208,7 @@ class DashboardService:
             (citas_completadas / total_citas * 100) if total_citas else 0.0
         )
 
-        ingresos_metodo = (
-            db.session.query(
-                Factura.metodo_pago,
-                func.coalesce(func.sum(Factura.total), 0).label("total"),
-            )
-            .filter(Factura.estado.in_(["pagado", "parcial"]), Factura.metodo_pago.isnot(None))
-            .group_by(Factura.metodo_pago)
-            .order_by(func.sum(Factura.total).desc())
-            .all()
-        )
-        ingresos_por_metodo = [(row.metodo_pago, float(row.total)) for row in ingresos_metodo]
+        ingresos_por_metodo = ReporteService.ingresos_por_metodo()
 
         ot_por_mecanico_rows = (
             db.session.query(

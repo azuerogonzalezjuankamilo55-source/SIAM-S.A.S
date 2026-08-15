@@ -833,12 +833,12 @@ class AssistantService:
 
         recomendaciones = [
             "\U0001f6e2\ufe0f **Cambio de aceite y filtro** \u2014 Cada 5,000 km o 6 meses",
-            "\U0001f527 **Revisi\u00f3n de frenos** (pastillas, discos, l\u00edquido) \u2014 Cada 10,000 km",
+            "\U0001f527 **Revisi\u00f3n de frenos** (pastillas, discos, l\u00edquido) \u2014 Cada 15,000 km",
         ]
 
         if edad is not None:
             if edad >= 1:
-                recomendaciones.append("\U0001f504 **Rotaci\u00f3n de neum\u00e1ticos** \u2014 Cada 10,000 km")
+                recomendaciones.append("\U0001f504 **Rotaci\u00f3n de neum\u00e1ticos** \u2014 Cada 40,000 km")
                 recomendaciones.append("\U0001f4a8 **Filtro de aire** \u2014 Cada 15,000 km")
             if edad >= 2:
                 recomendaciones.append("\u26a1 **Buj\u00edas y cables** \u2014 Cada 20,000 km")
@@ -853,7 +853,7 @@ class AssistantService:
                 recomendaciones.append("\u26a0\ufe0f **Revisi\u00f3n integral recomendada** \u2014 El veh\u00edculo tiene m\u00e1s de 8 a\u00f1os")
         else:
             recomendaciones.extend([
-                "\U0001f504 **Rotaci\u00f3n de neum\u00e1ticos** \u2014 Cada 10,000 km",
+                "\U0001f504 **Rotaci\u00f3n de neum\u00e1ticos** \u2014 Cada 40,000 km",
                 "\U0001f4a8 **Filtro de aire** \u2014 Cada 15,000 km",
                 "\u26a1 **Buj\u00edas** \u2014 Cada 20,000 km",
             ])
@@ -1204,9 +1204,9 @@ class AssistantService:
                 "\U0001f527 **Mantenimiento preventivo**\n\n"
                 "Como referencia general (consulta el manual de tu veh\u00edculo):\n"
                 "  \u2022 **Aceite y filtro**: cada 5,000 km o 6 meses.\n"
-                "  \u2022 **Frenos**: revisi\u00f3n cada 10,000 km.\n"
+                "  \u2022 **Frenos**: revisi\u00f3n cada 15,000 km.\n"
                 "  \u2022 **Filtro de aire**: cada 15,000 km.\n"
-                "  \u2022 **Rotaci\u00f3n de llantas**: cada 10,000 km.\n"
+                "  \u2022 **Rotaci\u00f3n de llantas**: cada 40,000 km.\n"
                 "  \u2022 **L\u00edquido de frenos y refrigerante**: revisi\u00f3n anual.\n\n"
                 "\U0001f4a1 Los intervalos exactos dependen de la marca y el modelo. "
                 "\u00bfQuieres agendar una cita para una revisi\u00f3n?"

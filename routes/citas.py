@@ -14,6 +14,7 @@ from database.commit import safe_commit, json_success, json_error
 from forms import CitaForm
 from services.notification_service import NotificationService
 from services.sede_service import SedeService
+from services.vehiculo_service import VehiculoService
 from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.citas")
@@ -196,8 +197,4 @@ def cambiar_estado(id: int, estado: str) -> Any:
 @citas_bp.route("/obtener-vehiculos/<int:cliente_id>")
 @login_required
 def obtener_vehiculos(cliente_id: int) -> Any:
-    vehiculos = Vehiculo.query.filter_by(cliente_id=cliente_id).all()
-    return jsonify([
-        {"id": v.id, "texto": f"{v.marca} {v.modelo} - {v.placa}"}
-        for v in vehiculos
-    ])
+    return jsonify(VehiculoService.listar_para_select(cliente_id))

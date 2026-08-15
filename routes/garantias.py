@@ -15,6 +15,7 @@ from database.commit import safe_commit, json_success, json_error
 from forms import GarantiaForm
 from services.garantia_service import GarantiaService, GarantiaError
 from services.notification_service import NotificationService
+from services.vehiculo_service import VehiculoService
 from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.garantias")
@@ -195,8 +196,4 @@ def cambiar_estado(id: int, estado: str) -> Any:
 @garantias_bp.route("/obtener-vehiculos/<int:cliente_id>")
 @login_required
 def obtener_vehiculos(cliente_id: int) -> Any:
-    vehiculos = Vehiculo.query.filter_by(cliente_id=cliente_id).all()
-    return jsonify([
-        {"id": v.id, "texto": f"{v.marca} {v.modelo} - {v.placa}"}
-        for v in vehiculos
-    ])
+    return jsonify(VehiculoService.listar_para_select(cliente_id))

@@ -20,6 +20,7 @@ from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
 from services.orden_trabajo_service import OrdenTrabajoService, NIVELES_COMBUSTIBLE
 from services.notification_service import NotificationService
+from services.vehiculo_service import VehiculoService
 from exceptions import BusinessRuleException, NotFoundException
 from decorators import staff_blueprint_guard
 
@@ -242,11 +243,7 @@ def cambiar_estado(id: int) -> Any:
 @ordenes_trabajo_bp.route("/obtener-vehiculos/<int:cliente_id>")
 @login_required
 def obtener_vehiculos(cliente_id: int) -> Any:
-    vehiculos = Vehiculo.query.filter_by(cliente_id=cliente_id).all()
-    return jsonify([
-        {"id": v.id, "texto": f"{v.marca} {v.modelo} - {v.placa}"}
-        for v in vehiculos
-    ])
+    return jsonify(VehiculoService.listar_para_select(cliente_id))
 
 
 @ordenes_trabajo_bp.route("/items/agregar/<int:id>", methods=["POST"])

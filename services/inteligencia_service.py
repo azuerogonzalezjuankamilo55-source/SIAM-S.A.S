@@ -251,7 +251,7 @@ class InteligenciaService:
             ("cambio_frenos", "Revisión de frenos", "Pastillas, discos y líquido de frenos"),
             ("balanceo", "Balanceo de llantas", "Cada 10,000 km o si siente vibración"),
             ("alineacion", "Alineación", "Si el volante tiembla o el vehículo se va hacia un lado"),
-            ("llantas", "Rotación de neumáticos", "Cada 10,000 km para desgaste parejo"),
+            ("llantas", "Rotación de neumáticos", "Cada 40,000 km para desgaste parejo"),
             ("bateria", "Prueba de batería", "Recomendada cada año"),
         ]:
             registro = ultima_fecha_km.get(tipo)

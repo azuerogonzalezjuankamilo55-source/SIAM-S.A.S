@@ -418,3 +418,46 @@ class TestIntervaloCitasAplicado:
         assert r.headers.get("Location", "").endswith("/citas/")
         with app.app_context():
             assert Cita.query.count() == 1
+
+
+class TestRecordatorioAnticipacionConfig:
+    def test_dias_anticipacion_usa_config(self, app):
+        with app.app_context():
+            config = ConfiguracionTaller.get_config()
+            config.notif_recordatorio_dias = 15
+            db.session.commit()
+            assert RecordatorioService._dias_anticipacion() == 15
+
+            config.notif_recordatorio_dias = 0
+            db.session.commit()
+            assert RecordatorioService._dias_anticipacion() == 3
+
+    def test_generar_mantenimientos_respeta_anticipacion(self, app):
+        with app.app_context():
+            config = ConfiguracionTaller.get_config()
+            config.notif_recordatorio_dias = 10
+            cliente = Cliente(nombre="Ana", telefono="555")
+            db.session.add(cliente)
+            db.session.flush()
+            vehiculo = Vehiculo(cliente_id=cliente.id, marca="Mazda", modelo="3", placa="XYZ999")
+            db.session.add(vehiculo)
+            db.session.flush()
+            vehiculo_id = vehiculo.id
+            db.session.add(
+                HistorialVehiculo(
+                    vehiculo_id=vehiculo_id,
+                    tipo="cambio_aceite",
+                    fecha=date.today() - timedelta(days=200),
+                )
+            )
+            db.session.commit()
+
+            RecordatorioService.generar_mantenimientos()
+
+        with app.app_context():
+            esperado = date.today() + timedelta(days=10)
+            rec = Recordatorio.query.filter_by(
+                vehiculo_id=vehiculo_id, tipo="mantenimiento"
+            ).first()
+            assert rec is not None
+            assert rec.fecha_programada == esperado
