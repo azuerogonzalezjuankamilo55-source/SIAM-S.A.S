@@ -105,12 +105,7 @@
                             <div><strong>{{ c.fecha }} · {{ c.hora }}</strong></div>
                             <small class="text-muted">{{ c.vehiculo.marca }} {{ c.vehiculo.modelo }} ({{ c.vehiculo.placa }})</small>
                         </div>
-                        <span class="badge bg-{{
-                            'warning' if c.estado == 'pendiente' else
-                            'info' if c.estado == 'en_proceso' else
-                            'success' if c.estado == 'completado' else
-                            'danger'
-                        }}">{{ c.estado|replace("_", " ")|title }}</span>
+                        <span class="badge bg-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
                     </li>
                     {% else %}
                     <li class="list-group-item text-center text-muted">No tienes próximas citas.</li>

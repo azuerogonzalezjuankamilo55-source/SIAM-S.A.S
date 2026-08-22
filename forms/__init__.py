@@ -1,4 +1,4 @@
-from forms.auth_forms import LoginForm, RegisterForm
+from forms.auth_forms import LoginForm, RegisterForm, AdminRegisterForm
 from forms.cliente_forms import ClienteForm
 from forms.vehiculo_forms import VehiculoForm
 from forms.servicio_forms import ServicioForm
@@ -8,7 +8,7 @@ from forms.factura_forms import FacturaForm, PagoForm, LogoForm
 from forms.inventario_forms import InventarioForm, MovimientoInventarioForm, CategoriaInventarioForm
 from forms.orden_trabajo_forms import OrdenTrabajoForm, CambiarEstadoForm
 from forms.taller_forms import TallerConfigForm
-from forms.portal_forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm
+from forms.portal_forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm, VehiculoPortalForm
 from forms.cotizacion_forms import CotizacionForm, CotizacionItemForm, GarantiaForm
 from forms.configuracion_forms import (
     EmpresaConfigForm,
@@ -21,6 +21,7 @@ from forms.configuracion_forms import (
 __all__ = [
     "LoginForm",
     "RegisterForm",
+    "AdminRegisterForm",
     "ClienteForm",
     "VehiculoForm",
     "ServicioForm",
@@ -38,6 +39,7 @@ __all__ = [
     "SolicitarCitaForm",
     "PerfilForm",
     "CambiarPasswordForm",
+    "VehiculoPortalForm",
     "CotizacionForm",
     "CotizacionItemForm",
     "GarantiaForm",

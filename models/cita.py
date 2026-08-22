@@ -6,6 +6,41 @@ if TYPE_CHECKING:
     from models.factura import Factura
 
 
+ESTADOS_CITA = [
+    "pendiente",
+    "confirmada",
+    "en_revision",
+    "en_reparacion",
+    "lista",
+    "entregada",
+    "cancelado",
+]
+
+ETIQUETAS_ESTADO_CITA = {
+    "pendiente": "Pendiente",
+    "confirmada": "Confirmada",
+    "en_revision": "En revisión",
+    "en_proceso": "En revisión",      # valor legado
+    "en_reparacion": "En reparación",
+    "lista": "Lista",
+    "entregada": "Entregada",
+    "completado": "Entregada",        # valor legado
+    "cancelado": "Cancelada",
+}
+
+COLORES_ESTADO_CITA = {
+    "pendiente": "warning",
+    "confirmada": "primary",
+    "en_revision": "info",
+    "en_proceso": "info",             # valor legado
+    "en_reparacion": "warning",
+    "lista": "success",
+    "entregada": "success",
+    "completado": "success",          # valor legado
+    "cancelado": "danger",
+}
+
+
 class Cita(db.Model):
     __tablename__ = "citas"
     __allow_unmapped__ = True
@@ -28,3 +63,11 @@ class Cita(db.Model):
 
     def __repr__(self) -> str:
         return f"<Cita {self.id}:{self.fecha} {self.hora} estado={self.estado}>"
+
+    @property
+    def estado_etiqueta(self) -> str:
+        return ETIQUETAS_ESTADO_CITA.get(self.estado, self.estado.replace("_", " ").title())
+
+    @property
+    def estado_color(self) -> str:
+        return COLORES_ESTADO_CITA.get(self.estado, "secondary")

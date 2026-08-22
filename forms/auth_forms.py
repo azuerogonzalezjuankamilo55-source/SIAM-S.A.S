@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
 
 
 class LoginForm(FlaskForm):
@@ -19,6 +19,38 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     nombre = StringField(
+        "Nombre completo",
+        validators=[DataRequired(), Length(min=2, max=100)],
+    )
+    documento = StringField(
+        "Documento de identidad",
+        validators=[DataRequired(), Length(min=5, max=20)],
+        render_kw={"placeholder": "Cédula o documento"},
+    )
+    correo = StringField(
+        "Correo electrónico",
+        validators=[DataRequired(), Email()],
+    )
+    telefono = StringField(
+        "Teléfono",
+        validators=[Optional(), Length(max=20)],
+    )
+    password = PasswordField(
+        "Contraseña",
+        validators=[DataRequired(), Length(min=8, max=128)],
+    )
+    confirmar_password = PasswordField(
+        "Confirmar contraseña",
+        validators=[
+            DataRequired(),
+            EqualTo("password", message="Las contraseñas no coinciden."),
+        ],
+    )
+    submit = SubmitField("Crear cuenta")
+
+
+class AdminRegisterForm(FlaskForm):
+    nombre = StringField(
         "Nombre",
         validators=[DataRequired(), Length(min=2, max=100)],
     )
@@ -30,4 +62,11 @@ class RegisterForm(FlaskForm):
         "Contraseña",
         validators=[DataRequired(), Length(min=8, max=128)],
     )
-    submit = SubmitField("Registrarse")
+    confirmar_password = PasswordField(
+        "Confirmar contraseña",
+        validators=[
+            DataRequired(),
+            EqualTo("password", message="Las contraseñas no coinciden."),
+        ],
+    )
+    submit = SubmitField("Crear cuenta administrativa")

@@ -12,25 +12,28 @@
         </div>
         <div class="d-none d-lg-block mb-4">
             <span class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:52px;height:52px;background:var(--siam-gradient);color:#fff;">
-                <i class="fa-solid fa-gears"></i>
+                <i class="fa-solid {% if area == 'cliente' %}fa-car-side{% elif area == 'admin' %}fa-user-shield{% else %}fa-gears{% endif %}"></i>
             </span>
-            <h3 class="fw-bold mb-1">Bienvenido de nuevo</h3>
-            <p class="text-muted mb-0">Ingresa a tu panel de control</p>
+            <h3 class="fw-bold mb-1">{% if area == 'cliente' %}Acceso clientes{% elif area == 'admin' %}Área administrativa{% else %}Bienvenido de nuevo{% endif %}</h3>
+            <p class="text-muted mb-0">{% if area == 'cliente' %}Consulta tus vehículos, citas y servicios{% elif area == 'admin' %}Ingresa al panel de control del taller{% else %}Ingresa a tu panel de control{% endif %}</p>
         </div>
-        <form method="POST">
+        <form method="POST" novalidate>
             {{ form.hidden_tag() }}
             <div class="mb-3">
-                <label class="form-label">Correo electrónico</label>
+                <label class="form-label" for="correo">Correo electrónico</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                    <input type="email" name="correo" class="form-control" placeholder="admin@siam.com" required autofocus>
+                    <input type="email" name="correo" id="correo" value="{{ form.correo.data or '' }}" class="form-control" placeholder="{% if area == 'admin' %}admin@taller.com{% else %}correo@ejemplo.com{% endif %}" required autofocus>
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label">Contraseña</label>
+                <label class="form-label" for="password">Contraseña</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
+                    <button class="btn btn-outline-secondary" type="button" data-toggle-password="#password" aria-label="Mostrar u ocultar contraseña" tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 mt-2 py-2">
@@ -39,8 +42,24 @@
         </form>
         <p class="text-center mt-3 mb-0 small">
             ¿No tienes cuenta?
+            {% if area == 'admin' %}
+            <a href="{{ url_for('auth.registrar_admin') }}" class="text-decoration-none">Crea cuenta administrativa aquí</a>
+            {% else %}
             <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Regístrate aquí</a>
+            {% endif %}
         </p>
+        {% if area != 'admin' %}
+        <hr class="my-3">
+        <p class="text-center small mb-0 text-muted">
+            <i class="fa-solid fa-user-shield me-1"></i>¿Eres parte del taller?
+            <a href="{{ url_for('auth.login', area='admin') }}" class="text-decoration-none">Acceso administrativo</a>
+        </p>
+        {% else %}
+        <p class="text-center small mt-2 mb-0 text-muted">
+            <i class="fa-solid fa-car-side me-1"></i>¿Eres cliente?
+            <a href="{{ url_for('auth.login', area='cliente') }}" class="text-decoration-none">Ingresar como cliente</a>
+        </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

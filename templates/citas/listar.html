@@ -39,37 +39,36 @@
                         <td>{{ c.fecha }}</td>
                         <td>{{ c.hora }}</td>
                         <td>
-                            <span class="badge bg-{{ {
-                                'pendiente': 'warning',
-                                'en_proceso': 'info',
-                                'completado': 'success',
-                                'cancelado': 'danger'
-                            }[c.estado] }}">
-                                {{ c.estado|replace("_", " ")|title }}
-                            </span>
+                            <span class="badge bg-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('citas.editar', id=c.id) }}" class="btn btn-outline-warning">
+                                <a href="{{ url_for('citas.editar', id=c.id) }}" class="btn btn-outline-warning" title="Editar">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
-                                {% if c.estado == "pendiente" %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='en_proceso') }}" class="btn btn-outline-info">
-                                    <i class="fa-solid fa-play"></i>
+                                {% set siguiente = {
+                                    'pendiente': ('confirmada', 'Confirmar', 'primary', 'fa-circle-check'),
+                                    'confirmada': ('en_revision', 'Iniciar revisión', 'info', 'fa-magnifying-glass'),
+                                    'en_revision': ('en_reparacion', 'Pasar a reparación', 'warning', 'fa-wrench'),
+                                    'en_reparacion': ('lista', 'Marcar listo', 'success', 'fa-flag-checkered')
+                                }.get(c.estado) %}
+                                {% if siguiente %}
+                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado=siguiente[0]) }}" class="btn btn-outline-{{ siguiente[2] }}" title="{{ siguiente[1] }}">
+                                    <i class="fa-solid {{ siguiente[3] }}"></i>
                                 </a>
                                 {% endif %}
-                                {% if c.estado == "en_proceso" %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='completado') }}" class="btn btn-outline-success">
-                                    <i class="fa-solid fa-check"></i>
-                                </a>
-                                {% endif %}
-                                {% if c.estado == "completado" and not c.factura %}
-                                <a href="{{ url_for('facturas.crear', cita_id=c.id) }}" class="btn btn-outline-primary">
+                                {% if c.estado == "lista" and not c.factura %}
+                                <a href="{{ url_for('facturas.crear', cita_id=c.id) }}" class="btn btn-outline-primary" title="Crear factura">
                                     <i class="fa-solid fa-file-lines"></i>
                                 </a>
                                 {% endif %}
-                                {% if c.estado != "cancelado" %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='cancelado') }}" class="btn btn-outline-danger">
+                                {% if c.estado == "lista" %}
+                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='entregada') }}" class="btn btn-outline-success" title="Entregar vehículo">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </a>
+                                {% endif %}
+                                {% if c.estado not in ("cancelado", "entregada") %}
+                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='cancelado') }}" class="btn btn-outline-danger" title="Cancelar cita">
                                     <i class="fa-solid fa-xmark"></i>
                                 </a>
                                 {% endif %}

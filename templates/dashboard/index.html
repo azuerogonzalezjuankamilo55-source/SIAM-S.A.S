@@ -451,12 +451,7 @@
                                 <td>{{ c.fecha }}</td>
                                 <td>{{ c.hora }}</td>
                                 <td>
-                                    <span class="badge badge-soft-{{ {
-                                        'pendiente': 'warning',
-                                        'en_proceso': 'info',
-                                        'completado': 'success',
-                                        'cancelado': 'danger'
-                                    }[c.estado] }}">{{ c.estado|replace("_", " ")|title }}</span>
+                                    <span class="badge badge-soft-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
                                 </td>
                             </tr>
                             {% endfor %}

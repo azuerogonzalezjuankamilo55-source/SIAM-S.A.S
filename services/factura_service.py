@@ -91,7 +91,7 @@ class FacturaService:
         )
 
         db.session.add(factura)
-        cita.estado = "completado"
+        cita.estado = "entregada"
         try:
             db.session.commit()
         except Exception as e:

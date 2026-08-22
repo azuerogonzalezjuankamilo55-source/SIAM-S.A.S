@@ -35,7 +35,10 @@ class TestPortalAuth:
         resp = client.post("/auth/register", data={
             "nombre": "Nuevo Cliente",
             "correo": "nuevo_cliente@test.com",
+            "documento": "1090123456",
+            "telefono": "3001234567",
             "password": "pass1234",
+            "confirmar_password": "pass1234",
         }, follow_redirects=True)
         assert resp.status_code == 200
         u = Usuario.query.filter_by(correo="nuevo_cliente@test.com").first()

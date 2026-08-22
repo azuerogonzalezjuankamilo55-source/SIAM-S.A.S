@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIAM - Sistema Integral Automotriz | Gestión Profesional para Talleres</title>
+    <title>SIAM - Sistema Integral de Administración Mecánica</title>
 
     <!-- SEO -->
     <meta name="description" content="SIAM - Sistema Integral Automotriz. Software profesional para la gestión de talleres mecánicos. Administra clientes, vehículos, servicios, citas, facturas e inventario en un solo lugar.">
@@ -159,6 +159,57 @@
                         </div>
                         <div class="landing-icon-bubble position-absolute bottom-0 end-0" style="animation: float 3.5s ease-in-out infinite 0.4s;">
                             <i class="fa-solid fa-gears text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acceso al sistema: dos áreas -->
+    <section class="py-5 bg-dark bg-opacity-50" id="acceso">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3"><i class="fa-solid fa-door-open me-1"></i> Acceso al sistema</span>
+                <h2 class="fw-bold mt-3">Elige tu <span class="text-primary">área</span></h2>
+                <p class="text-secondary">Área administrativa para el personal del taller · Área de clientes para propietarios de vehículos</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="0">
+                    <div class="card h-100 feature-card p-4 text-center">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-user-shield fs-1"></i></div>
+                        <span class="badge badge-soft-primary mb-2">Área administrativa</span>
+                        <h5 class="fw-bold mb-2">Personal del taller</h5>
+                        <p class="text-secondary small mb-4">
+                            Gestiona clientes, vehículos, citas, órdenes de trabajo,
+                            facturación e inventario desde el panel de control.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('auth.login', area='admin') }}" class="btn btn-gradient">
+                                <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar sesión
+                            </a>
+                            <a href="{{ url_for('auth.registrar_admin') }}" class="btn btn-outline-light">
+                                <i class="fa-solid fa-user-plus me-1"></i> Crear cuenta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 feature-card p-4 text-center">
+                        <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-car-side fs-1"></i></div>
+                        <span class="badge badge-soft-success mb-2">Área clientes</span>
+                        <h5 class="fw-bold mb-2">Propietarios de vehículo</h5>
+                        <p class="text-secondary small mb-4">
+                            Consulta tus vehículos, solicita citas y servicios, revisa tus
+                            facturas y sigue el estado de tu reparación.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('auth.login', area='cliente') }}" class="btn btn-gradient">
+                                <i class="fa-solid fa-right-to-bracket me-1"></i> Ingresar como cliente
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light">
+                                <i class="fa-solid fa-user-plus me-1"></i> Crear cuenta de cliente
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -43,7 +43,9 @@ class TestAuthRoutes:
         resp = client.post("/auth/register", data={
             "nombre": "Nuevo",
             "correo": "nuevo@test.com",
+            "documento": "1090654321",
             "password": "pass1234",
+            "confirmar_password": "pass1234",
         }, follow_redirects=True)
         assert resp.status_code == 200
         assert Usuario.query.filter_by(correo="nuevo@test.com").count() == 1

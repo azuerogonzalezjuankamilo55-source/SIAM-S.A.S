@@ -4,7 +4,7 @@ from wtforms import (
     StringField, IntegerField, DateField, TimeField, SelectField,
     TextAreaField, PasswordField, SubmitField,
 )
-from wtforms.validators import DataRequired, Length, Optional, Email, EqualTo
+from wtforms.validators import DataRequired, Length, Optional, Email, EqualTo, NumberRange
 
 
 class SolicitarCitaForm(FlaskForm):
@@ -42,3 +42,35 @@ class CambiarPasswordForm(FlaskForm):
         validators=[DataRequired(), EqualTo("nueva_password", message="Las contraseñas no coinciden")],
     )
     submit = SubmitField("Cambiar contraseña")
+
+
+class VehiculoPortalForm(FlaskForm):
+    tipo = SelectField(
+        "Tipo de vehículo *",
+        choices=[("carro", "Carro"), ("moto", "Moto")],
+        validators=[DataRequired()],
+    )
+    marca = StringField("Marca *", validators=[DataRequired(), Length(max=50)])
+    modelo = StringField("Modelo *", validators=[DataRequired(), Length(max=50)])
+    anio = IntegerField("Año", validators=[Optional(), NumberRange(min=1950, max=2100, message="Año inválido")])
+    placa = StringField("Placa *", validators=[DataRequired(), Length(max=20)])
+    kilometraje = IntegerField(
+        "Kilometraje",
+        validators=[Optional(), NumberRange(min=0, max=3000000, message="Kilometraje inválido")],
+    )
+    motor = StringField("Motor (si lo conoce)", validators=[Optional(), Length(max=50)])
+    combustible = SelectField(
+        "Tipo de combustible",
+        choices=[
+            ("", "No indicado"),
+            ("gasolina", "Gasolina"),
+            ("diesel", "Diésel"),
+            ("gas", "Gas (GLP/GNC)"),
+            ("hibrido", "Híbrido"),
+            ("electrico", "Eléctrico"),
+        ],
+        validators=[Optional()],
+        default="",
+    )
+    color = StringField("Color", validators=[Optional(), Length(max=30)])
+    submit = SubmitField("Guardar vehículo")

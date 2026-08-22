@@ -7,12 +7,13 @@ from flask_login import login_required, current_user
 
 from models.cliente import Cliente
 from models.cita import Cita
+from models.vehiculo import Vehiculo
 from models.servicio import Servicio
 from models.adjunto import Adjunto
 from models.configuracion_taller import ConfiguracionTaller
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
-from forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm
+from forms import SolicitarCitaForm, PerfilForm, CambiarPasswordForm, VehiculoPortalForm
 from services.notification_service import NotificationService
 from services.storage_service import AdjuntoService
 from services.portal_service import PortalService
@@ -73,6 +74,128 @@ def vehiculo_detalle(vehiculo_id: int) -> Any:
         return redirect(url_for("portal.vehiculos"))
     citas = Cita.query.filter_by(vehiculo_id=vehiculo.id).order_by(Cita.fecha.desc(), Cita.hora.desc()).all()
     return render_template("portal/vehiculo_detalle.html", vehiculo=vehiculo, citas=citas)
+
+
+@portal_bp.route("/vehiculos/nuevo", methods=["GET", "POST"])
+@login_required
+def crear_vehiculo() -> Any:
+    cliente = _cliente_actual()
+    if not cliente:
+        return redirect(url_for("portal.index"))
+    form = VehiculoPortalForm()
+    if form.validate_on_submit():
+        placa = form.placa.data.strip().upper()
+        if Vehiculo.query.filter(db.func.upper(Vehiculo.placa) == placa).first():
+            form.placa.errors.append("Esa placa ya está registrada en el taller.")
+            return render_template("portal/vehiculo_form.html", form=form, vehiculo=None)
+        vehiculo = Vehiculo(
+            cliente_id=cliente.id,
+            tipo=form.tipo.data,
+            marca=form.marca.data.strip(),
+            modelo=form.modelo.data.strip(),
+            anio=form.anio.data,
+            placa=placa,
+            kilometraje=form.kilometraje.data,
+            motor=(form.motor.data or "").strip() or None,
+            combustible=form.combustible.data or None,
+            color=(form.color.data or "").strip() or None,
+        )
+        db.session.add(vehiculo)
+        try:
+            safe_commit()
+            logger.info("Cliente %s registró vehículo %s", cliente.id, vehiculo.placa)
+            NotificationService.notify_staff(
+                "sistema",
+                "Nuevo vehículo registrado",
+                f"{cliente.nombre} registró su {vehiculo.tipo_label} {vehiculo.marca} {vehiculo.modelo} (placa {vehiculo.placa}).",
+                url_for("vehiculos.listar"),
+            )
+            NotificationService.notify(
+                current_user.id,
+                "sistema",
+                "Vehículo registrado",
+                f"Tu {vehiculo.tipo_label} {vehiculo.marca} {vehiculo.modelo} quedó registrado correctamente.",
+                url_for("portal.vehiculo_detalle", vehiculo_id=vehiculo.id),
+            )
+            flash("Vehículo registrado correctamente.", "success")
+            return redirect(url_for("portal.vehiculos"))
+        except Exception as e:
+            db.session.rollback()
+            logger.warning("Error registrando vehículo: %s", e)
+            flash(str(e), "danger")
+    return render_template("portal/vehiculo_form.html", form=form, vehiculo=None)
+
+
+@portal_bp.route("/vehiculos/<int:vehiculo_id>/editar", methods=["GET", "POST"])
+@login_required
+def editar_vehiculo(vehiculo_id: int) -> Any:
+    cliente = _cliente_actual()
+    if not cliente:
+        return redirect(url_for("portal.index"))
+    vehiculo = PortalService.get_vehiculo(cliente, vehiculo_id)
+    if not vehiculo:
+        flash("Vehículo no encontrado", "danger")
+        return redirect(url_for("portal.vehiculos"))
+    form = VehiculoPortalForm(obj=vehiculo)
+    if request.method == "GET":
+        form.placa.data = vehiculo.placa
+    if form.validate_on_submit():
+        placa = form.placa.data.strip().upper()
+        otro = Vehiculo.query.filter(
+            db.func.upper(Vehiculo.placa) == placa, Vehiculo.id != vehiculo.id
+        ).first()
+        if otro:
+            form.placa.errors.append("Esa placa ya está registrada en el taller.")
+            return render_template("portal/vehiculo_form.html", form=form, vehiculo=vehiculo)
+        vehiculo.tipo = form.tipo.data
+        vehiculo.marca = form.marca.data.strip()
+        vehiculo.modelo = form.modelo.data.strip()
+        vehiculo.anio = form.anio.data
+        vehiculo.placa = placa
+        vehiculo.kilometraje = form.kilometraje.data
+        vehiculo.motor = (form.motor.data or "").strip() or None
+        vehiculo.combustible = form.combustible.data or None
+        vehiculo.color = (form.color.data or "").strip() or None
+        try:
+            safe_commit()
+            logger.info("Cliente %s editó vehículo %s", cliente.id, vehiculo.placa)
+            flash("Vehículo actualizado.", "success")
+            return redirect(url_for("portal.vehiculo_detalle", vehiculo_id=vehiculo.id))
+        except Exception as e:
+            db.session.rollback()
+            logger.warning("Error editando vehículo: %s", e)
+            flash(str(e), "danger")
+    return render_template("portal/vehiculo_form.html", form=form, vehiculo=vehiculo)
+
+
+@portal_bp.route("/vehiculos/<int:vehiculo_id>/eliminar", methods=["POST"])
+@login_required
+def eliminar_vehiculo(vehiculo_id: int) -> Any:
+    cliente = _cliente_actual()
+    if not cliente:
+        return redirect(url_for("portal.index"))
+    vehiculo = PortalService.get_vehiculo(cliente, vehiculo_id)
+    if not vehiculo:
+        flash("Vehículo no encontrado", "danger")
+        return redirect(url_for("portal.vehiculos"))
+    tiene_citas = Cita.query.filter_by(vehiculo_id=vehiculo.id).count() > 0
+    if tiene_citas:
+        flash(
+            "No puedes eliminar este vehículo porque tiene citas o servicios asociados. "
+            "Contacta al taller si necesitas retirarlo.",
+            "warning",
+        )
+        return redirect(url_for("portal.vehiculo_detalle", vehiculo_id=vehiculo.id))
+    try:
+        db.session.delete(vehiculo)
+        safe_commit()
+        logger.info("Cliente %s eliminó vehículo #%s", cliente.id, vehiculo_id)
+        flash("Vehículo eliminado.", "success")
+    except Exception as e:
+        db.session.rollback()
+        logger.warning("Error eliminando vehículo: %s", e)
+        flash(str(e), "danger")
+    return redirect(url_for("portal.vehiculos"))
 
 
 @portal_bp.route("/citas")

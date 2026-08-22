@@ -11,8 +11,26 @@ document.addEventListener('DOMContentLoaded', function () {
     initLocationButton();
     initTableSearch();
     initFormLabels();
+    initPasswordToggles();
     initNotificaciones();
 });
+
+/* Mostrar/ocultar contraseña en formularios de acceso y registro */
+function initPasswordToggles() {
+    document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+        if (btn.dataset.pwToggleBound === '1') return;
+        btn.dataset.pwToggleBound = '1';
+        btn.addEventListener('click', function () {
+            var input = document.querySelector(btn.getAttribute('data-toggle-password'));
+            if (!input) return;
+            var mostrar = input.type === 'password';
+            input.type = mostrar ? 'text' : 'password';
+            var icono = btn.querySelector('i');
+            if (icono) icono.className = mostrar ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+            btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+    });
+}
 
 function initTooltips() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

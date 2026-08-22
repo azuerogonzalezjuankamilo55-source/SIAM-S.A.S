@@ -203,7 +203,9 @@ class DashboardService:
         )
 
         total_citas = Cita.query.count()
-        citas_completadas = Cita.query.filter(Cita.estado == "completado").count()
+        citas_completadas = Cita.query.filter(
+            Cita.estado.in_(["entregada", "completado"])  # completado = valor legado
+        ).count()
         tasa_completacion_citas = (
             (citas_completadas / total_citas * 100) if total_citas else 0.0
         )
@@ -298,7 +300,14 @@ class DashboardService:
             })
 
         for c in Cita.query.order_by(Cita.created_at.desc()).limit(limit).all():
-            estados = {"pendiente": "pendiente", "confirmada": "confirmada", "completado": "completada"}
+            estados = {
+                "pendiente": "pendiente",
+                "confirmada": "confirmada",
+                "en_revision": "en revisión",
+                "en_reparacion": "en reparación",
+                "lista": "lista",
+                "entregada": "entregada",
+            }
             eventos.append({
                 "tipo": "cita",
                 "icono": "calendar-check",

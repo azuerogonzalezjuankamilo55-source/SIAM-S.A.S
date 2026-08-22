@@ -4,9 +4,12 @@ from wtforms.validators import DataRequired, Optional
 
 ESTADOS = [
     ("pendiente", "Pendiente"),
-    ("en_proceso", "En Proceso"),
-    ("completado", "Completado"),
-    ("cancelado", "Cancelado"),
+    ("confirmada", "Confirmada"),
+    ("en_revision", "En revisión"),
+    ("en_reparacion", "En reparación"),
+    ("lista", "Lista"),
+    ("entregada", "Entregada"),
+    ("cancelado", "Cancelada"),
 ]
 
 

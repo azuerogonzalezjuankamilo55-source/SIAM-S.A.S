@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Crear Cuenta{% endblock %}
+{% block title %}Crear Cuenta Administrativa - SIAM{% endblock %}
 {% block auth_content %}
 <div class="card shadow border-0">
     <div class="card-body p-4 p-md-5">
         <div class="text-center mb-4 d-lg-none">
             <span class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:64px;height:64px;background:var(--siam-gradient);color:#fff;">
-                <i class="fa-solid fa-user-plus fa-2x"></i>
+                <i class="fa-solid fa-user-shield fa-2x"></i>
             </span>
             <h3 class="fw-bold">{{ taller_config.nombre_taller if taller_config and taller_config.nombre_taller else "SIAM" }}</h3>
-            <p class="text-muted">Sistema Integral Automotriz</p>
+            <p class="text-muted">Área administrativa</p>
         </div>
         <div class="d-none d-lg-block mb-4">
             <span class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width:52px;height:52px;background:var(--siam-gradient);color:#fff;">
-                <i class="fa-solid fa-user-plus"></i>
+                <i class="fa-solid fa-user-shield"></i>
             </span>
-            <h3 class="fw-bold mb-1">Crea tu cuenta</h3>
-            <p class="text-muted mb-0">Comienza a gestionar tu taller en minutos</p>
+            <h3 class="fw-bold mb-1">Cuenta administrativa</h3>
+            <p class="text-muted mb-0">Gestiona tu taller desde el panel de control</p>
         </div>
         <form method="POST" novalidate>
             {{ form.hidden_tag() }}
@@ -32,28 +32,14 @@
                 <label class="form-label" for="nombre">Nombre completo</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                    <input type="text" name="nombre" id="nombre" value="{{ form.nombre.data or '' }}" class="form-control" placeholder="Tu nombre completo" required minlength="2" maxlength="100">
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="documento">Documento de identidad</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
-                    <input type="text" name="documento" id="documento" value="{{ form.documento.data or '' }}" class="form-control" placeholder="Cédula o documento" required minlength="5" maxlength="20">
+                    <input type="text" name="nombre" id="nombre" value="{{ form.nombre.data or '' }}" class="form-control" placeholder="Tu nombre" required minlength="2" maxlength="100">
                 </div>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="correo">Correo electrónico</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                    <input type="email" name="correo" id="correo" value="{{ form.correo.data or '' }}" class="form-control" placeholder="correo@ejemplo.com" required>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="telefono">Teléfono</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-                    <input type="tel" name="telefono" id="telefono" value="{{ form.telefono.data or '' }}" class="form-control" placeholder="300 000 0000" maxlength="20">
+                    <input type="email" name="correo" id="correo" value="{{ form.correo.data or '' }}" class="form-control" placeholder="admin@taller.com" required>
                 </div>
             </div>
             <div class="mb-3">
@@ -77,12 +63,12 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 mt-2 py-2">
-                <i class="fa-solid fa-user-check me-1"></i> Crear cuenta
+                <i class="fa-solid fa-user-check me-1"></i> Crear cuenta administrativa
             </button>
         </form>
         <p class="text-center mt-3 mb-0 small">
             ¿Ya tienes cuenta?
-            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Inicia sesión</a>
+            <a href="{{ url_for('auth.login', area='admin') }}" class="text-decoration-none">Inicia sesión aquí</a>
         </p>
     </div>
 </div>
@@ -99,15 +85,15 @@
     {% endif %}
 </div>
 <div data-aos="fade-up" data-aos-delay="150">
-    <h1 class="fw-bold display-6 mb-3">Moderniza tu <span class="text-primary">taller</span> hoy</h1>
+    <h1 class="fw-bold display-6 mb-3">Control total del <span class="text-primary">taller</span></h1>
     <p class="lead mb-4 text-white-50">
-        Administra clientes, vehículos, servicios, citas, facturas e inventario
-        desde una sola plataforma web. Sin papeles, sin caos.
+        Con una cuenta administrativa gestionas clientes, vehículos, citas,
+        órdenes de trabajo, facturación e inventario en un solo lugar.
     </p>
-    <div class="d-flex gap-4 mt-2 text-white-50 small">
-        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Sin instalación</span>
-        <span><i class="fa-solid fa-circle-check text-success me-1"></i> 100% web</span>
-        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Multi-dispositivo</span>
+    <div class="d-flex gap-4 mt-2 text-white-50 small flex-wrap">
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Panel de control</span>
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Reportes</span>
+        <span><i class="fa-solid fa-circle-check text-success me-1"></i> Multi-sede</span>
     </div>
 </div>
 <div class="text-white-50 small" data-aos="fade-up">

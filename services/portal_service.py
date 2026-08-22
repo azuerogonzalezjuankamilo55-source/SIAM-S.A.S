@@ -62,7 +62,7 @@ class PortalService:
             .filter(
                 Cita.cliente_id == cliente.id,
                 Cita.fecha >= hoy,
-                Cita.estado.in_(["pendiente", "en_proceso"]),
+                Cita.estado.in_(["pendiente", "confirmada", "en_revision", "en_reparacion"]),
             )
             .order_by(Cita.fecha.asc(), Cita.hora.asc())
             .limit(5)

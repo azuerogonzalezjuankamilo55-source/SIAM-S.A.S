@@ -66,10 +66,20 @@
                 <div class="col-md-2">
                     <label class="form-label">Estado</label>
                     <select name="estado" class="form-select">
-                        <option value="pendiente" {{ "selected" if cita.estado == "pendiente" else "" }}>Pendiente</option>
-                        <option value="en_proceso" {{ "selected" if cita.estado == "en_proceso" else "" }}>En Proceso</option>
-                        <option value="completado" {{ "selected" if cita.estado == "completado" else "" }}>Completado</option>
-                        <option value="cancelado" {{ "selected" if cita.estado == "cancelado" else "" }}>Cancelado</option>
+                        {% for estado, etiqueta in [
+                            ("pendiente", "Pendiente"),
+                            ("confirmada", "Confirmada"),
+                            ("en_revision", "En revisión"),
+                            ("en_reparacion", "En reparación"),
+                            ("lista", "Lista"),
+                            ("entregada", "Entregada"),
+                            ("cancelado", "Cancelada")
+                        ] %}
+                        <option value="{{ estado }}" {{ "selected" if cita.estado == estado else "" }}>{{ etiqueta }}</option>
+                        {% endfor %}
+                        {% if cita.estado in ("en_proceso", "completado") %}
+                        <option value="{{ cita.estado }}" selected>{{ cita.estado_etiqueta }} (legado)</option>
+                        {% endif %}
                     </select>
                 </div>
                 {% endif %}

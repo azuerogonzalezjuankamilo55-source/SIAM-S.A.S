@@ -48,7 +48,7 @@ SEDES_INICIALES = [
     },
 ]
 
-ESTADOS_CITA_ACTIVOS = ("pendiente", "en_proceso")
+ESTADOS_CITA_ACTIVOS = ("pendiente", "confirmada", "en_revision", "en_reparacion", "lista")
 
 # Ventana laboral por día de semana (0=lunes .. 6=domingo): (apertura, cierre).
 # Coincide con el horario publicado de las sedes iniciales.

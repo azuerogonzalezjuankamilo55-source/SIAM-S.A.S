@@ -4,7 +4,7 @@ from typing import Any
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 
-from models.cita import Cita
+from models.cita import Cita, ESTADOS_CITA
 from models.cliente import Cliente
 from models.vehiculo import Vehiculo
 from models.mecanico import Mecanico
@@ -163,28 +163,38 @@ def eliminar(id: int) -> Any:
 @citas_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
 def cambiar_estado(id: int, estado: str) -> Any:
+    # Compatibilidad con estados legados de la versión anterior.
+    estado = {"completado": "entregada", "en_proceso": "en_revision"}.get(estado, estado)
     try:
         cita = db.get_or_404(Cita, id)
-        estados_validos = ("pendiente", "en_proceso", "completado", "cancelado")
-        if estado in estados_validos:
+        if estado in ESTADOS_CITA:
             cita.estado = estado
             safe_commit()
-            if estado == "completado":
+            if estado == "entregada":
                 try:
                     from services.historial_service import HistorialService
                     HistorialService.registrar_desde_cita(cita, current_user.id if current_user.is_authenticated else None)
                 except Exception as e:
                     logger.warning("No se pudo registrar historial de cita %s: %s", id, e)
+            mensajes_estado = {
+                "confirmada": ("Cita confirmada", f"Tu cita del {cita.fecha.strftime('%d/%m/%Y')} fue confirmada. ¡Te esperamos!"),
+                "en_revision": ("Vehículo en revisión", f"Tu vehículo está siendo revisado (cita del {cita.fecha.strftime('%d/%m/%Y')})."),
+                "en_reparacion": ("Vehículo en reparación", f"Tu vehículo entró en reparación (cita del {cita.fecha.strftime('%d/%m/%Y')})."),
+                "lista": ("Vehículo listo", f"Tu vehículo está listo para recoger (cita del {cita.fecha.strftime('%d/%m/%Y')})."),
+                "entregada": ("Servicio entregado", f"Tu vehículo fue entregado. Gracias por tu visita del {cita.fecha.strftime('%d/%m/%Y')}."),
+                "cancelado": ("Cita cancelada", f"Tu cita del {cita.fecha.strftime('%d/%m/%Y')} fue cancelada por el taller."),
+            }
+            if estado in mensajes_estado:
                 try:
                     NotificationService.notify_cliente(
                         cita.cliente_id,
                         "cita",
-                        "Cita completada",
-                        f"Tu cita del {cita.fecha.strftime('%d/%m/%Y')} fue completada.",
+                        mensajes_estado[estado][0],
+                        mensajes_estado[estado][1],
                         url_for("portal.citas"),
                     )
                 except Exception as e:
-                    logger.warning("No se pudo notificar la cita completada %s: %s", id, e)
+                    logger.warning("No se pudo notificar el cambio de estado de la cita %s: %s", id, e)
             logger.info("Cita #%s cambió a estado: %s", id, estado)
     except Exception as e:
         db.session.rollback()

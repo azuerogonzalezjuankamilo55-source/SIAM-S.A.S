@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar vehículo" if vehiculo else "Registrar vehículo" }} - SIAM{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+        <i class="fa-solid {{ 'fa-motorcycle' if form.tipo.data == 'moto' else 'fa-car' }} me-2"></i>
+        {{ "Editar vehículo" if vehiculo else "Registrar vehículo" }}
+    </h4>
+    <a href="{{ url_for('portal.vehiculos') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            {% if form.errors %}
+            <div class="alert alert-danger py-2 small">
+                {% for field, errors in form.errors.items() %}
+                {% for error in errors %}
+                <div><i class="fa-solid fa-circle-exclamation me-1"></i>{{ error }}</div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label d-block mb-1">Tipo de vehículo *</label>
+                    <div class="btn-group w-100" role="group" aria-label="Tipo de vehículo">
+                        <input type="radio" class="btn-check" name="tipo" id="tipo_carro" value="carro" autocomplete="off" {% if (form.tipo.data or 'carro') == 'carro' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="tipo_carro"><i class="fa-solid fa-car me-1"></i> Carro</label>
+                        <input type="radio" class="btn-check" name="tipo" id="tipo_moto" value="moto" autocomplete="off" {% if form.tipo.data == 'moto' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="tipo_moto"><i class="fa-solid fa-motorcycle me-1"></i> Moto</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="placa">Placa *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-id-card-clip"></i></span>
+                        <input type="text" name="placa" id="placa" value="{{ form.placa.data or '' }}" class="form-control text-uppercase" placeholder="ABC123" required maxlength="20" style="text-transform:uppercase;">
+                    </div>
+                    {% for error in form.placa.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="marca">Marca *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-industry"></i></span>
+                        <input type="text" name="marca" id="marca" value="{{ form.marca.data or '' }}" class="form-control" placeholder="Toyota, Yamaha, Renault..." required maxlength="50">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="modelo">Modelo *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-car-side"></i></span>
+                        <input type="text" name="modelo" id="modelo" value="{{ form.modelo.data or '' }}" class="form-control" placeholder="Corolla, FZ 150..." required maxlength="50">
+                    </div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <label class="form-label" for="anio">Año</label>
+                    <input type="number" name="anio" id="anio" value="{{ form.anio.data if form.anio.data is not none else '' }}" class="form-control" placeholder="2020" min="1950" max="2100">
+                    {% for error in form.anio.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4 col-6">
+                    <label class="form-label" for="kilometraje">Kilometraje</label>
+                    <div class="input-group">
+                        <input type="number" name="kilometraje" id="kilometraje" value="{{ form.kilometraje.data if form.kilometraje.data is not none else '' }}" class="form-control" placeholder="45000" min="0">
+                        <span class="input-group-text">km</span>
+                    </div>
+                    {% for error in form.kilometraje.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="motor">Motor (si lo conoce)</label>
+                    <input type="text" name="motor" id="motor" value="{{ form.motor.data or '' }}" class="form-control" placeholder="1.6L, 150cc..." maxlength="50">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="combustible">Tipo de combustible</label>
+                    <select name="combustible" id="combustible" class="form-select">
+                        <option value="" {% if not form.combustible.data %}selected{% endif %}>No indicado</option>
+                        <option value="gasolina" {% if form.combustible.data == 'gasolina' %}selected{% endif %}>Gasolina</option>
+                        <option value="diesel" {% if form.combustible.data == 'diesel' %}selected{% endif %}>Diésel</option>
+                        <option value="gas" {% if form.combustible.data == 'gas' %}selected{% endif %}>Gas (GLP/GNC)</option>
+                        <option value="hibrido" {% if form.combustible.data == 'hibrido' %}selected{% endif %}>Híbrido</option>
+                        <option value="electrico" {% if form.combustible.data == 'electrico' %}selected{% endif %}>Eléctrico</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="color">Color</label>
+                    <input type="text" name="color" id="color" value="{{ form.color.data or '' }}" class="form-control" placeholder="Blanco, Negro..." maxlength="30">
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Guardar vehículo
+                </button>
+                <a href="{{ url_for('portal.vehiculos') }}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

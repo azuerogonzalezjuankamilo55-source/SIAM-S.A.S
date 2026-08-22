@@ -31,14 +31,7 @@
                         <td>{{ c.sede.nombre if c.sede else "—" }}</td>
                         <td>{{ c.vehiculo.placa }} - {{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
                         <td>
-                            <span class="badge bg-{{ {
-                                'pendiente': 'warning',
-                                'en_proceso': 'info',
-                                'completado': 'success',
-                                'cancelado': 'danger'
-                            }[c.estado] }}">
-                                {{ c.estado|replace("_", " ")|title }}
-                            </span>
+                            <span class="badge bg-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
                         </td>
                         <td>
                             {% if c.estado == "pendiente" %}
