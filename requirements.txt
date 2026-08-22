@@ -41,3 +41,4 @@ cffi==2.1.0
 
 # Images
 Pillow==12.3.0
+gunicorn
