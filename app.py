@@ -4,7 +4,7 @@ from typing import Any
 
 from flask import Flask, redirect, url_for, render_template, send_from_directory, flash
 from flask_login import LoginManager
-from flask_migrate import Migrate, upgrade
+from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -77,17 +77,6 @@ def create_app(config_name: str | None = None) -> Flask:
     register_template_processors(app)
 
     # ==========================================================
-    # MIGRACIONES AUTOMÁTICAS EN RENDER
-    # ==========================================================
-
-    if (
-        os.getenv("RENDER") == "true"
-        or os.getenv("RENDER") == "1"
-        or os.getenv("AUTO_MIGRATE") == "true"
-    ):
-        run_migrations(app)
-
-    # ==========================================================
     # RUTA PRINCIPAL
     # ==========================================================
 
@@ -126,44 +115,6 @@ def create_app(config_name: str | None = None) -> Flask:
         }, 200 if db_ok else 503
 
     return app
-
-
-# ==============================================================
-# MIGRACIONES AUTOMÁTICAS
-# ==============================================================
-
-def run_migrations(app: Flask) -> None:
-
-    logger = app.logger
-
-    logger.info("==========================================")
-    logger.info("SIAM - MIGRACIONES AUTOMÁTICAS")
-    logger.info("==========================================")
-
-    try:
-
-        with app.app_context():
-
-            logger.info(
-                "Comprobando migraciones de base de datos..."
-            )
-
-            upgrade()
-
-            logger.info(
-                "Migraciones ejecutadas correctamente."
-            )
-
-    except Exception as error:
-
-        logger.exception(
-            "ERROR ejecutando las migraciones: %s",
-            error
-        )
-
-        # Es importante detener el arranque si la base de datos
-        # no puede actualizarse.
-        raise
 
 
 # ==============================================================
@@ -376,6 +327,15 @@ def register_error_handlers(app: Flask) -> None:
             "Error interno del servidor"
         )
 
+        # CRÍTICO: si la excepción fue SQL, PostgreSQL dejó la transacción
+        # abortada (InFailedSqlTransaction). Hacer rollback aquí evita que
+        # renderizar errors/500.html (que extiende base.html y ejecuta
+        # consultas por los context processors) provoque un SEGUNDO error.
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+
         return render_template(
             "errors/500.html"
         ), 500
@@ -507,6 +467,8 @@ def register_template_processors(app: Flask) -> None:
 
             except Exception:
 
+                db.session.rollback()
+
                 config = None
 
             g._taller_config = config
@@ -528,6 +490,9 @@ def register_template_processors(app: Flask) -> None:
             None
         )
 
+        # ConfiguracionService.css_vars ya NO consulta la BD: si no hay
+        # config en g, usa defaults. Esto evita consultas duplicadas y
+        # evita errores por transacción abortada al renderizar errores.
         return {
             "css_vars": ConfiguracionService.css_vars(
                 config

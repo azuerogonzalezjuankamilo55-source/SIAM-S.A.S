@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initAnimations();
     initToast();
     initDeleteLinks();
+    initConfirmForms();
     initDarkMode();
     initAjaxForms();
     initAjaxDelete();
@@ -67,7 +68,15 @@ function initSidebar() {
     });
 }
 
+function prefiereMovimientoReducido() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 function initAnimations() {
+    if (prefiereMovimientoReducido()) {
+        document.documentElement.classList.add('aos-fallback');
+        return;
+    }
     if (typeof AOS !== 'undefined') {
         document.documentElement.classList.add('aos-ready');
         AOS.init({
@@ -119,9 +128,10 @@ function getCSRFToken() {
 }
 
 function initDeleteLinks() {
-    var deleteLinks = document.querySelectorAll('[data-confirm]');
+    var deleteLinks = document.querySelectorAll('[data-confirm]:not(form)');
     deleteLinks.forEach(function (link) {
         link.addEventListener('click', function (e) {
+            if (link.closest('form')) return;
             var msg = link.getAttribute('data-confirm') || '¿Estás seguro?';
             if (!confirm(msg)) {
                 e.preventDefault();
@@ -139,6 +149,29 @@ function initDeleteLinks() {
             form.appendChild(csrfInput);
             document.body.appendChild(form);
             form.submit();
+        });
+    });
+}
+
+/* Confirmación para formularios destructivos: data-confirm-form (o
+   data-confirm heredado) sobre <form>. Cancelar no ejecuta nada; al confirmar
+   se deshabilitan los botones y se envía una sola vez (sin re-entrada). */
+function initConfirmForms() {
+    document.querySelectorAll('form[data-confirm-form], form[data-confirm]').forEach(function (form) {
+        if (form.dataset.confirmBound === '1') return;
+        form.dataset.confirmBound = '1';
+        var msg = form.getAttribute('data-confirm-form') || form.getAttribute('data-confirm') || '¿Estás seguro de realizar esta acción?';
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (form.dataset.enviando === '1') return;
+            if (!window.confirm(msg)) return;
+            form.dataset.enviando = '1';
+            setTimeout(function () {
+                form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (b) {
+                    b.disabled = true;
+                });
+                form.submit();
+            }, 0);
         });
     });
 }
@@ -435,14 +468,28 @@ function initChat() {
     var input = document.getElementById('chatInput');
 
     if (form && input) {
+        var chatEnviando = false;
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+            if (chatEnviando) return;
             var text = input.value.trim();
             if (!text) return;
+            chatEnviando = true;
             input.value = '';
             addChatMessage('user', text);
             showTyping();
             scrollChat();
+
+            var submitBtn = form.querySelector('button[type="submit"], button:not([type])');
+            if (submitBtn) submitBtn.disabled = true;
+            if (input) input.disabled = true;
+
+            var controller = new AbortController();
+            var agotoTiempo = false;
+            var timer = setTimeout(function () {
+                agotoTiempo = true;
+                controller.abort();
+            }, 30000);
 
             fetch('/asistente/ask', {
                 method: 'POST',
@@ -451,22 +498,35 @@ function initChat() {
                     'X-CSRFToken': getCSRFToken(),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ mensaje: text })
+                body: JSON.stringify({ mensaje: text }),
+                signal: controller.signal
             })
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                clearTimeout(timer);
                 hideTyping();
                 if (data.respuesta) {
                     addChatMessage('assistant', data.respuesta, data.tipo, data.items, data.acciones);
                 } else if (data.error) {
                     addChatMessage('assistant', 'Error: ' + data.error);
+                } else {
+                    addChatMessage('assistant', 'No pude procesar tu mensaje. Intenta nuevamente.');
                 }
                 scrollChat();
             })
             .catch(function () {
+                clearTimeout(timer);
                 hideTyping();
-                addChatMessage('assistant', 'Error de conexión. Intenta nuevamente.');
+                addChatMessage('assistant',
+                    agotoTiempo
+                        ? 'La consulta tardó demasiado. Intenta de nuevo en unos momentos.'
+                        : 'Error de conexión. Verifica tu conexión e intenta nuevamente.');
                 scrollChat();
+            })
+            .finally(function () {
+                chatEnviando = false;
+                if (submitBtn) submitBtn.disabled = false;
+                if (input) { input.disabled = false; input.focus(); }
             });
         });
     }

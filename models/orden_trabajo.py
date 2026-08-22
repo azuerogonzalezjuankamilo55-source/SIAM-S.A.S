@@ -24,6 +24,18 @@ ESTADOS_OT = [
     "entregado",
 ]
 
+ESTADOS_OT_LABELS = {
+    "recibido": "Recibido",
+    "diagnostico": "Diagnóstico",
+    "esperando_repuestos": "Esperando Repuestos",
+    "en_reparacion": "En Reparación",
+    "pruebas": "En Pruebas",
+    "listo_entrega": "Listo para Entrega",
+    "entregado": "Entregado",
+}
+
+ESTADOS_OT_CHOICES = [(estado, ESTADOS_OT_LABELS[estado]) for estado in ESTADOS_OT]
+
 
 class OrdenTrabajo(db.Model):
     __tablename__ = "ordenes_trabajo"

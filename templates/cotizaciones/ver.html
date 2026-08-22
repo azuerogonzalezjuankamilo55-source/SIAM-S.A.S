@@ -101,59 +101,10 @@
 </div>
 {% endif %}
 
+{% from "partials/_cotizacion_items.html" import tabla_items_cotizacion %}
 <div class="card">
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Descripción</th>
-                        <th class="text-center">Cant.</th>
-                        <th class="text-end">P. Unitario</th>
-                        <th class="text-end">Subtotal</th>
-                        {% if cotizacion.estado in ("pendiente", "aprobada") %}
-                        <th></th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in cotizacion.items %}
-                    <tr>
-                        <td>{{ item.descripcion }}</td>
-                        <td class="text-center">{{ item.cantidad }}</td>
-                        <td class="text-end">$ {{ "{:,.2f}".format(item.precio_unitario) }}</td>
-                        <td class="text-end">$ {{ "{:,.2f}".format(item.subtotal) }}</td>
-                        {% if cotizacion.estado in ("pendiente", "aprobada") %}
-                        <td class="text-end">
-                            <form method="POST" action="{{ url_for('cotizaciones.eliminar_item', item_id=item.id) }}" class="d-inline" data-confirm-form="¿Quitar este ítem?">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
-                            </form>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-3">Sin ítems todavía.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="3" class="text-end">Subtotal</th>
-                        <th class="text-end">$ {{ "{:,.2f}".format(cotizacion.subtotal) }}</th>
-                    </tr>
-                    <tr>
-                        <th colspan="3" class="text-end">IVA ({{ "{:,.2f}".format(cotizacion.iva_porcentaje) }}%)</th>
-                        <th class="text-end">$ {{ "{:,.2f}".format(cotizacion.iva) }}</th>
-                    </tr>
-                    <tr>
-                        <th colspan="3" class="text-end">Total</th>
-                        <th class="text-end fs-5">$ {{ "{:,.2f}".format(cotizacion.total) }}</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+        {{ tabla_items_cotizacion(cotizacion, editable=(cotizacion.estado in ("pendiente", "aprobada"))) }}
 
         {% if cotizacion.estado == "pendiente" and cotizacion.items %}
         <div class="d-flex gap-2 justify-content-end">
@@ -197,7 +148,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <form method="POST" action="{{ url_for('cotizaciones.enviar', id=cotizacion.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-success" data-otro-mensaje="Cotización enviada al cliente">
+                    <button type="submit" class="btn btn-success">
                         <i class="fa-solid fa-paper-plane me-1"></i>Enviar
                     </button>
                 </form>

@@ -1,5 +1,4 @@
 import logging
-from datetime import date, timedelta
 from decimal import Decimal
 
 from database.db import db
@@ -186,26 +185,3 @@ class CotizacionService:
             .order_by(Cotizacion.created_at.desc())
             .all()
         )
-
-    @staticmethod
-    def get_para_vehiculo(vehiculo_id: int) -> list[Cotizacion]:
-        return (
-            Cotizacion.query.filter_by(vehiculo_id=vehiculo_id)
-            .order_by(Cotizacion.created_at.desc())
-            .all()
-        )
-
-    @staticmethod
-    def marcar_vencidas() -> int:
-        """Marca como vencidas las pendientes cuya validez ya expiró."""
-        contador = 0
-        pendientes = Cotizacion.query.filter_by(estado="pendiente").all()
-        hoy = date.today()
-        for c in pendientes:
-            limite = (c.created_at.date() + timedelta(days=c.validez_dias)) if c.created_at else hoy
-            if limite < hoy:
-                c.estado = "vencida"
-                contador += 1
-        if contador:
-            db.session.commit()
-        return contador

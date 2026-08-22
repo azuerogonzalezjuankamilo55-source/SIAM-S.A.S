@@ -89,10 +89,12 @@ def register() -> Any:
                 return jsonify({"success": True, "message": "Registro exitoso. Inicia sesión."})
             flash("Registro exitoso. Inicia sesión.", "success")
             return redirect(url_for("auth.login"))
-        except Exception as e:
+        except Exception:
             db.session.rollback()
+            logger.exception("Error registrando usuario %s", correo)
+            mensaje = "No se pudo completar el registro. Intenta nuevamente."
             if request.is_json:
-                return json_error(str(e))
-            flash(str(e), "danger")
+                return json_error(mensaje)
+            flash(mensaje, "danger")
             return render_template("auth/register.html", form=form)
     return render_template("auth/register.html", form=form)

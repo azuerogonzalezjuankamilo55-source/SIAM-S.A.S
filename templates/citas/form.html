@@ -36,7 +36,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Sede</label>
-                    <select name="sede_id" class="form-select">
+                    <select name="sede_id" id="sede_id" class="form-select">
                         <option value="">Sin sede</option>
                         {% for s in sedes %}
                         <option value="{{ s.id }}" {{ "selected" if cita and cita.sede_id == s.id else "" }}>{{ s.nombre }}</option>
@@ -54,11 +54,13 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Fecha *</label>
-                    <input type="date" name="fecha" class="form-control" value="{{ cita.fecha if cita else '' }}" required>
+                    <input type="date" name="fecha" id="fecha" class="form-control" value="{{ cita.fecha if cita else '' }}" required>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Hora *</label>
-                    <input type="time" name="hora" class="form-control" value="{{ cita.hora if cita else '' }}" required>
+                    <input type="time" name="hora" id="hora" class="form-control" value="{{ cita.hora if cita else '' }}" list="listaHoras" required>
+                    <datalist id="listaHoras"></datalist>
+                    <div class="form-text" id="hintHoras"></div>
                 </div>
                 {% if cita %}
                 <div class="col-md-2">
@@ -98,5 +100,31 @@ document.getElementById('cliente_id')?.addEventListener('change', function() {
             });
         });
 });
+
+function cargarHorasDisponibles() {
+    const fecha = document.getElementById('fecha');
+    const sede = document.getElementById('sede_id');
+    const lista = document.getElementById('listaHoras');
+    const hint = document.getElementById('hintHoras');
+    if (!lista || !hint) return;
+    if (!fecha || !fecha.value) { lista.innerHTML = ''; hint.textContent = ''; return; }
+    const params = new URLSearchParams({ fecha: fecha.value });
+    if (sede && sede.value) params.set('sede_id', sede.value);
+    {% if cita %}params.set('cita_id', '{{ cita.id }}');{% endif %}
+    fetch('/api/horas-disponibles?' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+            const horas = (data && data.horas) || [];
+            lista.innerHTML = horas.map(h => `<option value="${h}">`).join('');
+            hint.textContent = horas.length
+                ? `${horas.length} horario(s) disponible(s)`
+                : 'Sin horarios disponibles para esa fecha y sede';
+        })
+        .catch(() => {});
+}
+['sede_id', 'fecha'].forEach(function (id) {
+    document.getElementById(id)?.addEventListener('change', cargarHorasDisponibles);
+});
+cargarHorasDisponibles();
 </script>
 {% endblock %}

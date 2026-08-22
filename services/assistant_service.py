@@ -13,6 +13,8 @@ from models.inventario import Inventario
 from models.servicio import Servicio
 from models.mecanico import Mecanico
 from models.orden_trabajo import OrdenTrabajo, ESTADOS_OT
+from models.configuracion_taller import ConfiguracionTaller
+from services.sede_service import HORARIO_LABORAL
 
 logger = logging.getLogger("siam.assistant_service")
 
@@ -490,10 +492,36 @@ class AssistantService:
 
     @staticmethod
     def _ubicaciones() -> dict:
+        try:
+            config = ConfiguracionTaller.get_config()
+        except Exception:
+            config = None
+        if config and config.direccion:
+            ciudad = f", {config.ciudad}" if config.ciudad else ""
+            texto = (
+                f"Nuestra sede principal está en {config.direccion}{ciudad}. "
+                "¿Quieres ver todas nuestras sedes?"
+            )
+        else:
+            texto = "Contamos con diferentes sedes. ¿Quieres ver todas nuestras sedes?"
         return {
-            "text": "Contamos con diferentes sedes. Nuestra sede principal est\u00e1 en Soacha, Cundinamarca. \u00bfQuieres ver todas nuestras sedes?",
+            "text": texto,
             "tipo": "botones",
         }
+
+    @staticmethod
+    def _texto_horario() -> str:
+        def fmt(t) -> str:
+            return t.strftime("%I:%M %p").lstrip("0").lstrip(":").lower()
+
+        apertura, cierre = HORARIO_LABORAL[0]
+        texto = f"Nuestro horario de atención es **lunes a viernes de {fmt(apertura)} a {fmt(cierre)}**"
+        sabado = HORARIO_LABORAL.get(5)
+        if sabado:
+            texto += f" y **sábados de {fmt(sabado[0])} a {fmt(sabado[1])}**"
+        if not HORARIO_LABORAL.get(6):
+            texto += ". Los domingos permanecemos cerrados"
+        return texto + "."
 
     @staticmethod
     def _repuestos(entities: dict) -> dict:
@@ -872,7 +900,7 @@ class AssistantService:
         query = entities.get("query", "")
 
         respuestas = {
-            r"\bhorarios?\b": "Nuestro horario de atenci\u00f3n es **lunes a viernes de 7:00 AM a 6:00 PM** y **s\u00e1bados de 8:00 AM a 1:00 PM**.",
+            r"\bhorarios?\b": AssistantService._texto_horario(),
             r"\bd[i\u00ed]as?\s+ (de )?entrega|tiempo.*reparaci[o\u00f3]n|demora": (
                 "El tiempo de reparaci\u00f3n depende del servicio. Un mantenimiento b\u00e1sico toma 1-2 horas. "
                 "Trabajos mayores como motor o transmisi\u00f3n pueden tomar 2-5 d\u00edas h\u00e1biles."

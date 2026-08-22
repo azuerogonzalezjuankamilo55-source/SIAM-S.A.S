@@ -44,7 +44,7 @@
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                             {% endif %}
-                            <form method="post" action="{{ url_for('portal.eliminar_documento', adjunto_id=a.id) }}" data-confirm="¿Eliminar este documento?">
+                            <form method="post" action="{{ url_for('portal.eliminar_documento', adjunto_id=a.id) }}" data-confirm-form="¿Eliminar este documento? Esta acción no se puede deshacer.">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                     <i class="fa-solid fa-trash"></i>

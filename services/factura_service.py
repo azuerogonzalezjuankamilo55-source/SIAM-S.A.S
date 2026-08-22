@@ -6,7 +6,6 @@ from database.db import db
 from models.cita import Cita
 from models.factura import Factura, FacturaDetalle
 from models.servicio import Servicio
-from models.orden_trabajo import OrdenTrabajo
 from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
 from exceptions import BusinessRuleException, NotFoundException
@@ -27,11 +26,6 @@ class FacturaInput:
 
 
 class FacturaService:
-
-    @staticmethod
-    def get_iva_rate() -> Decimal:
-        config = ConfiguracionTaller.get_config()
-        return config.iva_rate
 
     @staticmethod
     def generar(input_data: FacturaInput) -> Factura:
@@ -150,12 +144,3 @@ class FacturaService:
 
         logger.info("Pago registrado: factura=%s monto=%s metodo=%s", factura.numero, monto, metodo_pago)
         return pago
-
-    @staticmethod
-    def get_orden_trabajo_servicios(orden_trabajo_id: int) -> list:
-        """Obtener servicios sugeridos para una OT (diagnóstico como servicios)."""
-        ot = db.session.get(OrdenTrabajo, orden_trabajo_id)
-        if not ot:
-            raise NotFoundException(f"OT {orden_trabajo_id} no encontrada")
-        servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
-        return servicios

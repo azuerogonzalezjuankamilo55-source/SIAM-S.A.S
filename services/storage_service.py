@@ -90,6 +90,18 @@ class FileService:
 
         limite = FileService._max_bytes(tipo)
         tamano = size if size is not None else getattr(file, "content_length", None)
+        if tamano is None:
+            # Con multipart los navegadores no envían Content-Length por parte
+            # (content_length llega None): medir el stream real para que el
+            # límite por tipo sea efectivo.
+            stream = getattr(file, "stream", file)
+            try:
+                pos = stream.tell()
+                stream.seek(0, os.SEEK_END)
+                tamano = stream.tell()
+                stream.seek(pos)
+            except (OSError, ValueError):
+                tamano = None
         if tamano is not None and tamano > limite:
             raise FileError(f"El archivo supera el máximo de {FileService.max_mb(tipo)} MB.")
 

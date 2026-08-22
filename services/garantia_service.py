@@ -135,11 +135,3 @@ class GarantiaService:
             .order_by(Garantia.created_at.desc())
             .all()
         )
-
-    @staticmethod
-    def get_para_vehiculo(vehiculo_id: int) -> list[Garantia]:
-        return (
-            Garantia.query.filter_by(vehiculo_id=vehiculo_id)
-            .order_by(Garantia.created_at.desc())
-            .all()
-        )

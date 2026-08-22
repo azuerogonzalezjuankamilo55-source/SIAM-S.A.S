@@ -50,6 +50,29 @@ def recibir_ubicacion() -> Any:
         return json_error("No se pudo guardar tu ubicación. Intenta nuevamente.")
 
 
+@api_bp.route("/horas-disponibles")
+@login_required
+def horas_disponibles() -> Any:
+    """Slots libres para una sede/fecha (staff y portal)."""
+    from datetime import date as date_cls
+
+    from services.sede_service import SedeService
+
+    sede_id = request.args.get("sede_id", type=int)
+    cita_id = request.args.get("cita_id", type=int)
+    try:
+        fecha = date_cls.fromisoformat(request.args.get("fecha", "") or "")
+    except ValueError:
+        return json_error("Fecha inválida.", status=400)
+
+    try:
+        horas = SedeService.horas_disponibles(sede_id or None, fecha, cita_id)
+    except Exception:
+        logger.error("Error consultando horas disponibles", exc_info=True)
+        return json_error("No se pudieron consultar los horarios.", status=500)
+    return jsonify({"fecha": fecha.isoformat(), "horas": horas})
+
+
 @api_bp.route("/asistencia", methods=["GET", "POST"])
 @login_required
 def asistencia() -> Any:

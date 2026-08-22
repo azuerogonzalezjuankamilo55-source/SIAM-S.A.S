@@ -281,7 +281,16 @@
         if (!s || !map) return;
         map.setView([s.latitud, s.longitud], 15);
         if (markers[s.id]) markers[s.id].openPopup();
+        var el = document.getElementById('map');
+        if (el) {
+            var r = el.getBoundingClientRect();
+            if (r.bottom < 0 || r.top > window.innerHeight) {
+                var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+            }
+        }
     }
+    window.verSedeEnMapa = verSedeEnMapa;
 
     function buscarSede() {
         var q = (document.getElementById('buscarSede').value || '').toLowerCase().trim();

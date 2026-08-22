@@ -103,11 +103,13 @@
                 <i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i> Diagnóstico IA
             </a>
         </li>
+        {% if current_user.es_admin %}
         <li class="nav-item">
             <a href="{{ url_for('recordatorios.index') }}" class="nav-link">
                 <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Recordatorios
             </a>
         </li>
+        {% endif %}
         <li class="nav-item">
             <a href="{{ url_for('sedes.index') }}" class="nav-link">
                 <i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i> Sedes
@@ -200,11 +202,13 @@
                 </li>
             </ul>
         </li>
+        {% if current_user.es_admin %}
         <li class="nav-item">
             <a href="{{ url_for('reportes.index') }}" class="nav-link">
                 <i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i> Reportes
             </a>
         </li>
+        {% endif %}
     </ul>
     {% endif %}
 

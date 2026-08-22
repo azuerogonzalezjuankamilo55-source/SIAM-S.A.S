@@ -5,6 +5,7 @@ from typing import Any
 
 from database.db import db
 from models.sede import Sede
+from models.configuracion_taller import ConfiguracionTaller
 
 logger = logging.getLogger("siam.sedes")
 
@@ -48,6 +49,18 @@ SEDES_INICIALES = [
 ]
 
 ESTADOS_CITA_ACTIVOS = ("pendiente", "en_proceso")
+
+# Ventana laboral por día de semana (0=lunes .. 6=domingo): (apertura, cierre).
+# Coincide con el horario publicado de las sedes iniciales.
+HORARIO_LABORAL = {
+    0: (time(7, 0), time(18, 0)),
+    1: (time(7, 0), time(18, 0)),
+    2: (time(7, 0), time(18, 0)),
+    3: (time(7, 0), time(18, 0)),
+    4: (time(7, 0), time(18, 0)),
+    5: (time(8, 0), time(13, 0)),
+    6: None,
+}
 
 
 class SedeService:
@@ -106,11 +119,6 @@ class SedeService:
         }
 
     @staticmethod
-    def get(sede_id: int) -> Sede | None:
-        SedeService.seed_sedes()
-        return db.session.get(Sede, sede_id)
-
-    @staticmethod
     def sede_ocupada(
         sede_id: int, fecha: date, hora: time, cita_excluida_id: int | None = None
     ) -> bool:
@@ -126,3 +134,39 @@ class SedeService:
         if cita_excluida_id:
             query = query.filter(Cita.id != cita_excluida_id)
         return query.first() is not None
+
+    @staticmethod
+    def horas_disponibles(
+        sede_id: int | None, fecha: date, cita_excluida_id: int | None = None
+    ) -> list[str]:
+        """Slots libres ("HH:MM") para una sede/fecha según horario laboral,
+        intervalo y anticipación configurados. Sin sede no hay filtro de
+        ocupación (la cita queda sin sede)."""
+        from datetime import datetime, timedelta
+
+        ventana = HORARIO_LABORAL.get(fecha.weekday())
+        if not ventana:
+            return []
+        try:
+            config = ConfiguracionTaller.get_config()
+            intervalo = int(config.citas_intervalo_min or 30)
+            anticipacion_h = int(config.citas_min_anticipacion_horas or 0)
+        except Exception:
+            intervalo, anticipacion_h = 30, 0
+        if intervalo <= 0:
+            intervalo = 30
+
+        inicio = datetime.combine(fecha, ventana[0])
+        fin = datetime.combine(fecha, ventana[1])
+        minimo = datetime.now() + timedelta(hours=anticipacion_h)
+
+        horas: list[str] = []
+        actual = inicio
+        while actual < fin:
+            libre = not sede_id or not SedeService.sede_ocupada(
+                int(sede_id), fecha, actual.time(), cita_excluida_id
+            )
+            if libre and actual >= minimo:
+                horas.append(actual.strftime("%H:%M"))
+            actual += timedelta(minutes=intervalo)
+        return horas

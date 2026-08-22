@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from database.db import db
+from models.factura import METODOS_PAGO
 
 if TYPE_CHECKING:
     from models.usuario import Usuario
@@ -23,16 +24,7 @@ class PagoFactura(db.Model):
 
     @property
     def metodo_pago_display(self) -> str:
-        labels = {
-            "Efectivo": "Efectivo",
-            "Tarjeta Débito": "Tarjeta Débito",
-            "Tarjeta Crédito": "Tarjeta Crédito",
-            "Transferencia": "Transferencia",
-            "PSE": "PSE",
-            "Nequi": "Nequi",
-            "Daviplata": "Daviplata",
-        }
-        return labels.get(self.metodo_pago, self.metodo_pago)
+        return dict(METODOS_PAGO).get(self.metodo_pago, self.metodo_pago)
 
     def __repr__(self) -> str:
         return f"<PagoFactura {self.id}:factura={self.factura_id} monto={self.monto}>"

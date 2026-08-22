@@ -2,17 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, DateField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Optional
 
-ESTADOS_OT = [
-    ("recibido", "Recibido"),
-    ("diagnostico", "Diagnóstico"),
-    ("esperando_repuestos", "Esperando Repuestos"),
-    ("en_reparacion", "En Reparación"),
-    ("pruebas", "En Pruebas"),
-    ("listo_entrega", "Listo para Entrega"),
-    ("entregado", "Entregado"),
-]
-
-NIVELES_COMBUSTIBLE = ["Vacio", "1/4", "1/2", "3/4", "Lleno"]
+from models.orden_trabajo import ESTADOS_OT_CHOICES
+from services.orden_trabajo_service import NIVELES_COMBUSTIBLE
 
 
 class OrdenTrabajoForm(FlaskForm):
@@ -31,6 +22,6 @@ class OrdenTrabajoForm(FlaskForm):
 
 
 class CambiarEstadoForm(FlaskForm):
-    estado = SelectField("Nuevo Estado", choices=ESTADOS_OT, validators=[DataRequired()])
+    estado = SelectField("Nuevo Estado", choices=ESTADOS_OT_CHOICES, validators=[DataRequired()])
     observacion = StringField("Observación", validators=[Optional()])
     submit = SubmitField("Cambiar Estado")

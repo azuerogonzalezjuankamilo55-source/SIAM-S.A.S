@@ -95,10 +95,14 @@ class ConfiguracionService:
 
     @staticmethod
     def css_vars(config: ConfiguracionTaller | None) -> dict[str, str]:
-        """Variables CSS de apariencia a inyectar en base.html (siempre HEX válidos)."""
+        """Variables CSS de apariencia a inyectar en base.html (siempre HEX válidos).
+
+        IMPORTANTE: NO consulta la base de datos. Si no recibe config usa
+        los colores por defecto. Esto evita consultas duplicadas (inject_taller_config
+        ya cargó la configuración) y evita errores al renderizar errores/500.html
+        cuando la transacción SQL está abortada.
+        """
         fuente = config
-        if fuente is None:
-            fuente = ConfiguracionTaller.query.first()
         primario = validar_hex(getattr(fuente, "color_primario", None)) or DEFAULT_COLORES["color_primario"]
         fuerte = validar_hex(getattr(fuente, "color_primario_fuerte", None)) or DEFAULT_COLORES["color_primario_fuerte"]
         soft = validar_hex(getattr(fuente, "color_primario_soft", None)) or DEFAULT_COLORES["color_primario_soft"]
@@ -148,6 +152,7 @@ class ConfiguracionService:
             db.session.execute(text("SELECT 1"))
             db_ok = True
         except Exception:
+            db.session.rollback()
             db_ok = False
         resultados.append({
             "nombre": "Base de datos",
@@ -159,6 +164,7 @@ class ConfiguracionService:
             ConfiguracionTaller.query.first()
             config_ok = True
         except Exception:
+            db.session.rollback()
             config_ok = False
         resultados.append({
             "nombre": "Configuración del taller",
@@ -190,6 +196,7 @@ class ConfiguracionService:
             db.session.execute(text("SELECT 1"))
             bd_estado = "conectado"
         except Exception:
+            db.session.rollback()
             bd_estado = "no disponible"
         return {
             "app": "SIAM",
@@ -206,6 +213,7 @@ class ConfiguracionService:
             row = db.session.execute(text("SELECT version_num FROM alembic_version")).first()
             return row[0] if row else None
         except Exception:
+            db.session.rollback()
             return None
 
     @staticmethod
