@@ -258,6 +258,7 @@
     </div>
     <div class="card-body p-0">
         <div id="mapaMiUbicacion" style="height:340px;width:100%;" role="region" aria-label="Mapa de tu ubicación y del taller"></div>
+        <div class="px-3 pt-2 pb-1 small d-none text-info" id="infoMiRuta"></div>
         <div class="px-3 py-3 d-flex align-items-start gap-2 text-muted small" id="estadoMiUbicacion">
             <i class="fa-solid fa-circle-info mt-1" aria-hidden="true"></i>
             <span>Comparte tu ubicación solo mientras te diriges al taller. Puedes dejar de compartir en cualquier momento.</span>
@@ -278,6 +279,7 @@
     var marcadorTaller = null;
     var marcadorCliente = null;
     var circuloExactitud = null;
+    var lineaRuta = null;
     var watchIdUbicacion = null;
     var ultimoEnvioUbicacion = 0;
     var compartiendoUbicacion = false;
@@ -361,6 +363,52 @@
             color: '#2563eb', weight: 1, fillColor: '#2563eb', fillOpacity: .12
         }).addTo(mapaMiUbicacion);
         mapaMiUbicacion.fitBounds(L.latLngBounds([posicion, [latTaller, lngTaller]]).pad(0.15), { maxZoom: 16 });
+        solicitarRuta();
+    }
+
+    function solicitarRuta() {
+        fetch('/api/ubicacion/ruta', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d || !d.success) return;
+                pintarRuta(d);
+            })
+            .catch(function () {});
+    }
+
+    function limpiarRuta() {
+        if (lineaRuta) {
+            mapaMiUbicacion.removeLayer(lineaRuta);
+            lineaRuta = null;
+        }
+        var info = document.getElementById('infoMiRuta');
+        if (info) info.classList.add('d-none');
+    }
+
+    function pintarRuta(d) {
+        var geo = d.geometry || [];
+        if (lineaRuta) mapaMiUbicacion.removeLayer(lineaRuta);
+        lineaRuta = null;
+        if (geo.length >= 2) {
+            lineaRuta = L.polyline(geo.map(function (p) { return [p.lat, p.lng]; }), {
+                color: '#2563eb', weight: 4, opacity: .7
+            }).addTo(mapaMiUbicacion);
+        }
+        var latlngs = [[latTaller, lngTaller]];
+        if (d.latitude && d.longitude) latlngs.push([d.latitude, d.longitude]);
+        if (latlngs.length > 1) {
+            mapaMiUbicacion.fitBounds(L.latLngBounds(latlngs).pad(0.15), { maxZoom: 16 });
+        }
+        var info = document.getElementById('infoMiRuta');
+        if (!info) return;
+        if (d.distance_m !== undefined && d.duration_s !== undefined) {
+            var km = d.distance_m >= 1000 ? (d.distance_m / 1000).toFixed(1) + ' km' : d.distance_m + ' m';
+            var eta = new Date(Date.now() + d.duration_s * 1000).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+            info.textContent = 'Ruta al taller (' + direccionTaller + ') · Distancia: ' + km + ' · Llegada aprox.: ' + eta;
+            info.classList.remove('d-none');
+        } else {
+            info.classList.add('d-none');
+        }
     }
 
     function enviarUbicacion(pos) {
@@ -413,6 +461,7 @@
         }
         ultimoEnvioUbicacion = 0;
         compartiendoUbicacion = false;
+        limpiarRuta();
     }
 
     function detenerCompartido() {

@@ -9,6 +9,7 @@ from database.commit import safe_commit, json_success, json_error
 from decorators import staff_required
 from services.portal_service import PortalService
 from services.ubicacion_service import UbicacionService, UbicacionError
+from services.routes_service import RoutesService
 
 logger = logging.getLogger("siam.routes.api_ubicacion")
 api_ubicacion_bp = Blueprint("api_ubicacion", __name__, url_prefix="/api")
@@ -120,6 +121,46 @@ def estado_ubicacion() -> Any:
     if cliente is None:
         return json_error("El usuario no está asociado a un cliente del taller.", status=403)
     return json_success(UbicacionService.estado_para_portal(cliente))
+
+
+@api_ubicacion_bp.route("/ubicacion/ruta")
+@login_required
+def ruta_ubicacion() -> Any:
+    """Cliente: ruta OSRM taller -> su ubicación actual compartida.
+
+    El cálculo es server-side (OSRM público, sin API keys). Si OSRM no
+    responde devuelve {"ok": False} y el portal conserva los marcadores.
+    """
+    cliente = PortalService.get_cliente_de_usuario(current_user)
+    if cliente is None:
+        return json_error("El usuario no está asociado a un cliente del taller.", status=403)
+
+    registro = UbicacionService.cliente_en_camino(cliente.id)
+    if registro is None:
+        return json_success({"ok": False, "error": "sin_ubicacion_compartida"})
+
+    taller = UbicacionService.taller()
+    ruta = RoutesService.distancia_y_duracion(
+        (taller["latitude"], taller["longitude"]),
+        (registro.latitude, registro.longitude),
+    )
+    if not ruta.get("ok"):
+        return json_success({"ok": False, "error": ruta.get("error")})
+
+    geometria_latlng = [
+        {"lat": pair[1], "lng": pair[0]}
+        for pair in ruta.get("geometry") or []
+        if len(pair) >= 2
+    ]
+    return json_success({
+        "ok": True,
+        "taller": taller,
+        "latitude": registro.latitude,
+        "longitude": registro.longitude,
+        "distance_m": int(ruta.get("distance_m", 0) or 0),
+        "duration_s": int(ruta.get("duration_s", 0) or 0),
+        "geometry": geometria_latlng,
+    })
 
 
 @api_ubicacion_bp.route("/admin/clientes-en-camino")

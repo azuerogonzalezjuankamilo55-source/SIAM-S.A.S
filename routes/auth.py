@@ -3,6 +3,7 @@ from typing import Any
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy.exc import IntegrityError
 
 from models import Usuario, Cliente
 from database.db import db
@@ -11,6 +12,29 @@ from database.commit import safe_commit, json_success, json_error
 
 logger = logging.getLogger("siam.routes.auth")
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+class RegistroError(Exception):
+    """Error de dominio del registro con mensaje seguro para el usuario."""
+
+    def __init__(self, mensaje: str):
+        self.mensaje = mensaje
+        super().__init__(mensaje)
+
+
+def _mensaje_duplicado(correo: str, documento: str) -> str:
+    """Mensaje amigable tras una violación de unicidad (POST-rollback).
+
+    Nunca lanza: si la re-consulta falla, devuelve el mensaje genérico.
+    """
+    try:
+        if Usuario.query.filter_by(correo=correo).first():
+            return "El correo ya está registrado"
+        if documento and Cliente.query.filter(Cliente.cedula == documento).first():
+            return "Ese documento ya está registrado"
+    except Exception:
+        db.session.rollback()
+    return "No se pudo completar el registro. Intenta nuevamente."
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -65,64 +89,57 @@ def register() -> Any:
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()
         documento = form.documento.data.strip()
-        if Usuario.query.filter_by(correo=correo).first():
-            if request.is_json:
-                return jsonify({"success": False, "error": "El correo ya está registrado"}), 400
-            flash("El correo ya está registrado", "danger")
-            return render_template("auth/register.html", form=form)
-        cliente = Cliente.query.filter(db.func.lower(Cliente.correo) == correo).first()
-        por_documento = Cliente.query.filter(Cliente.cedula == documento).first() if documento else None
-        # Un documento ya usado solo es válido si pertenece al mismo cliente
-        # (vinculación por correo); nunca permite tomar registros ajenos.
-        if por_documento and (not cliente or por_documento.id != cliente.id):
-            if not cliente and por_documento and not por_documento.correo:
-                cliente = por_documento
-            elif por_documento:
-                if request.is_json:
-                    return jsonify({"success": False, "error": "Ese documento ya está registrado"}), 400
-                flash("Ese documento ya está registrado", "danger")
-                return render_template("auth/register.html", form=form)
-        usuario = Usuario(
-            nombre=form.nombre.data.strip(),
-            correo=correo,
-            rol="cliente",
-            cliente_id=cliente.id if cliente else None,
-        )
-        usuario.set_password(form.password.data)
-        if not cliente and correo:
-            nuevo_cliente = Cliente(
+        try:
+            if Usuario.query.filter_by(correo=correo).first():
+                raise RegistroError("El correo ya está registrado")
+            cliente = Cliente.query.filter(db.func.lower(Cliente.correo) == correo).first()
+            por_documento = Cliente.query.filter(Cliente.cedula == documento).first() if documento else None
+            # Un documento ya usado solo es válido si pertenece al mismo cliente
+            # (vinculación por correo); nunca permite tomar registros ajenos.
+            if por_documento and (not cliente or por_documento.id != cliente.id):
+                if not cliente and por_documento and not por_documento.correo:
+                    cliente = por_documento
+                elif por_documento:
+                    raise RegistroError("Ese documento ya está registrado")
+            usuario = Usuario(
                 nombre=form.nombre.data.strip(),
                 correo=correo,
-                cedula=documento or None,
-                telefono=(form.telefono.data or "").strip() or None,
+                rol="cliente",
+                cliente_id=cliente.id if cliente else None,
             )
-            db.session.add(nuevo_cliente)
-            db.session.flush()
-            usuario.cliente_id = nuevo_cliente.id
-        elif cliente and documento:
-            if not cliente.cedula:
-                cliente.cedula = documento
-            if form.telefono.data and not cliente.telefono:
-                cliente.telefono = form.telefono.data.strip()
-        db.session.add(usuario)
-        try:
-            safe_commit()
-            logger.info("Nuevo usuario cliente registrado: %s", correo)
-            try:
-                from services.notification_service import NotificationService
-                NotificationService.notify_staff(
-                    "sistema",
-                    "Nuevo cliente registrado",
-                    f"{form.nombre.data.strip()} creó una cuenta de cliente ({correo}).",
-                    url_for("clientes.listar"),
+            usuario.set_password(form.password.data)
+            if not cliente and correo:
+                nuevo_cliente = Cliente(
+                    nombre=form.nombre.data.strip(),
+                    correo=correo,
+                    cedula=documento or None,
+                    telefono=(form.telefono.data or "").strip() or None,
                 )
-            except Exception as ne:
-                logger.warning("No se pudo notificar registro de cliente: %s", ne)
-            login_user(usuario)
+                db.session.add(nuevo_cliente)
+                db.session.flush()
+                usuario.cliente_id = nuevo_cliente.id
+            elif cliente and documento:
+                if not cliente.cedula:
+                    cliente.cedula = documento
+                if form.telefono.data and not cliente.telefono:
+                    cliente.telefono = form.telefono.data.strip()
+            db.session.add(usuario)
+            safe_commit()
+        except RegistroError as e:
+            db.session.rollback()
+            logger.warning("Registro rechazado (%s): %s", e.mensaje, correo)
             if request.is_json:
-                return jsonify({"success": True, "message": "Registro exitoso."})
-            flash("¡Bienvenido/a a SIAM! Tu cuenta fue creada.", "success")
-            return redirect(url_for("portal.index"))
+                return json_error(e.mensaje, status=400)
+            flash(e.mensaje, "danger")
+            return render_template("auth/register.html", form=form)
+        except IntegrityError:
+            db.session.rollback()
+            # Excepción real y visible en el log del servidor (nunca al cliente).
+            logger.exception("Registro con conflicto de unicidad: %s", correo)
+            if request.is_json:
+                return json_error(_mensaje_duplicado(correo, documento), status=400)
+            flash(_mensaje_duplicado(correo, documento), "danger")
+            return render_template("auth/register.html", form=form)
         except Exception:
             db.session.rollback()
             logger.exception("Error registrando usuario %s", correo)
@@ -131,6 +148,22 @@ def register() -> Any:
                 return json_error(mensaje)
             flash(mensaje, "danger")
             return render_template("auth/register.html", form=form)
+        logger.info("Nuevo usuario cliente registrado: %s", correo)
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.notify_staff(
+                "sistema",
+                "Nuevo cliente registrado",
+                f"{form.nombre.data.strip()} creó una cuenta de cliente ({correo}).",
+                url_for("clientes.listar"),
+            )
+        except Exception as ne:
+            logger.warning("No se pudo notificar registro de cliente: %s", ne)
+        login_user(usuario)
+        if request.is_json:
+            return jsonify({"success": True, "message": "Registro exitoso."})
+        flash("¡Bienvenido/a a SIAM! Tu cuenta fue creada.", "success")
+        return redirect(url_for("portal.index"))
     return render_template("auth/register.html", form=form)
 
 

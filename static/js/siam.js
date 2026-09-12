@@ -825,7 +825,11 @@ function initNotificaciones() {
         }).join('');
     }
 
+    var cargando = false;
+
     function cargar() {
+        if (cargando) return;
+        cargando = true;
         fetch('/notificaciones/api/listar', { headers: { 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -833,14 +837,17 @@ function initNotificaciones() {
                 renderItems(data.items);
                 actualizarBadge(data.items.filter(function (n) { return !n.leida; }).length);
             })
-            .catch(function () {});
+            .catch(function () {})
+            .then(function () { cargando = false; });
     }
 
     function marcar(id) {
         return fetch('/notificaciones/api/leer/' + id, {
             method: 'POST',
             headers: { 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' }
-        }).then(function (r) { return r.json(); });
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d && d.success) cargar();
+        });
     }
 
     lista.addEventListener('click', function (e) {

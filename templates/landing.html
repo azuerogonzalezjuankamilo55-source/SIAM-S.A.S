@@ -106,13 +106,18 @@
                     <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
                     <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                     <li class="nav-item ms-lg-2">
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">
-                            <i class="fa-solid fa-right-to-bracket me-1"></i>Iniciar Sesión
+                        <a href="{{ url_for('auth.login', area='admin') }}" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-user-shield me-1"></i>Ingresar como administrador
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('auth.login', area='cliente') }}" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-car-side me-1"></i>Ingresar como cliente
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ url_for('auth.register') }}" class="btn btn-gradient btn-sm">
-                            <i class="fa-solid fa-user-plus me-1"></i>Registrarse
+                            <i class="fa-solid fa-user-plus me-1"></i>Registrarme como cliente
                         </a>
                     </li>
                 </ul>
@@ -179,10 +184,10 @@
                     <div class="card h-100 feature-card p-4 text-center">
                         <div class="benefit-icon mx-auto mb-3"><i class="fa-solid fa-user-shield fs-1"></i></div>
                         <span class="badge badge-soft-primary mb-2">Área administrativa</span>
-                        <h5 class="fw-bold mb-2">Personal del taller</h5>
+                        <h5 class="fw-bold mb-2">Administrador y personal del taller</h5>
                         <p class="text-secondary small mb-4">
-                            Gestiona clientes, vehículos, citas, órdenes de trabajo,
-                            facturación e inventario desde el panel de control.
+                            Administradores, recepción y mecánicos: gestionan clientes, vehículos,
+                            citas, órdenes de trabajo, facturación e inventario desde el panel.
                         </p>
                         <div class="d-grid gap-2">
 <a href="{{ url_for('auth.login', area='admin') }}" class="btn btn-gradient">

@@ -196,12 +196,13 @@
     justify-content: center;
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     border-radius: var(--radius-md);
     border: none;
     background: transparent;
     color: var(--text-muted);
     cursor: pointer;
-    transition: all var(--transition-fast) ease;
+    transition: background-color var(--transition-fast) ease, color var(--transition-fast) ease;
     position: relative;
 }
 
@@ -214,11 +215,19 @@
     position: absolute;
     top: 2px;
     right: 2px;
+    left: auto;
     font-size: 0.6rem;
     padding: 0.15em 0.4em;
     min-width: 16px;
+    width: auto;
+    max-width: 26px;
     text-align: center;
     border-radius: var(--radius-full);
+    line-height: 1.1;
+    transform: none;
+    pointer-events: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ---------- Notifications ---------- */
@@ -324,6 +333,23 @@
 
 .notif-menu-footer a:hover {
     color: var(--primary);
+}
+
+/* La campana nunca debe mover su layout ni animar posiciones: el badge es
+   absoluto dentro del botón de tamaño fijo y solo se usa transition de color. */
+.navbar-icon-btn,
+.navbar-icon-btn * {
+    transform: none;
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navbar-icon-btn,
+    .navbar-notif-btn,
+    .notif-menu,
+    .notif-item {
+        transition: none !important;
+    }
 }
 
 /* ---------- Mobile Navbar ---------- */
