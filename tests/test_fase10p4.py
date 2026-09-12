@@ -12,6 +12,7 @@ Cubre los 6 problemas reportados en la fase:
 5. Despliegue en Render: Procfile/render.yaml con Gunicorn 'app:create_app()'.
 6. Compatibilidad de producción: HTTPS, cookies seguras, CSRF y PostgreSQL.
 """
+import logging
 import pathlib
 
 import pytest
@@ -372,3 +373,67 @@ class TestProduccion:
     def test_runtime_python(self):
         rt = (RAIZ / "runtime.txt").read_text(encoding="utf-8").strip()
         assert rt.startswith("python-3.")
+
+
+# ============================================================
+# Causa raíz del fallo en Render: BD sin esquema (aún sin migrar).
+# Antes, /auth/login?area=* devolvía 500 en
+#   routes/auth.py (Usuario.query.filter_by(rol="admin").count())
+# porque el GET consultaba la BD sin protección. Ahora las rutas públicas
+# degradan con gracia (igual que "/" y /health) y loguean la excepción real.
+# ============================================================
+
+class TestDegradacionSinEsquema:
+    # Reproduce el escenario de Render con una base REALMENTE vacía
+    # (sin tablas, como un despliegue que aún no ejecutó flask db upgrade).
+    # Se parchea la clase ProductionConfig antes de crear la app para que el
+    # engine se construya contra la base vacía (monkeypatch restaura después).
+
+    def _app_con_bd_vacia(self, monkeypatch, tmp_path):
+        from config import ProductionConfig
+
+        db_path = tmp_path / "vacia.db"
+        monkeypatch.setenv("SECRET_KEY", "clave-produccion-tests")
+        monkeypatch.setattr(
+            ProductionConfig,
+            "SQLALCHEMY_DATABASE_URI",
+            f"sqlite:///{db_path.as_posix()}",
+        )
+        return create_app("production")
+
+    def test_login_y_registro_sin_500_con_bd_vacia(self, monkeypatch, tmp_path):
+        app = self._app_con_bd_vacia(monkeypatch, tmp_path)
+        with app.test_client() as c:
+            assert c.get("/health").status_code == 200
+            assert c.get("/").status_code == 200
+            assert c.get("/auth/register").status_code == 200
+            assert c.get("/auth/login?area=admin").status_code == 200
+            assert c.get("/auth/login?area=cliente").status_code == 200
+            # Fail-closed: jamás se permite bootstrap admin con BD incierta.
+            assert c.get("/auth/registrar-admin").status_code in (301, 302, 303)
+
+    def test_excepcion_real_queda_en_log(self, monkeypatch, tmp_path):
+        import traceback
+        from routes import auth as auth_routes
+
+        capturados: list[str] = []
+        class _Captura(logging.Handler):
+            def emit(self, record):
+                msg = record.getMessage()
+                if record.exc_info:
+                    msg += "".join(traceback.format_exception(*record.exc_info))
+                capturados.append(msg)
+
+        cap = _Captura()
+        auth_routes.logger.addHandler(cap)
+        try:
+            app = self._app_con_bd_vacia(monkeypatch, tmp_path)
+            with app.test_client() as c:
+                c.get("/auth/login?area=admin")
+            detalle = " ".join(capturados).lower()
+            assert any(
+                marcador in detalle
+                for marcador in ("no such table", "does not exist", "operationalerror")
+            )
+        finally:
+            auth_routes.logger.removeHandler(cap)

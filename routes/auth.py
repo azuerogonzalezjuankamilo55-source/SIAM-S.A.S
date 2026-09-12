@@ -22,6 +22,22 @@ class RegistroError(Exception):
         super().__init__(mensaje)
 
 
+def _existe_admin() -> bool:
+    """¿Existe al menos una cuenta de administrador?
+
+    Patrón de degradación igual al resto de la app (landing, /health y
+    context processors): si la BD está caída o aún sin migrar, se devuelve
+    True (fail-closed: jamás se habilita el bootstrap administrativo con una
+    BD incierta) y la excepción real queda completa y visible en el log.
+    """
+    try:
+        return Usuario.query.filter_by(rol="admin").count() > 0
+    except Exception:
+        db.session.rollback()
+        logger.exception("No se pudo consultar si existe un administrador")
+        return True
+
+
 def _mensaje_duplicado(correo: str, documento: str) -> str:
     """Mensaje amigable tras una violación de unicidad (POST-rollback).
 
@@ -47,7 +63,7 @@ def login() -> Any:
     area = request.args.get("area") or ""
     if area not in ("admin", "cliente"):
         area = ""
-    permite_registrar_admin = Usuario.query.filter_by(rol="admin").count() == 0
+    permite_registrar_admin = not _existe_admin()
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()
         password = form.password.data
@@ -179,7 +195,7 @@ def registrar_admin() -> Any:
         if current_user.es_cliente:
             return redirect(url_for("portal.index"))
         return redirect(url_for("dashboard.index"))
-    if Usuario.query.filter_by(rol="admin").count() > 0:
+    if _existe_admin():
         flash("Ya existe una cuenta de administrador. Inicia sesión para gestionar SIAM.", "warning")
         return redirect(url_for("auth.login"))
     form = AdminRegisterForm()
