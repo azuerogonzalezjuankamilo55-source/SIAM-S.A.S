@@ -1,95 +1,117 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/status_badge.html" import status_badge %}
+{% from "components/empty_state.html" import empty_state %}
+
 {% block title %}Citas{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Citas</h4>
-    <a href="{{ url_for('citas.crear') }}" class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Nueva Cita
-    </a>
-</div>
-<div class="card">
-    <div class="card-body">
-        <div class="search-input mb-3" style="max-width: 340px;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaCitas">
+{{ page_header(titulo="Citas", icono="fa-calendar-check",
+               subtitulo="Agenda y control de citas del taller",
+               boton="Nueva Cita", boton_icon="fa-plus",
+               boton_url=url_for('citas.crear')) }}
+
+{% set cita_mapa = {
+    'pendiente': {'bg': 'warning', 'texto': 'Pendiente'},
+    'confirmada': {'bg': 'primary', 'texto': 'Confirmada'},
+    'en_revision': {'bg': 'info', 'texto': 'En revisión'},
+    'en_proceso': {'bg': 'info', 'texto': 'En revisión'},
+    'en_reparacion': {'bg': 'warning', 'texto': 'En reparación'},
+    'lista': {'bg': 'success', 'texto': 'Lista'},
+    'entregada': {'bg': 'success', 'texto': 'Entregada'},
+    'completado': {'bg': 'success', 'texto': 'Entregada'},
+    'cancelado': {'bg': 'danger', 'texto': 'Cancelada'},
+    'default': {'bg': 'secondary', 'texto': '—'}
+} %}
+
+<div class="card" data-aos="fade-up">
+    <div class="table-toolbar p-2">
+        <div class="table-toolbar-left w-100">
+            <div class="search-input w-100" style="max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" class="form-control form-control-sm" placeholder="Buscar por cliente, placa o vehículo..." aria-label="Buscar citas" data-table-search="#tablaCitas">
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover" id="tablaCitas">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Cliente</th>
-                        <th>Vehículo</th>
-                        <th>Sede</th>
-                        <th>Mecánico</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for c in citas %}
-                    <tr>
-                        <td>{{ c.id }}</td>
-                        <td>{{ c.cliente.nombre }}</td>
-                        <td>{{ c.vehiculo.placa }} - {{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
-                        <td>{{ c.sede.nombre if c.sede else "—" }}</td>
-                        <td>{{ c.mecanico.nombre if c.mecanico else "Sin asignar" }}</td>
-                        <td>{{ c.fecha }}</td>
-                        <td>{{ c.hora }}</td>
-                        <td>
-                            <span class="badge bg-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('citas.editar', id=c.id) }}" class="btn btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                {% set siguiente = {
-                                    'pendiente': ('confirmada', 'Confirmar', 'primary', 'fa-circle-check'),
-                                    'confirmada': ('en_revision', 'Iniciar revisión', 'info', 'fa-magnifying-glass'),
-                                    'en_revision': ('en_reparacion', 'Pasar a reparación', 'warning', 'fa-wrench'),
-                                    'en_reparacion': ('lista', 'Marcar listo', 'success', 'fa-flag-checkered')
-                                }.get(c.estado) %}
-                                {% if siguiente %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado=siguiente[0]) }}" class="btn btn-outline-{{ siguiente[2] }}" title="{{ siguiente[1] }}">
-                                    <i class="fa-solid {{ siguiente[3] }}"></i>
-                                </a>
-                                {% endif %}
-                                {% if c.estado == "lista" and not c.factura %}
-                                <a href="{{ url_for('facturas.crear', cita_id=c.id) }}" class="btn btn-outline-primary" title="Crear factura">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </a>
-                                {% endif %}
-                                {% if c.estado == "lista" %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='entregada') }}" class="btn btn-outline-success" title="Entregar vehículo">
-                                    <i class="fa-solid fa-box-open"></i>
-                                </a>
-                                {% endif %}
-                                {% if c.estado not in ("cancelado", "entregada") %}
-                                <a href="{{ url_for('citas.cambiar_estado', id=c.id, estado='cancelado') }}" class="btn btn-outline-danger" title="Cancelar cita">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="9">
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></div>
-                                <h6 class="mb-1">Aún no hay citas registradas</h6>
-                                <p class="text-muted small mb-3">Agenda la primera cita para organizar el día del taller.</p>
-                                <a href="{{ url_for('citas.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear cita</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-modern table-hover mb-0" id="tablaCitas">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th>Vehículo</th>
+                    <th>Sede</th>
+                    <th>Mecánico</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in citas %}
+                <tr>
+                    <td data-label="ID">{{ c.id }}</td>
+                    <td data-label="Cliente">{{ c.cliente.nombre }}</td>
+                    <td data-label="Vehículo">{{ c.vehiculo.placa }} · {{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
+                    <td data-label="Sede">{{ c.sede.nombre if c.sede else "—" }}</td>
+                    <td data-label="Mecánico">{{ c.mecanico.nombre if c.mecanico else "Sin asignar" }}</td>
+                    <td data-label="Fecha">{{ c.fecha }}</td>
+                    <td data-label="Hora">{{ c.hora }}</td>
+                    <td data-label="Estado">{{ status_badge(c.estado, cita_mapa) }}</td>
+                    <td data-label="Acciones">
+                        <div class="table-actions justify-content-end">
+                            <a href="{{ url_for('citas.editar', id=c.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                            </a>
+                            {% set siguiente = {
+                                'pendiente': ('confirmada', 'Confirmar', 'primary', 'fa-circle-check'),
+                                'confirmada': ('en_revision', 'Iniciar revisión', 'info', 'fa-magnifying-glass'),
+                                'en_revision': ('en_reparacion', 'Pasar a reparación', 'warning', 'fa-wrench'),
+                                'en_reparacion': ('lista', 'Marcar listo', 'success', 'fa-flag-checkered')
+                            }.get(c.estado) %}
+                            {% if siguiente %}
+                            <form method="post" action="{{ url_for('citas.cambiar_estado', id=c.id, estado=siguiente[0]) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-{{ siguiente[2] }}" title="{{ siguiente[1] }}">
+                                    <i class="fa-solid {{ siguiente[3] }}" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if c.estado == "lista" and not c.factura %}
+                            <a href="{{ url_for('facturas.crear', cita_id=c.id) }}" class="btn btn-sm btn-outline-primary" title="Crear factura">
+                                <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+                            </a>
+                            {% endif %}
+                            {% if c.estado == "lista" %}
+                            <form method="post" action="{{ url_for('citas.cambiar_estado', id=c.id, estado='entregada') }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Entregar vehículo">
+                                    <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if c.estado not in ("cancelado", "entregada") %}
+                            <form method="post" action="{{ url_for('citas.cambiar_estado', id=c.id, estado='cancelado') }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar cita">
+                                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="p-0">
+                        {{ empty_state(icon="fa-calendar-check", titulo="Aún no hay citas registradas",
+                                       mensaje="Agenda la primera cita para organizar el día del taller.",
+                                       accion="Crear cita", url=url_for('citas.crear'), accion_icon="fa-plus") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

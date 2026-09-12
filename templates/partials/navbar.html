@@ -1,56 +1,109 @@
-<nav class="app-navbar px-3 py-2">
+<nav class="app-navbar" aria-label="Barra superior">
     <div class="d-flex align-items-center justify-content-between gap-2">
-        <div class="d-flex align-items-center gap-2">
+        <!-- Left: toggle + search -->
+        <div class="navbar-left">
             <button class="btn btn-soft btn-icon d-md-none" type="button" id="sidebarToggler" aria-label="Abrir menú" aria-expanded="false">
-                <i class="fa-solid fa-bars"></i>
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
             {% if current_user.is_authenticated %}
-            {% if current_user.foto_path %}
-            <img src="{{ current_user.foto_path }}" alt="{{ current_user.nombre }}" class="avatar avatar-sm">
-            {% else %}
-            <span class="d-flex align-items-center justify-content-center text-primary avatar avatar-sm">
-                <i class="fa-solid fa-circle-user fs-4"></i>
-            </span>
-            {% endif %}
-            <div class="lh-1">
-                <small class="text-secondary text-uppercase d-none d-sm-block" style="font-size:.68rem;letter-spacing:.5px;">Bienvenido</small>
-                <span class="fw-semibold">{{ current_user.nombre }}</span>
+            <div class="navbar-search d-none d-md-block">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="navbarSearch" placeholder="Buscar..." aria-label="Buscar en el sistema" autocomplete="off" data-staff-search="true">
+                <kbd aria-hidden="true">/</kbd>
             </div>
-            {% else %}
-            <span class="text-light">Bienvenido</span>
+            {% if current_user.es_cliente %}
+            <div class="navbar-brand-mobile d-md-none">
+                <span class="navbar-user-avatar-placeholder">
+                    <i class="fa-solid fa-car" aria-hidden="true"></i>
+                </span>
+            </div>
             {% endif %}
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            {% if current_user.is_authenticated %}
-            <span class="badge badge-soft-primary d-none d-md-inline">{{ current_user.rol }}</span>
             {% endif %}
             {% if current_user.is_authenticated %}
-            <div class="dropdown" id="notificacionesDropdown">
-                <button class="btn btn-soft btn-icon position-relative" id="notifToggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge">0</span>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="notifToggle">
-                    <div class="px-3 py-2 fw-semibold border-bottom d-flex justify-content-between align-items-center">
-                        Notificaciones
-                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="notifMarcarTodas">Marcar leídas</button>
+            <div class="dropdown">
+                <div class="navbar-user" data-bs-toggle="dropdown" role="button" aria-label="Menú de usuario" aria-expanded="false">
+                    {% if current_user.foto_path %}
+                    <img src="{{ current_user.foto_path }}" alt="Foto de {{ current_user.nombre }}" class="navbar-user-avatar">
+                    {% else %}
+                    <span class="navbar-user-avatar-placeholder">
+                        <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                    </span>
+                    {% endif %}
+                    <div class="navbar-user-info">
+                        <span class="navbar-user-name">{{ current_user.nombre }}</span>
+                        <span class="navbar-user-role">{{ current_user.rol }}</span>
                     </div>
-                    <div id="notifLista" class="notif-lista">
-                        <div class="px-3 py-3 text-muted small text-center">Cargando...</div>
-                    </div>
-                    <a href="{{ url_for('notificaciones.index') }}" class="d-block text-center small py-2 border-top text-decoration-none">
-                        Ver todas
+                    <i class="fa-solid fa-chevron-down text-muted" style="font-size:.65rem;" aria-hidden="true"></i>
+                </div>
+                <div class="dropdown-menu dropdown-menu-end navbar-profile-dropdown">
+                    {% if current_user.es_cliente %}
+                    <a class="dropdown-item" href="{{ url_for('portal.perfil') }}">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>Mi Perfil
+                    </a>
+                    <a class="dropdown-item" href="{{ url_for('portal.index') }}">
+                        <i class="fa-solid fa-house" aria-hidden="true"></i>Mi Portal
+                    </a>
+                    {% elif current_user.es_admin %}
+                    <a class="dropdown-item" href="{{ url_for('configuracion.index') }}">
+                        <i class="fa-solid fa-sliders" aria-hidden="true"></i>Configuración
+                    </a>
+                    <a class="dropdown-item" href="{{ url_for('reportes.index') }}">
+                        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>Reportes
+                    </a>
+                    {% else %}
+                    <a class="dropdown-item" href="{{ url_for('dashboard.index') }}">
+                        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>Dashboard
+                    </a>
+                    <a class="dropdown-item" href="{{ url_for('assistant.index') }}">
+                        <i class="fa-solid fa-robot" aria-hidden="true"></i>Asistente
+                    </a>
+                    {% endif %}
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Cerrar sesión
                     </a>
                 </div>
             </div>
             {% endif %}
-            <button class="btn btn-soft btn-icon" id="darkModeToggle" title="Modo oscuro/claro">
-                <i class="fa-solid fa-moon"></i>
-            </button>
+        </div>
+
+        <!-- Right: actions -->
+        <div class="navbar-right">
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-icon" title="Cerrar sesión">
-                <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="badge badge-soft-primary d-none d-lg-inline px-2 py-1">{{ current_user.rol }}</span>
+
+            <div class="dropdown" id="notificacionesDropdown">
+                <button class="navbar-icon-btn navbar-notif-btn" id="notifToggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones" title="Notificaciones">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                    <span class="badge bg-danger d-none" id="notifBadge">0</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="notifToggle">
+                    <div class="notif-menu-header">
+                        <h6><i class="fa-solid fa-bell text-primary me-1" aria-hidden="true"></i>Notificaciones</h6>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="notifMarcarTodas">
+                            <i class="fa-solid fa-check-double me-1" aria-hidden="true"></i>Marcar leídas
+                        </button>
+                    </div>
+                    <div id="notifLista" class="notif-lista">
+                        <div class="px-3 py-3 text-muted small text-center">Cargando...</div>
+                    </div>
+                    <div class="notif-menu-footer">
+                        <a href="{{ url_for('notificaciones.index') }}">
+                            <i class="fa-solid fa-arrow-right me-1" aria-hidden="true"></i>Ver todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="navbar-icon-btn" id="darkModeToggle" aria-label="Cambiar modo claro/oscuro" title="Cambiar tema">
+                <i class="fa-solid fa-moon" aria-hidden="true"></i>
+            </button>
+
+            <a href="{{ url_for('auth.logout') }}" class="navbar-icon-btn text-danger" aria-label="Cerrar sesión" title="Cerrar sesión">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
             </a>
+            {% else %}
+            <span class="text-light">Bienvenido</span>
             {% endif %}
         </div>
     </div>

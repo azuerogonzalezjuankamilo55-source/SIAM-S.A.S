@@ -1,0 +1,26 @@
+{# ============================================================
+   SIAM Component: Page Header (título + botón acción)
+   Uso:
+   {% from "components/page_header.html" import page_header %}
+   {{ page_header(titulo="Clientes", icono="fa-users",
+                  subtitulo="Gestiona tus clientes",
+                  boton="Nuevo Cliente", boton_icon="fa-plus",
+                  boton_url=url_for('clientes.crear')) }}
+   ============================================================ #}
+{% macro page_header(titulo="", icono="fa-bars", subtitulo=None,
+                     boton=None, boton_icon="fa-plus", boton_url="#") -%}
+<div class="page-header">
+    <div>
+        <h4>
+            {% if icono %}<i class="fa-solid {{ icono }}" aria-hidden="true"></i>{% endif %}
+            {{ titulo }}
+        </h4>
+        {% if subtitulo %}<small class="text-muted">{{ subtitulo }}</small>{% endif %}
+    </div>
+    {% if boton %}
+    <a href="{{ boton_url }}" class="btn btn-primary">
+        <i class="fa-solid {{ boton_icon }} me-1" aria-hidden="true"></i>{{ boton }}
+    </a>
+    {% endif %}
+</div>
+{%- endmacro %}

@@ -34,3 +34,4 @@ from models.cotizacion import (
 )
 from models.cotizacion_item import CotizacionItem
 from models.garantia import Garantia, ESTADOS_GARANTIA, ESTADOS_GARANTIA_LABELS
+from models.ubicacion_cliente import UbicacionCliente

@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Cotización {{ cotizacion.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Cotización {{ cotizacion.numero }}</h4>
-    <div class="btn-group btn-group-sm">
-        <a href="{{ url_for('cotizaciones.listar') }}" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-file-signature" aria-hidden="true"></i> Cotización {{ cotizacion.numero }}</h4>
+        <small class="text-muted">Detalle y gestión de la cotización</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('cotizaciones.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
         </a>
         {% if cotizacion.estado in ("pendiente", "aprobada") %}
         <a href="{{ url_for('cotizaciones.editar', id=cotizacion.id) }}" class="btn btn-warning">
-            <i class="fa-solid fa-pen"></i> Editar
+            <i class="fa-solid fa-pen me-1" aria-hidden="true"></i>Editar
         </a>
         {% endif %}
     </div>
@@ -37,9 +40,7 @@
         <div class="card h-100">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase small">Estado</h6>
-                <span class="badge bg-{{
-                    {'pendiente': 'warning', 'aprobada': 'success', 'rechazada': 'danger', 'convertida': 'primary', 'vencida': 'secondary'}[cotizacion.estado]
-                }}">{{ labels[cotizacion.estado] }}</span>
+                <span class="badge bg-{{ cotizacion.estado_color }}">{{ labels[cotizacion.estado] }}</span>
                 <p class="small text-muted mt-2 mb-0">Sede: {{ cotizacion.sede.nombre if cotizacion.sede else "Sin sede" }} · Validez: {{ cotizacion.validez_dias }} días</p>
             </div>
         </div>
@@ -57,8 +58,10 @@
 
 {% if cotizacion.estado in ("pendiente", "aprobada") %}
 <div class="card mb-3">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fa-solid fa-plus"></i> Agregar ítem</h6>
+    </div>
     <div class="card-body">
-        <h6 class="mb-3">Agregar ítem</h6>
         <form method="POST" action="{{ url_for('cotizaciones.agregar_item', id=cotizacion.id) }}" class="row g-2 align-items-end">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="col-md-7">
@@ -75,7 +78,7 @@
                 <input type="number" name="cantidad" class="form-control" value="1" min="1" max="999">
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-plus me-1"></i>Agregar</button>
+                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Agregar</button>
             </div>
         </form>
         <hr>
@@ -94,7 +97,7 @@
                 <input type="number" step="0.01" name="precio_unitario" class="form-control" placeholder="0.00" required>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-plus me-1"></i>Agregar</button>
+                <button type="submit" class="btn btn-outline-primary w-100"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Agregar</button>
             </div>
         </form>
     </div>
@@ -103,6 +106,9 @@
 
 {% from "partials/_cotizacion_items.html" import tabla_items_cotizacion %}
 <div class="card">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fa-solid fa-list"></i> Ítems de la cotización</h6>
+    </div>
     <div class="card-body">
         {{ tabla_items_cotizacion(cotizacion, editable=(cotizacion.estado in ("pendiente", "aprobada"))) }}
 
@@ -110,23 +116,23 @@
         <div class="d-flex gap-2 justify-content-end">
             <form method="POST" action="{{ url_for('cotizaciones.cambiar_estado', id=cotizacion.id, estado='rechazada') }}" data-confirm-form="¿Marcar como rechazada?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-xmark me-1"></i>Rechazar</button>
+                <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Rechazar</button>
             </form>
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enviarModal">
-                <i class="fa-solid fa-paper-plane me-1"></i>Enviar al cliente para aprobación
+                <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>Enviar al cliente para aprobación
             </button>
         </div>
         {% elif cotizacion.estado == "aprobada" and not cotizacion.orden_trabajo_id %}
         <div class="d-flex justify-content-end">
             <form method="POST" action="{{ url_for('cotizaciones.convertir_ot', id=cotizacion.id) }}" data-confirm-form="¿Generar orden de trabajo a partir de esta cotización?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wrench me-1"></i>Convertir en Orden de Trabajo</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wrench me-1" aria-hidden="true"></i>Convertir en Orden de Trabajo</button>
             </form>
         </div>
         {% elif cotizacion.orden_trabajo_id %}
         <div class="d-flex justify-content-end">
             <a href="{{ url_for('ordenes_trabajo.ver', id=cotizacion.orden_trabajo_id) }}" class="btn btn-outline-primary">
-                <i class="fa-solid fa-arrow-right me-1"></i>Ver OT vinculada
+                <i class="fa-solid fa-arrow-right me-1" aria-hidden="true"></i>Ver OT vinculada
             </a>
         </div>
         {% endif %}
@@ -145,11 +151,11 @@
                 <p>El cliente recibirá una notificación para aprobar o rechazar la cotización <strong>{{ cotizacion.numero }}</strong> por un total de <strong>$ {{ "{:,.2f}".format(cotizacion.total) }}</strong>.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
                 <form method="POST" action="{{ url_for('cotizaciones.enviar', id=cotizacion.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-success">
-                        <i class="fa-solid fa-paper-plane me-1"></i>Enviar
+                        <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>Enviar
                     </button>
                 </form>
             </div>

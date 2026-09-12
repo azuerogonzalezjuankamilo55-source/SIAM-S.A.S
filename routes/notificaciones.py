@@ -1,6 +1,6 @@
 import logging
 
-from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 
 from database.commit import json_success, json_error
@@ -57,12 +57,6 @@ def eliminar(notificacion_id: int):
             return json_error()
         flash("No se pudo eliminar la notificación.", "danger")
         return redirect(url_for("notificaciones.index"))
-
-
-@notificaciones_bp.route("/api/no-leidas")
-@login_required
-def api_no_leidas():
-    return jsonify({"count": NotificationService.unread_count(current_user.id)})
 
 
 @notificaciones_bp.route("/api/listar")

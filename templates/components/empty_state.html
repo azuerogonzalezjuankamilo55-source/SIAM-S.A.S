@@ -1,0 +1,25 @@
+{# ============================================================
+   SIAM Component: Empty State
+   Uso:
+   {% from "components/empty_state.html" import empty_state %}
+   {{ empty_state(icon="fa-users", titulo="Sin clientes",
+                  mensaje="Registra tu primer cliente para comenzar.",
+                  accion="Crear cliente", url=url_for('clientes.crear'),
+                  accion_icon="fa-plus") }}
+   ============================================================ #}
+{% macro empty_state(icon="fa-inbox", titulo="Sin datos todavía",
+                     mensaje="No hay información registrada aún.",
+                     accion=None, url="#", accion_icon="fa-plus") -%}
+<div class="empty-state" role="status">
+    <div class="empty-state-icon" aria-hidden="true">
+        <i class="fa-solid {{ icon }}"></i>
+    </div>
+    <h6>{{ titulo }}</h6>
+    <p>{{ mensaje }}</p>
+    {% if accion %}
+    <a href="{{ url }}" class="btn btn-primary mt-2">
+        <i class="fa-solid {{ accion_icon }} me-1" aria-hidden="true"></i>{{ accion }}
+    </a>
+    {% endif %}
+</div>
+{%- endmacro %}

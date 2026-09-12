@@ -1,36 +1,42 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/form_section.html" import form_section %}
+
 {% block title %}{{ "Editar" if cliente else "Nuevo" }} Cliente{% endblock %}
 {% block content %}
-<h4 class="mb-4">{{ "Editar" if cliente else "Nuevo" }} Cliente</h4>
-<div class="card">
+{{ page_header(titulo=("Editar" if cliente else "Nuevo") ~ " Cliente", icono="fa-user-pen",
+               subtitulo=("Actualiza la información de " ~ cliente.nombre) if cliente else "Registra un nuevo cliente en el taller") }}
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         <form method="POST">
             {{ form.hidden_tag() }}
+            {% call form_section(icono="fa-address-card", titulo="Datos del cliente") %}
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre if cliente else '' }}" required>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Teléfono</label>
-                    <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono if cliente else '' }}">
+                    <label class="form-label">Nombre <span class="required">*</span></label>
+                    <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre if cliente else '' }}" placeholder="Nombre y apellido" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Cédula</label>
-                    <input type="text" name="cedula" class="form-control" value="{{ cliente.cedula if cliente else '' }}">
+                    <input type="text" name="cedula" class="form-control" value="{{ cliente.cedula if cliente else '' }}" placeholder="C.C.">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono if cliente else '' }}" placeholder="+57...">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Correo</label>
-                    <input type="email" name="correo" class="form-control" value="{{ cliente.correo if cliente else '' }}">
+                    <input type="email" name="correo" class="form-control" value="{{ cliente.correo if cliente else '' }}" placeholder="correo@ejemplo.com">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Dirección</label>
-                    <input type="text" name="direccion" class="form-control" value="{{ cliente.direccion if cliente else '' }}">
+                    <input type="text" name="direccion" class="form-control" value="{{ cliente.direccion if cliente else '' }}" placeholder="Dirección de residencia">
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{{ url_for('clientes.listar') }}" class="btn btn-secondary">Cancelar</a>
+            {% endcall %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Guardar</button>
+                <a href="{{ url_for('clientes.listar') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

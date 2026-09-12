@@ -82,7 +82,13 @@ def create_app(config_name: str | None = None) -> Flask:
 
     @app.route("/")
     def index() -> Any:
-        return render_template("landing.html")
+        desde_models = __import__("models", fromlist=["Usuario"])
+        try:
+            permiso_bootstrap = desde_models.Usuario.query.filter_by(rol="admin").count() == 0
+        except Exception:
+            db.session.rollback()
+            permiso_bootstrap = False
+        return render_template("landing.html", permite_registrar_admin=permiso_bootstrap)
 
     # ==========================================================
     # HEALTH CHECK
@@ -258,6 +264,7 @@ def register_blueprints(app: Flask) -> None:
         cotizaciones_bp,
         garantias_bp,
         configuracion_bp,
+        api_ubicacion_bp,
     )
 
     app.register_blueprint(auth_bp)
@@ -301,6 +308,8 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(garantias_bp)
 
     app.register_blueprint(configuracion_bp)
+
+    app.register_blueprint(api_ubicacion_bp)
 
 
 # ==============================================================

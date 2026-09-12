@@ -22,13 +22,6 @@ def _login(client, correo="admin@test.com", password="admin123"):
 class TestSecurityFixes:
     """Verify security fixes from stability audit."""
 
-    def test_citas_eliminar_rejects_get(self, client, db):
-        """CITAS-1: eliminar must reject GET (should be POST only)."""
-        _crear_admin(db)
-        _login(client)
-        resp = client.get("/citas/eliminar/1", follow_redirects=True)
-        assert resp.status_code in (405,), f"Expected 405, got {resp.status_code}"
-
     def test_citas_cambiar_estado_rejects_get(self, client, db):
         """CITAS-2: cambiar_estado must reject GET (should be POST only)."""
         _crear_admin(db)

@@ -1,12 +1,17 @@
 {% extends "base.html" %}
+{% from "components/empty_state.html" import empty_state %}
 {% block title %}Mis Documentos{% endblock %}
 {% block content %}
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-folder-open" aria-hidden="true"></i> Mis Documentos</h4>
+        <small class="text-muted">Soportes, fotos y documentos de tu vehículo</small>
+    </div>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card" data-aos="fade-up">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong><i class="fa-solid fa-folder-open me-2"></i>Mis Documentos</strong>
-            </div>
             <div class="card-body">
                 <form method="post" action="{{ url_for('portal.adjuntar_documento') }}" enctype="multipart/form-data" class="mb-4">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -15,7 +20,7 @@
                                accept=".jpg,.jpeg,.png,.webp,.mp4,.pdf"
                                capture="environment">
                         <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fa-solid fa-upload me-1"></i> Adjuntar
+                            <i class="fa-solid fa-upload me-1" aria-hidden="true"></i> Adjuntar
                         </button>
                     </div>
                     <div class="form-text mt-1">Soportes, fotos, videos o PDF. Máx. 5 MB imagen, 15 MB PDF, 100 MB video.</div>
@@ -26,28 +31,28 @@
                     {% for a in adjuntos %}
                     <li class="list-group-item d-flex align-items-center gap-3">
                         <span class="badge badge-soft-primary flex-shrink-0" style="font-size:1rem;">
-                            {% if a.es_imagen %}<i class="fa-solid fa-image"></i>
-                            {% elif a.es_video %}<i class="fa-solid fa-video"></i>
-                            {% elif a.es_pdf %}<i class="fa-solid fa-file-pdf"></i>
-                            {% else %}<i class="fa-solid fa-file"></i>{% endif %}
+                            {% if a.es_imagen %}<i class="fa-solid fa-image" aria-hidden="true"></i>
+                            {% elif a.es_video %}<i class="fa-solid fa-video" aria-hidden="true"></i>
+                            {% elif a.es_pdf %}<i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                            {% else %}<i class="fa-solid fa-file" aria-hidden="true"></i>{% endif %}
                         </span>
                         <div class="flex-grow-1 min-w-0">
                             <div class="text-truncate">{{ a.nombre_original }}</div>
                             <small class="text-muted">{{ a.tamano_legible }} · {{ a.created_at.strftime('%d/%m/%Y %H:%M') if a.created_at }}</small>
                         </div>
                         <div class="d-flex gap-2 flex-shrink-0">
-                            <a href="{{ url_for('portal.descargar_documento', adjunto_id=a.id) }}" class="btn btn-sm btn-outline-primary" title="Descargar">
-                                <i class="fa-solid fa-download"></i>
+                            <a href="{{ url_for('portal.descargar_documento', adjunto_id=a.id) }}" class="btn btn-sm btn-soft" title="Descargar">
+                                <i class="fa-solid fa-download" aria-hidden="true"></i>
                             </a>
                             {% if a.es_imagen %}
                             <a href="{{ a.path }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Ver">
-                                <i class="fa-solid fa-eye"></i>
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
                             </a>
                             {% endif %}
                             <form method="post" action="{{ url_for('portal.eliminar_documento', adjunto_id=a.id) }}" data-confirm-form="¿Eliminar este documento? Esta acción no se puede deshacer.">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                    <i class="fa-solid fa-trash"></i>
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                 </button>
                             </form>
                         </div>
@@ -55,10 +60,8 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                <div class="text-center text-muted py-5">
-                    <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
-                    Aún no tienes documentos. Adjunta soportes, facturas escaneadas o fotos de tu vehículo.
-                </div>
+                {{ empty_state(icon="fa-folder-open", titulo="Aún no tienes documentos",
+                               mensaje="Adjunta soportes, facturas escaneadas o fotos de tu vehículo.") }}
                 {% endif %}
             </div>
         </div>

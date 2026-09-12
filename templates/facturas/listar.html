@@ -1,16 +1,24 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/status_badge.html" import status_badge %}
+{% from "components/empty_state.html" import empty_state %}
+
 {% block title %}Facturas{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Facturas</h4>
-    <div>
-        <a href="{{ url_for('facturas.configuracion') }}" class="btn btn-outline-info me-2">
-            <i class="fa-solid fa-gear"></i> Configuración
-        </a>
-    </div>
-</div>
+{{ page_header(titulo="Facturas", icono="fa-receipt",
+               subtitulo="Control de facturación y pagos",
+               boton="Configuración", boton_icon="fa-gear",
+               boton_url=url_for('facturas.configuracion')) }}
 
-<div class="card mb-3">
+{% set factura_mapa = {
+    'pagado': {'bg': 'success', 'texto': 'Pagada'},
+    'pendiente': {'bg': 'warning', 'texto': 'Pendiente'},
+    'parcial': {'bg': 'info', 'texto': 'Pago Parcial'},
+    'anulado': {'bg': 'danger', 'texto': 'Anulada'},
+    'default': {'bg': 'secondary', 'texto': '—'}
+} %}
+
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body py-2">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-auto">
@@ -26,7 +34,7 @@
             <div class="col-auto">
                 <label class="form-label small mb-0">Buscar</label>
                 <div class="search-input">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     <input type="search" name="busqueda" class="form-control form-control-sm" placeholder="Número o cliente..." aria-label="Buscar" value="{{ request.args.get('busqueda', '') }}" data-table-search="#tablaFacturas">
                 </div>
             </div>
@@ -37,93 +45,79 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle" id="tablaFacturas">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Número</th>
-                        <th>Cliente / OT</th>
-                        <th>Total</th>
-                        <th>Pagado</th>
-                        <th>Saldo</th>
-                        <th>Método</th>
-                        <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for f in facturas %}
-                    {% set saldo = f.saldo_pendiente %}
-                    <tr class="{{ 'table-success' if f.estado == 'pagado' else 'table-danger' if f.estado == 'anulado' else 'table-warning' if saldo > 0 and f.monto_pagado > 0 else '' }}">
-                        <td>{{ f.id }}</td>
-                        <td><strong>{{ f.numero }}</strong></td>
-                        <td>
-                            {{ f.cita.cliente.nombre }}
-                            {% if f.orden_trabajo %}
-                            <br><small class="text-muted">OT: <a href="{{ url_for('ordenes_trabajo.ver', id=f.orden_trabajo.id) }}">{{ f.orden_trabajo.numero }}</a></small>
+<div class="card" data-aos="fade-up">
+    <div class="table-responsive">
+        <table class="table table-modern table-hover align-middle mb-0" id="tablaFacturas">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Número</th>
+                    <th>Cliente / OT</th>
+                    <th>Total</th>
+                    <th>Pagado</th>
+                    <th>Saldo</th>
+                    <th>Método</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in facturas %}
+                {% set saldo = f.saldo_pendiente %}
+                <tr>
+                    <td data-label="ID">{{ f.id }}</td>
+                    <td data-label="Número"><span class="fw-bold">{{ f.numero }}</span></td>
+                    <td data-label="Cliente">
+                        {{ f.cita.cliente.nombre if f.cita else (f.orden_trabajo.cliente.nombre if f.orden_trabajo else "—") }}
+                        {% if f.orden_trabajo %}
+                        <br><small class="text-muted">OT: <a href="{{ url_for('ordenes_trabajo.ver', id=f.orden_trabajo.id) }}">{{ f.orden_trabajo.numero }}</a></small>
+                        {% endif %}
+                    </td>
+                    <td data-label="Total"><span class="fw-semibold">${{ "%.2f"|format(f.total|float) }}</span></td>
+                    <td data-label="Pagado">${{ "%.2f"|format(f.monto_pagado|float) }}</td>
+                    <td data-label="Saldo">
+                        {% if saldo > 0 %}
+                        <span class="text-danger fw-semibold">${{ "%.2f"|format(saldo|float) }}</span>
+                        {% else %}
+                        <span class="text-success">$0.00</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Método">{{ f.metodo_pago or "—" }}</td>
+                    <td data-label="Estado">{{ status_badge(f.estado_actualizado, factura_mapa) }}</td>
+                    <td data-label="Fecha">{{ f.created_at.strftime('%d/%m/%Y') }}</td>
+                    <td data-label="Acciones">
+                        <div class="table-actions justify-content-end">
+                            <a href="{{ url_for('facturas.ver', id=f.id) }}" class="btn btn-sm btn-outline-info" title="Ver">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </a>
+                            <a href="{{ url_for('facturas.pdf', id=f.id) }}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank">
+                                <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                            </a>
+                            {% if f.estado != "pagado" and f.estado != "anulado" %}
+                            <a href="{{ url_for('facturas.pagar', id=f.id) }}" class="btn btn-sm btn-outline-success" title="Pagar">
+                                <i class="fa-solid fa-money-bill" aria-hidden="true"></i>
+                            </a>
                             {% endif %}
-                        </td>
-                        <td><strong>${{ "%.2f"|format(f.total|float) }}</strong></td>
-                        <td>${{ "%.2f"|format(f.monto_pagado|float) }}</td>
-                        <td>
-                            {% if saldo > 0 %}
-                            <span class="text-danger">${{ "%.2f"|format(saldo|float) }}</span>
-                            {% else %}
-                            <span class="text-success">$0.00</span>
+                            {% if f.estado == "pendiente" and f.monto_pagado == 0 %}
+                            <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-sm btn-outline-danger" title="Anular" data-confirm="¿Anular factura {{ f.numero }}?">
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                            </a>
                             {% endif %}
-                        </td>
-                        <td>{{ f.metodo_pago or "-" }}</td>
-                        <td>
-                            <span class="badge bg-{{ {
-                                'pendiente': 'warning',
-                                'parcial': 'info',
-                                'pagado': 'success',
-                                'anulado': 'danger'
-                            }[f.estado_actualizado] }}">
-                                {{ f.estado_actualizado|title }}
-                            </span>
-                        </td>
-                        <td>{{ f.created_at.strftime('%d/%m/%Y') }}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('facturas.ver', id=f.id) }}" class="btn btn-outline-info" title="Ver">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                                <a href="{{ url_for('facturas.pdf', id=f.id) }}" class="btn btn-outline-secondary" title="PDF" target="_blank">
-                                    <i class="fa-solid fa-file-pdf"></i>
-                                </a>
-                                {% if f.estado != "pagado" and f.estado != "anulado" %}
-                                <a href="{{ url_for('facturas.pagar', id=f.id) }}" class="btn btn-outline-success" title="Pagar">
-                                    <i class="fa-solid fa-money-bill"></i>
-                                </a>
-                                {% endif %}
-                                {% if f.estado == "pendiente" and f.monto_pagado == 0 %}
-                                <a href="{{ url_for('facturas.anular', id=f.id) }}" class="btn btn-outline-danger" title="Anular" data-confirm="¿Anular factura {{ f.numero }}?">
-                                    <i class="fa-solid fa-circle-xmark"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="10">
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></div>
-                                <h6 class="mb-1">Aún no hay facturas</h6>
-                                <p class="text-muted small mb-3">Las facturas generadas desde las órdenes de trabajo aparecerán aquí.</p>
-                                <a href="{{ url_for('facturas.configuracion') }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-gear me-1"></i>Configurar facturación</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="p-0">
+                        {{ empty_state(icon="fa-file-lines", titulo="Aún no hay facturas",
+                                       mensaje="Las facturas generadas desde las órdenes de trabajo aparecerán aquí.",
+                                       accion="Configurar facturación", url=url_for('facturas.configuracion'), accion_icon="fa-gear") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

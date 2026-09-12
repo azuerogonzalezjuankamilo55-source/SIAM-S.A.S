@@ -1,27 +1,23 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Orden {{ orden.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Orden {{ orden.numero }}</h4>
-    <a href="{{ url_for('portal.ordenes') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
-</div>
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+{{ page_header(titulo="Orden " ~ orden.numero, icono="fa-clipboard-list",
+               subtitulo="Seguimiento de tu reparación",
+               boton="Volver", boton_icon="fa-arrow-left",
+               boton_url=url_for('portal.ordenes')) }}
 
 <div class="row g-3">
     <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header"><strong>Estado de la reparación</strong></div>
+        <div class="card mb-3" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-signal me-2 text-primary" aria-hidden="true"></i>Estado de la reparación</h6>
+            </div>
             <div class="card-body">
-                <span class="badge bg-{{ {
-                    'recibido': 'secondary',
-                    'diagnostico': 'info',
-                    'esperando_repuestos': 'warning',
-                    'en_reparacion': 'primary',
-                    'pruebas': 'info',
-                    'listo_entrega': 'success',
-                    'entregado': 'dark'
-                }[orden.estado] }} fs-6">{{ orden.estado_display }}</span>
+                <span class="badge badge-soft-{{ bsoft.get(orden.estado_color, orden.estado_color) }} fs-6">
+                    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ orden.estado_display }}
+                </span>
                 <hr>
                 <div class="text-muted small">
                     <div><strong>Ingreso:</strong> {{ orden.fecha_ingreso }}</div>
@@ -37,8 +33,10 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header"><strong>Diagnóstico y observaciones</strong></div>
+        <div class="card mb-3" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-magnifying-glass me-2 text-info" aria-hidden="true"></i>Diagnóstico y observaciones</h6>
+            </div>
             <div class="card-body">
                 {% if orden.diagnostico_inicial %}
                 <div class="mb-2"><strong>Diagnóstico:</strong><br>{{ orden.diagnostico_inicial }}</div>
@@ -54,16 +52,21 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header"><strong>Seguimiento</strong></div>
+<div class="card" data-aos="fade-up">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-warning" aria-hidden="true"></i>Seguimiento</h6>
+    </div>
     <div class="card-body p-0">
         <ul class="list-group list-group-flush">
             {% for h in orden.historial %}
             <li class="list-group-item">
-                <span class="badge bg-secondary">{{ h.created_at.strftime('%d/%m/%Y %H:%M') if h.created_at }}</span>
+                <span class="badge badge-soft-secondary">
+                    <i class="fa-solid fa-clock me-1" style="font-size:.6em;" aria-hidden="true"></i>
+                    {{ h.created_at.strftime('%d/%m/%Y %H:%M') if h.created_at }}
+                </span>
                 {% if h.estado_anterior %}
                 <span class="text-muted">{{ h.estado_anterior|replace("_", " ")|title }}</span>
-                <i class="fa-solid fa-arrow-right"></i>
+                <i class="fa-solid fa-arrow-right mx-1 text-muted" aria-hidden="true"></i>
                 {% endif %}
                 <strong>{{ h.estado_nuevo|replace("_", " ")|title }}</strong>
                 {% if h.observacion %}<div class="small text-muted mt-1">{{ h.observacion }}</div>{% endif %}

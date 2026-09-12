@@ -57,6 +57,8 @@ class DashboardData:
     ot_retrasadas: list = field(default_factory=list)
     ot_en_proceso: list = field(default_factory=list)
     asistencias_activas: list = field(default_factory=list)
+    servicios_completados: int = 0
+    proximas_citas: list = field(default_factory=list)
 
 
 class DashboardService:
@@ -238,6 +240,18 @@ class DashboardService:
             .all()
         )
 
+        servicios_completados = OrdenTrabajo.query.filter(
+            OrdenTrabajo.estado == "entregado"
+        ).count()
+
+        proximas_citas = (
+            Cita.query
+            .filter(Cita.fecha >= today, Cita.estado != "cancelado")
+            .order_by(Cita.fecha.asc(), Cita.hora.asc())
+            .limit(6)
+            .all()
+        )
+
         asistencias_activas = (
             AsistenciaEmergencia.query
             .filter(AsistenciaEmergencia.estado == "pendiente")
@@ -281,6 +295,8 @@ class DashboardService:
             ot_retrasadas=ot_retrasadas,
             ot_en_proceso=ot_en_proceso,
             asistencias_activas=asistencias_activas,
+            servicios_completados=servicios_completados,
+            proximas_citas=proximas_citas,
         )
 
         logger.debug("Dashboard actualizado: %d clientes, $%.2f ingresos mes", data.total_clientes, data.ingresos_mes)

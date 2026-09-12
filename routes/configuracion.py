@@ -96,7 +96,7 @@ def seccion(seccion: str) -> Any:
                     vieja = config.logo_path
                     config.logo_path = nueva_ruta
                     try:
-                        db.session.commit()
+                        safe_commit()
                     except Exception:
                         ImageService.eliminar(nueva_ruta)
                         raise
@@ -268,6 +268,8 @@ def seccion(seccion: str) -> Any:
 @configuracion_bp.route("/sistema/comprobar", methods=["POST"])
 @login_required
 def sistema_comprobar() -> Any:
+    if current_user.rol != "admin":
+        return json_error("No tienes permisos de administrador.", 403)
     resultados = ConfiguracionService.estado_sistema()
     return json_success(data={"resultados": resultados})
 

@@ -1,58 +1,38 @@
 {% extends "base.html" %}
+{% from "partials/_factura_detalles.html" import tabla_detalles_factura %}
 {% block title %}Factura {{ factura.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Factura {{ factura.numero }}</h4>
+<div class="page-header">
     <div>
-        <a href="{{ url_for('portal.facturas') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
-        <a href="{{ url_for('portal.factura_pdf', factura_id=factura.id) }}" class="btn btn-primary btn-sm">
-            <i class="fa-solid fa-download"></i> Descargar PDF
+        <h4><i class="fa-solid fa-file-invoice" aria-hidden="true"></i> Factura {{ factura.numero }}</h4>
+        <small class="text-muted">Detalle y pagos de tu factura</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('portal.facturas') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Volver
+        </a>
+        <a href="{{ url_for('portal.factura_pdf', factura_id=factura.id) }}" class="btn btn-primary">
+            <i class="fa-solid fa-download me-1" aria-hidden="true"></i> Descargar PDF
         </a>
     </div>
 </div>
 
 <div class="row g-3">
     <div class="col-lg-7">
-        <div class="card mb-3">
-            <div class="card-header"><strong>Detalle de la factura</strong></div>
-            <div class="card-body p-0">
-                <table class="table mb-0">
-                    <thead>
-                        <tr><th>Servicio</th><th class="text-center">Cant.</th><th class="text-end">P. Unitario</th><th class="text-end">Subtotal</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for d in factura.detalles %}
-                        <tr>
-                            <td>{{ d.servicio.nombre }}</td>
-                            <td class="text-center">{{ d.cantidad }}</td>
-                            <td class="text-end">${{ "%.2f"|format(d.precio_unitario) }}</td>
-                            <td class="text-end">${{ "%.2f"|format(d.subtotal) }}</td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4" class="text-center text-muted">Sin detalles</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="card mb-3" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-list-check me-2 text-primary" aria-hidden="true"></i>Detalle de la factura</h6>
             </div>
-            <div class="card-body border-top">
-                <div class="row">
-                    <div class="col-md-4 text-muted">Subtotal</div>
-                    <div class="col-md-8 text-end">${{ "%.2f"|format(factura.subtotal) }}</div>
-                    <div class="col-md-4 text-muted">IVA ({{ factura.iva_porcentaje }}%)</div>
-                    <div class="col-md-8 text-end">${{ "%.2f"|format(factura.iva) }}</div>
-                    {% if factura.descuento > 0 %}
-                    <div class="col-md-4 text-muted">Descuento</div>
-                    <div class="col-md-8 text-end">-${{ "%.2f"|format(factura.descuento) }}</div>
-                    {% endif %}
-                    <div class="col-md-4 fw-bold">Total</div>
-                    <div class="col-md-8 text-end fw-bold fs-5">${{ "%.2f"|format(factura.total) }}</div>
-                </div>
+            <div class="card-body p-0">
+                {{ tabla_detalles_factura(factura) }}
             </div>
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card mb-3">
-            <div class="card-header"><strong>Información del taller</strong></div>
+        <div class="card mb-3" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-warehouse me-2 text-info" aria-hidden="true"></i>Información del taller</h6>
+            </div>
             <div class="card-body">
                 <div class="fw-bold">{{ config.nombre_taller }}</div>
                 {% if config.nit %}<div class="text-muted small">NIT: {{ config.nit }}</div>{% endif %}
@@ -60,8 +40,10 @@
                 {% if config.telefono %}<div class="text-muted small">Tel: {{ config.telefono }}</div>{% endif %}
             </div>
         </div>
-        <div class="card">
-            <div class="card-header"><strong>Pagos realizados</strong></div>
+        <div class="card" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-credit-card me-2 text-success" aria-hidden="true"></i>Pagos realizados</h6>
+            </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     {% for p in factura.pagos %}
@@ -70,7 +52,9 @@
                             <strong>${{ "%.2f"|format(p.monto) }}</strong>
                             <div><small class="text-muted">{{ p.metodo_pago_display }} · {{ p.created_at.strftime('%d/%m/%Y') if p.created_at }}</small></div>
                         </div>
-                        <span class="badge bg-success align-self-center">{{ p.estado }}</span>
+                        <span class="badge badge-soft-success align-self-center">
+                            <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ p.estado }}
+                        </span>
                     </li>
                     {% else %}
                     <li class="list-group-item text-center text-muted">Sin pagos registrados</li>

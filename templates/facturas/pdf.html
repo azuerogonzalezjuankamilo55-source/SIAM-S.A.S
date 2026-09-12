@@ -6,18 +6,18 @@
 <style>
     @page { margin: 2cm 1.5cm; size: A4; }
     body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; margin: 0; padding: 0; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1a73e8; padding-bottom: 15px; margin-bottom: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2563EB; padding-bottom: 15px; margin-bottom: 20px; }
     .logo { max-height: 80px; max-width: 200px; }
     .header-right { text-align: right; }
-    .header-right h1 { color: #1a73e8; margin: 0; font-size: 22pt; }
+    .header-right h1 { color: #2563EB; margin: 0; font-size: 22pt; }
     .header-right h2 { color: #666; margin: 5px 0 0; font-size: 12pt; font-weight: normal; }
     .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
     .info-box { width: 48%; }
     .info-box h3 { font-size: 9pt; color: #666; text-transform: uppercase; margin: 0 0 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
     .info-box p { margin: 2px 0; font-size: 9pt; }
-    .info-box .highlight { font-size: 11pt; font-weight: bold; color: #1a73e8; }
+    .info-box .highlight { font-size: 11pt; font-weight: bold; color: #2563EB; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-    table thead th { background: #1a73e8; color: #fff; padding: 6px 8px; text-align: left; font-size: 9pt; }
+    table thead th { background: #2563EB; color: #fff; padding: 6px 8px; text-align: left; font-size: 9pt; }
     table thead th.right { text-align: right; }
     table thead th.center { text-align: center; }
     table tbody td { padding: 5px 8px; border-bottom: 1px solid #eee; font-size: 9pt; }
@@ -27,7 +27,7 @@
     .totals { margin-left: auto; width: 300px; }
     .totals table { margin-bottom: 0; }
     .totals td { padding: 3px 8px; }
-    .totals .grand-total { font-size: 12pt; font-weight: bold; color: #1a73e8; }
+    .totals .grand-total { font-size: 12pt; font-weight: bold; color: #2563EB; }
     .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #999; border-top: 1px solid #ddd; padding-top: 5px; }
     .dian-info { font-size: 7.5pt; color: #999; margin-top: 15px; text-align: center; }
     .estado-badge { display: inline-block; padding: 3px 10px; border-radius: 3px; font-size: 8pt; font-weight: bold; }
@@ -109,7 +109,7 @@
         {% if factura.descuento > 0 %}
         <tr><td>Descuento</td><td class="right">-${{ "%.2f"|format(factura.descuento|float) }}</td></tr>
         {% endif %}
-        <tr style="border-top:2px solid #1a73e8;">
+        <tr style="border-top:2px solid #2563EB;">
             <td class="grand-total">TOTAL</td>
             <td class="right grand-total">${{ "%.2f"|format(factura.total|float) }}</td>
         </tr>

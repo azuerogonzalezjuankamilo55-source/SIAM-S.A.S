@@ -19,6 +19,7 @@ from database.db import db
 from database.commit import safe_commit, json_success, json_error
 from forms import OrdenTrabajoForm
 from services.orden_trabajo_service import OrdenTrabajoService, NIVELES_COMBUSTIBLE
+from services.numeracion import siguiente_numero
 from services.notification_service import NotificationService
 from services.vehiculo_service import VehiculoService
 from exceptions import BusinessRuleException, NotFoundException
@@ -30,18 +31,7 @@ ordenes_trabajo_bp.before_request(staff_blueprint_guard)
 
 
 def _generar_numero() -> str:
-    ultimo = (
-        OrdenTrabajo.query
-        .order_by(OrdenTrabajo.id.desc())
-        .first()
-    )
-    if ultimo and ultimo.numero and ultimo.numero.startswith("OT-"):
-        try:
-            last_num = int(ultimo.numero[3:])
-            return f"OT-{last_num + 1:06d}"
-        except (ValueError, IndexError):
-            pass
-    return "OT-000001"
+    return siguiente_numero(OrdenTrabajo, "OT")
 
 
 def _registrar_historial(orden: OrdenTrabajo, estado_anterior: str | None, observacion: str = "") -> None:

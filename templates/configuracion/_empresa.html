@@ -1,7 +1,7 @@
-<div class="card shadow-sm">
+<div class="card" data-aos="fade-up">
     <div class="card-header bg-transparent">
-        <h5 class="mb-0"><i class="fa-solid fa-building me-2" aria-hidden="true"></i>Empresa</h5>
-        <small class="text-secondary">Datos de identificación, contacto y facturación. Se muestran en el portal, la página pública y los documentos.</small>
+        <h6 class="mb-0"><i class="fa-solid fa-building text-primary me-2" aria-hidden="true"></i>Empresa</h6>
+        <small class="text-muted">Datos de identificación, contacto y facturación. Se muestran en el portal, la página pública y los documentos.</small>
     </div>
     <div class="card-body">
         {% if config and config.logo_path %}
@@ -68,30 +68,34 @@
                         <label class="form-label">{{ form.linkedin.label.text }}</label>
                         {{ form.linkedin(class="form-control") }}
                     </div>
-                    <div class="col-12">
-                        <hr>
-                        <h6 class="text-secondary">Facturación</h6>
+                </div>
+                <div class="form-section mt-3">
+                    <div class="form-section-header">
+                        <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i>
+                        <h6>Facturación</h6>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">{{ form.regimen.label.text }}</label>
-                        {{ form.regimen(class="form-control") }}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">{{ form.prefijo_factura.label.text }}</label>
-                        {{ form.prefijo_factura(class="form-control") }}
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">{{ form.iva_porcentaje.label.text }}</label>
-                        {{ form.iva_porcentaje(class="form-control") }}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">{{ form.resolucion_dian.label.text }}</label>
-                        {{ form.resolucion_dian(class="form-control") }}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">{{ form.logo.label.text }}</label>
-                        {{ form.logo(class="form-control") }}
-                        <small class="text-muted">Formatos: JPG, PNG, WebP · Máx. 5 MB</small>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.regimen.label.text }}</label>
+                            {{ form.regimen(class="form-control") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.prefijo_factura.label.text }}</label>
+                            {{ form.prefijo_factura(class="form-control") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.iva_porcentaje.label.text }}</label>
+                            {{ form.iva_porcentaje(class="form-control") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.resolucion_dian.label.text }}</label>
+                            {{ form.resolucion_dian(class="form-control") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.logo.label.text }}</label>
+                            {{ form.logo(class="form-control") }}
+                            <small class="text-muted">Formatos: JPG, PNG, WebP · Máx. 5 MB</small>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-4">

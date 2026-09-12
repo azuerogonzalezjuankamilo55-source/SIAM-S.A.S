@@ -23,16 +23,18 @@
 {% endblock %}
 {% block content %}
 <div id="chatContainer" class="card" data-aos="fade-up">
-    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white border-0">
         <div class="d-flex align-items-center gap-2">
-            <i class="fa-solid fa-robot fs-5"></i>
+            <span class="chat-avatar d-inline-flex align-items-center justify-content-center rounded-circle" style="background:rgba(255,255,255,.18);" aria-hidden="true">
+                <i class="fa-solid fa-robot"></i>
+            </span>
             <div>
                 <h6 class="mb-0">Asistente SIAM</h6>
-                <small class="text-white-50">Online</small>
+                <small class="text-white-50"><i class="fa-solid fa-circle me-1" style="font-size:.5em;color:#4ADE80;" aria-hidden="true"></i>Online</small>
             </div>
         </div>
-        <button class="btn btn-sm btn-outline-light" onclick="clearChat()" title="Limpiar conversación">
-            <i class="fa-solid fa-trash"></i>
+        <button class="btn btn-sm btn-soft" style="background:rgba(255,255,255,.12);color:#fff;" onclick="clearChat()" title="Limpiar conversación">
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
         </button>
     </div>
     <div id="chatMessages" class="card-body bg-dark bg-opacity-25">
@@ -55,17 +57,17 @@
         <div id="quickReplies" class="mb-2">
             <small class="text-secondary d-block mb-2">¿En qué podemos ayudarte?</small>
             <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro no quiere arrancar">🔧 Mi carro no arranca</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi moto se está apagando">🏍️ Mi moto se apaga</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Por qué mi carro vibra?">🚗 Mi carro vibra</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cada cuánto debo cambiar el aceite?">🛢️ Cambio de aceite</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro se está calentando">🔥 Se calienta</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Qué significa el Check Engine?">💡 Check Engine</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Necesito cambiar una llanta">🛞 Cambiar llanta</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Estoy varado">🚨 Estoy varado</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Quiero solicitar una cita">📅 Solicitar cita</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuánto cuesta una revisión?">💰 Precio revisión</button>
-                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuál es la sede más cercana?">📍 Sede cercana</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro no quiere arrancar"><i class="fa-solid fa-screwdriver-wrench me-1" aria-hidden="true"></i>Mi carro no arranca</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi moto se está apagando"><i class="fa-solid fa-motorcycle me-1" aria-hidden="true"></i>Mi moto se apaga</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Por qué mi carro vibra?"><i class="fa-solid fa-car me-1" aria-hidden="true"></i>Mi carro vibra</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cada cuánto debo cambiar el aceite?"><i class="fa-solid fa-oil-can me-1" aria-hidden="true"></i>Cambio de aceite</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Mi carro se está calentando"><i class="fa-solid fa-fire me-1" aria-hidden="true"></i>Se calienta</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Qué significa el Check Engine?"><i class="fa-solid fa-lightbulb me-1" aria-hidden="true"></i>Check Engine</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Necesito cambiar una llanta"><i class="fa-solid fa-circle-dot me-1" aria-hidden="true"></i>Cambiar llanta</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Estoy varado"><i class="fa-solid fa-truck-ramp-box me-1" aria-hidden="true"></i>Estoy varado</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="Quiero solicitar una cita"><i class="fa-solid fa-calendar-plus me-1" aria-hidden="true"></i>Solicitar cita</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuánto cuesta una revisión?"><i class="fa-solid fa-money-bill me-1" aria-hidden="true"></i>Precio revisión</button>
+                <button type="button" class="btn btn-sm btn-soft border quick-reply-btn" data-text="¿Cuál es la sede más cercana?"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>Sede cercana</button>
             </div>
         </div>
         <form id="chatForm" class="d-flex gap-2">
@@ -73,11 +75,11 @@
             <div class="flex-grow-1 position-relative">
                 <textarea id="chatInput" class="form-control" rows="1" placeholder="Escribe tu mensaje..." style="padding-right: 40px;"></textarea>
                 <button type="button" class="btn btn-sm btn-outline-secondary position-absolute end-0 bottom-0 me-1 mb-1" onclick="document.getElementById('chatInput').value='';" title="Limpiar">
-                    <i class="fa-solid fa-xmark"></i>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
             </div>
             <button type="submit" class="btn btn-primary px-4">
-                <i class="fa-solid fa-paper-plane me-1"></i> Enviar
+                <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i> Enviar
             </button>
         </form>
         <small class="text-secondary mt-1 d-block">Presiona Enter para enviar, Shift+Enter para nueva línea</small>

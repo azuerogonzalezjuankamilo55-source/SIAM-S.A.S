@@ -1,60 +1,66 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/empty_state.html" import empty_state %}
+
 {% block title %}Inventario{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>Inventario</h4>
-    <div>
-        <a href="{{ url_for('inventario.kardex') }}" class="btn btn-outline-secondary me-2">
-            <i class="fa-solid fa-book-open"></i> Kardex
-        </a>
-        <a href="{{ url_for('inventario.alertas') }}" class="btn btn-outline-danger me-2">
-            <i class="fa-solid fa-triangle-exclamation"></i> Alertas
-        </a>
-        <a href="{{ url_for('inventario.listar_categorias') }}" class="btn btn-outline-info me-2">
-            <i class="fa-solid fa-tags"></i> Categorías
-        </a>
-        <a href="{{ url_for('inventario.crear') }}" class="btn btn-primary">
-            <i class="fa-solid fa-plus"></i> Nuevo Producto
-        </a>
+{{ page_header(titulo="Inventario", icono="fa-boxes-stacked",
+               subtitulo="Control de stock, precios y alertas de mínimo",
+               boton="Nuevo Producto", boton_icon="fa-plus",
+               boton_url=url_for('inventario.crear')) }}
+
+<div class="d-flex flex-wrap gap-2 mb-3" data-aos="fade-up">
+    <a href="{{ url_for('inventario.kardex') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fa-solid fa-book-open me-1" aria-hidden="true"></i>Kardex
+    </a>
+    <a href="{{ url_for('inventario.alertas') }}" class="btn btn-sm btn-outline-danger">
+        <i class="fa-solid fa-triangle-exclamation me-1" aria-hidden="true"></i>Alertas
+    </a>
+    <a href="{{ url_for('inventario.listar_categorias') }}" class="btn btn-sm btn-outline-info">
+        <i class="fa-solid fa-tags me-1" aria-hidden="true"></i>Categorías
+    </a>
+</div>
+
+<div class="row g-3 mb-3" data-aos="fade-up">
+    <div class="col-6 col-md-3">
+        <div class="metric-box">
+            <div class="metric-box-icon" style="color:var(--bs-primary);background:rgba(var(--bs-primary-rgb),.10);"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></div>
+            <div>
+                <div class="metric-box-label">Productos activos</div>
+                <div class="metric-box-value">{{ valorizacion.total_productos }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-box metric-success">
+            <div class="metric-box-icon"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i></div>
+            <div>
+                <div class="metric-box-label">Valor inventario</div>
+                <div class="metric-box-value">${{ "{:,.0f}".format(valorizacion.total_valor) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-box metric-warning">
+            <div class="metric-box-icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
+            <div>
+                <div class="metric-box-label">Stock bajo</div>
+                <div class="metric-box-value">{{ valorizacion.items_bajo }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-box metric-danger">
+            <div class="metric-box-icon"><i class="fa-solid fa-circle-minus" aria-hidden="true"></i></div>
+            <div>
+                <div class="metric-box-label">Sin stock</div>
+                <div class="metric-box-value">{{ valorizacion.items_sin_stock }}</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row g-2 mb-3">
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body py-3">
-                <div class="text-muted small">Productos activos</div>
-                <h5 class="mb-0">{{ valorizacion.total_productos }}</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body py-3">
-                <div class="text-muted small">Valor del inventario</div>
-                <h5 class="mb-0 text-success">${{ "{:,.0f}".format(valorizacion.total_valor) }}</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body py-3">
-                <div class="text-muted small">Stock bajo</div>
-                <h5 class="mb-0 text-warning">{{ valorizacion.items_bajo }}</h5>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body py-3">
-                <div class="text-muted small">Sin stock</div>
-                <h5 class="mb-0 text-danger">{{ valorizacion.items_sin_stock }}</h5>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body py-2">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-auto">
@@ -69,7 +75,7 @@
             <div class="col-auto">
                 <label class="form-label small mb-0">Buscar</label>
                 <div class="search-input">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     <input type="search" name="busqueda" class="form-control form-control-sm" placeholder="SKU o nombre..." aria-label="Buscar" value="{{ request.args.get('busqueda', '') }}" data-table-search="#tablaInventario">
                 </div>
             </div>
@@ -92,98 +98,95 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle" id="tablaInventario">
-                <thead>
-                    <tr>
-                        <th>SKU</th>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Ubicación</th>
-                        <th>Stock</th>
-                        <th>Stock Mín.</th>
-                        <th>Costo Prom.</th>
-                        <th>Precio Venta</th>
-                        <th>Proveedor</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in items %}
-                    <tr class="{{ 'table-secondary' if i.es_baja else 'table-danger' if i.stock_critico_alcanzado else 'table-warning' if i.stock_bajo else '' }}">
-                        <td><code>{{ i.sku or "-" }}</code></td>
-                        <td>
-                            <a href="{{ url_for('inventario.ver', id=i.id) }}" class="text-decoration-none">{{ i.nombre }}</a>
-                            {% if i.es_baja %}<span class="badge bg-secondary">Baja</span>{% endif %}
-                        </td>
-                        <td>{{ i.categoria_nombre or "-" }}</td>
-                        <td>{{ i.ubicacion or "-" }}</td>
-                        <td>
+<div class="card" data-aos="fade-up">
+    <div class="table-responsive">
+        <table class="table table-modern table-hover align-middle mb-0" id="tablaInventario">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Ubicación</th>
+                    <th>Stock</th>
+                    <th>Stock Mín.</th>
+                    <th>Costo Prom.</th>
+                    <th>Precio Venta</th>
+                    <th>Proveedor</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in items %}
+                <tr>
+                    <td data-label="SKU"><code>{{ i.sku or "—" }}</code></td>
+                    <td data-label="Nombre">
+                        <a href="{{ url_for('inventario.ver', id=i.id) }}" class="text-decoration-none fw-semibold">{{ i.nombre }}</a>
+                        {% if i.es_baja %}<span class="badge bg-secondary ms-1">Baja</span>{% endif %}
+                    </td>
+                    <td data-label="Categoría">{{ i.categoria_nombre or "—" }}</td>
+                    <td data-label="Ubicación">{{ i.ubicacion or "—" }}</td>
+                    <td data-label="Stock">
+                        <div class="d-flex align-items-center gap-1">
                             <strong>{{ i.cantidad }}</strong>
                             {% if not i.es_baja %}
                             {% if i.stock_critico_alcanzado %}
-                            <span class="badge bg-danger ms-1" title="Stock crítico">Crítico</span>
+                            <span class="badge bg-danger" title="Stock crítico">Crítico</span>
                             {% elif i.stock_bajo %}
-                            <i class="fa-solid fa-triangle-exclamation text-warning ms-1" title="Stock bajo"></i>
+                            <span class="badge badge-soft-warning" title="Stock bajo">Bajo</span>
                             {% endif %}
                             {% endif %}
-                        </td>
-                        <td>{{ i.stock_minimo }}</td>
-                        <td>${{ "%.2f"|format(i.costo_promedio|float) if i.costo_promedio else "-" }}</td>
-                        <td>${{ "%.2f"|format(i.precio_venta|float) if i.precio_venta else "-" }}</td>
-                        <td>{{ i.proveedor or "-" }}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('inventario.ver', id=i.id) }}" class="btn btn-outline-info" title="Ver">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                                {% if not i.es_baja %}
-                                <a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-outline-primary" title="Movimiento">
-                                    <i class="fa-solid fa-arrows-left-right"></i>
-                                </a>
-                                <a href="{{ url_for('inventario.editar', id=i.id) }}" class="btn btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <button class="btn btn-outline-danger" title="Dar de baja"
-                                        onclick="document.getElementById('baja-motivo-{{ i.id }}').showModal()">
-                                    <i class="fa-solid fa-box-archive"></i>
-                                </button>
-                                {% endif %}
-                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Stock mín">{{ i.stock_minimo }}</td>
+                    <td data-label="Costo">${{ "%.2f"|format(i.costo_promedio|float) if i.costo_promedio else "—" }}</td>
+                    <td data-label="Precio venta">${{ "%.2f"|format(i.precio_venta|float) if i.precio_venta else "—" }}</td>
+                    <td data-label="Proveedor">{{ i.proveedor or "—" }}</td>
+                    <td data-label="Acciones">
+                        <div class="table-actions justify-content-end">
+                            <a href="{{ url_for('inventario.ver', id=i.id) }}" class="btn btn-sm btn-outline-info" title="Ver">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </a>
                             {% if not i.es_baja %}
-                            <dialog id="baja-motivo-{{ i.id }}" class="p-3 rounded-3 border">
-                                <form method="POST" action="{{ url_for('inventario.baja', id=i.id) }}">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-                                    <h6 class="mb-2">Dar de baja: {{ i.nombre }}</h6>
-                                    <textarea name="motivo" class="form-control mb-2" rows="2"
-                                              placeholder="Motivo de la baja (obligatorio)" required></textarea>
-                                    <div class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1"
-                                                onclick="document.getElementById('baja-motivo-{{ i.id }}').close()">Cancelar</button>
-                                        <button class="btn btn-sm btn-danger">Confirmar baja</button>
-                                    </div>
-                                </form>
-                            </dialog>
+                            <a href="{{ url_for('inventario.movimiento', id=i.id) }}" class="btn btn-sm btn-outline-primary" title="Movimiento">
+                                <i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i>
+                            </a>
+                            <a href="{{ url_for('inventario.editar', id=i.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" title="Dar de baja"
+                                    onclick="document.getElementById('baja-motivo-{{ i.id }}').showModal()">
+                                <i class="fa-solid fa-box-archive" aria-hidden="true"></i>
+                            </button>
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="10">
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></div>
-                                <h6 class="mb-1">Inventario vacío</h6>
-                                <p class="text-muted small mb-3">Agrega productos para llevar el control de stock y alertas de mínimo.</p>
-                                <a href="{{ url_for('inventario.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear producto</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                        {% if not i.es_baja %}
+                        <dialog id="baja-motivo-{{ i.id }}" class="p-3 rounded-3 border">
+                            <form method="POST" action="{{ url_for('inventario.baja', id=i.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
+                                <h6 class="mb-2">Dar de baja: {{ i.nombre }}</h6>
+                                <textarea name="motivo" class="form-control mb-2" rows="2"
+                                          placeholder="Motivo de la baja (obligatorio)" required></textarea>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+                                            onclick="document.getElementById('baja-motivo-{{ i.id }}').close()">Cancelar</button>
+                                    <button class="btn btn-sm btn-danger">Confirmar baja</button>
+                                </div>
+                            </form>
+                        </dialog>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="p-0">
+                        {{ empty_state(icon="fa-boxes-stacked", titulo="Inventario vacío",
+                                       mensaje="Agrega productos para llevar el control de stock y alertas de mínimo.",
+                                       accion="Crear producto", url=url_for('inventario.crear'), accion_icon="fa-plus") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

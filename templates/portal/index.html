@@ -1,14 +1,32 @@
 {% extends "base.html" %}
+{% from "components/stat_card.html" import stat_card %}
+{% from "components/badge.html" import badge_dot %}
 {% block title %}Mi Portal{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #mapaMiUbicacion { z-index: 0; border-radius: 0; }
+    @media (max-width: 576px) { #mapaMiUbicacion { height: 300px !important; } }
+    .leaflet-container { font-family: 'Inter', system-ui, sans-serif; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .taller-pin, .cliente-pin { border: 2.5px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 14px rgba(2,6,23,.45); }
+    .taller-pin { width: 36px; height: 36px; font-size: 15px; background: #ef4444; }
+    .cliente-pin { width: 30px; height: 30px; font-size: 13px; background: #2563eb; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Hola, {{ data.cliente.nombre }} 👋</h4>
-    <div class="d-flex gap-2">
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-user-large" aria-hidden="true"></i> Hola, {{ data.cliente.nombre }}</h4>
+        <small class="text-muted">Bienvenido a tu portal del cliente SIAM</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url_for('sedes.index') }}" class="btn btn-danger">
-            <i class="fa-solid fa-truck-ramp-box"></i> Asistencia / Sedes
+            <i class="fa-solid fa-truck-ramp-box me-1" aria-hidden="true"></i> Asistencia / Sedes
         </a>
         <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-primary">
-            <i class="fa-solid fa-calendar-plus"></i> Solicitar Cita
+            <i class="fa-solid fa-calendar-plus me-1" aria-hidden="true"></i> Solicitar Cita
         </a>
     </div>
 </div>
@@ -18,66 +36,58 @@
     <div class="row g-2">
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('sedes.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">🚨</div><small>Estoy varado</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-truck-ramp-box text-danger" aria-hidden="true"></i></div><small>Estoy varado</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('portal.solicitar_cita') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">📅</div><small>Agendar cita</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-calendar-plus text-primary" aria-hidden="true"></i></div><small>Agendar cita</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('portal.vehiculos') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">🚗</div><small>Mis vehículos</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-car text-info" aria-hidden="true"></i></div><small>Mis vehículos</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('portal.ordenes') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">🔧</div><small>Mis reparaciones</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-screwdriver-wrench text-warning" aria-hidden="true"></i></div><small>Mis reparaciones</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('portal.facturas') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">🧾</div><small>Mis facturas</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-file-invoice text-success" aria-hidden="true"></i></div><small>Mis facturas</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('sedes.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">📍</div><small>Buscar sede</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-location-dot text-secondary" aria-hidden="true"></i></div><small>Buscar sede</small>
             </a>
         </div>
         <div class="col-6 col-md-3 col-lg-2">
             <a href="{{ url_for('assistant.index') }}" class="card text-center p-3 text-decoration-none h-100 portal-quick">
-                <div class="fs-2 mb-1">🤖</div><small>Preguntar a SIAM</small>
+                <div class="fs-2 mb-1"><i class="fa-solid fa-robot text-primary" aria-hidden="true"></i></div><small>Preguntar a SIAM</small>
             </a>
         </div>
     </div>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <h2>{{ data.total_vehiculos }}</h2>
-            <span class="text-muted">Vehículos</span>
-        </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="0">
+        {{ stat_card(icon="fa-car", color="info", titulo="Vehículos",
+                     valor=data.total_vehiculos, sub="registrados") }}
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <h2>{{ data.proximas_citas|length }}</h2>
-            <span class="text-muted">Próximas citas</span>
-        </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="60">
+        {{ stat_card(icon="fa-calendar-check", color="warning", titulo="Próximas citas",
+                     valor=data.proximas_citas|length, sub="programadas") }}
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <h2>{{ data.ordenes_activas|length }}</h2>
-            <span class="text-muted">Reparaciones activas</span>
-        </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="120">
+        {{ stat_card(icon="fa-screwdriver-wrench", color="primary", titulo="Reparaciones activas",
+                     valor=data.ordenes_activas|length, sub="en el taller") }}
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center p-3">
-            <h2>{{ data.facturas_pendientes|length }}</h2>
-            <span class="text-muted">Facturas pendientes</span>
-        </div>
+    <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="180">
+        {{ stat_card(icon="fa-file-invoice", color="danger", titulo="Facturas pendientes",
+                     valor=data.facturas_pendientes|length, sub="por pagar") }}
     </div>
 </div>
 
@@ -86,7 +96,7 @@
     'en_reparacion': 75, 'pruebas': 90, 'listo_entrega': 100, 'entregado': 100
 } %}
 {% set ot_color = {
-    'recibido': 'success', 'diagnostico': 'primary', 'esperando_repuestos': 'warning',
+    'recibido': 'success', 'diagnostico': 'info', 'esperando_repuestos': 'warning',
     'en_reparacion': 'warning', 'pruebas': 'info', 'listo_entrega': 'success', 'entregado': 'success'
 } %}
 
@@ -94,8 +104,8 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Próximas citas</strong>
-                <a href="{{ url_for('portal.citas') }}" class="small">Ver todas</a>
+                <h6 class="mb-0"><i class="fa-solid fa-calendar-week me-2 text-primary" aria-hidden="true"></i>Próximas citas</h6>
+                <a href="{{ url_for('portal.citas') }}" class="btn btn-sm btn-soft">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
@@ -105,7 +115,9 @@
                             <div><strong>{{ c.fecha }} · {{ c.hora }}</strong></div>
                             <small class="text-muted">{{ c.vehiculo.marca }} {{ c.vehiculo.modelo }} ({{ c.vehiculo.placa }})</small>
                         </div>
-                        <span class="badge bg-{{ c.estado_color }}">{{ c.estado_etiqueta }}</span>
+                        <span class="badge badge-soft-{{ bsoft.get(c.estado_color, c.estado_color) }}">
+                            <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ c.estado_etiqueta }}
+                        </span>
                     </li>
                     {% else %}
                     <li class="list-group-item text-center text-muted">No tienes próximas citas.</li>
@@ -117,19 +129,26 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong><i class="fa-solid fa-car me-2 text-primary"></i>Estado de mi vehículo</strong>
-                <a href="{{ url_for('portal.ordenes') }}" class="small">Ver todas</a>
+                <h6 class="mb-0"><i class="fa-solid fa-car me-2 text-primary" aria-hidden="true"></i>Estado de mi vehículo</h6>
+                <a href="{{ url_for('portal.ordenes') }}" class="btn btn-sm btn-soft">Ver todas</a>
             </div>
             <div class="card-body">
                 {% if data.ordenes_activas %}
                 <div class="small text-secondary mb-3 d-flex flex-wrap gap-2">
-                    <span>🟢 Recibido</span><span>🔵 Diagnóstico</span><span>🟡 En reparación</span><span>🟣 Esperando repuesto</span><span>🔷 En pruebas</span><span>🟢 Listo para entregar</span>
+                    {{ badge_dot("Recibido", "success") }}
+                    {{ badge_dot("Diagnóstico", "info") }}
+                    {{ badge_dot("En reparación", "warning") }}
+                    {{ badge_dot("Esperando repuesto", "warning") }}
+                    {{ badge_dot("En pruebas", "info") }}
+                    {{ badge_dot("Listo para entregar", "success") }}
                 </div>
                 {% for o in data.ordenes_activas %}
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong>{{ o.numero }}</strong>
-                        <span class="badge bg-{{ ot_color.get(o.estado, 'secondary') }}">{{ o.estado_display }}</span>
+                        <span class="badge badge-soft-{{ ot_color.get(o.estado, 'secondary') }}">
+                            <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ o.estado_display }}
+                        </span>
                     </div>
                     <small class="text-muted">{{ o.vehiculo.marca }} {{ o.vehiculo.modelo }} · {{ o.vehiculo.placa }}</small>
                     <div class="progress mt-2" style="height: 10px;" role="progressbar" aria-valuenow="{{ ot_progreso.get(o.estado, 15) }}" aria-valuemin="0" aria-valuemax="100">
@@ -149,8 +168,8 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Facturas pendientes</strong>
-                <a href="{{ url_for('portal.facturas') }}" class="small">Ver todas</a>
+                <h6 class="mb-0"><i class="fa-solid fa-file-invoice me-2 text-danger" aria-hidden="true"></i>Facturas pendientes</h6>
+                <a href="{{ url_for('portal.facturas') }}" class="btn btn-sm btn-soft">Ver todas</a>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
@@ -175,8 +194,8 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Mantenimientos próximos</strong>
-                <a href="{{ url_for('portal.recordatorios') }}" class="small">Ver todos</a>
+                <h6 class="mb-0"><i class="fa-solid fa-bell me-2 text-warning" aria-hidden="true"></i>Mantenimientos próximos</h6>
+                <a href="{{ url_for('portal.recordatorios') }}" class="btn btn-sm btn-soft">Ver todos</a>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
@@ -187,7 +206,9 @@
                             <small class="text-muted">{{ r.vehiculo.placa }} · {{ r.tipo_label }}</small>
                         </div>
                         <div class="text-end">
-                            <span class="badge bg-{{ 'warning' if r.estado == 'pendiente' else 'info' }}">{{ r.estado_label }}</span><br>
+                            <span class="badge badge-soft-{{ 'warning' if r.estado == 'pendiente' else 'info' }}">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ r.estado_label }}
+                            </span><br>
                             <small class="text-muted">{{ r.fecha_programada.strftime('%d/%m/%Y') }}</small>
                         </div>
                     </li>
@@ -201,13 +222,13 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header">
-                <strong>Actividad reciente</strong>
+                <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-info" aria-hidden="true"></i>Actividad reciente</h6>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     {% for h in data.historial_reciente %}
                     <li class="list-group-item">
-                        <div><span class="badge bg-secondary">{{ h.tipo_label }}</span>
+                        <div><span class="badge badge-soft-secondary">{{ h.tipo_label }}</span>
                             <strong>{{ h.vehiculo.placa }}</strong>
                             <small class="text-muted float-end">{{ h.fecha }}</small>
                         </div>
@@ -221,4 +242,205 @@
         </div>
     </div>
 </div>
+
+<!-- Mi ubicación -->
+<div class="card mb-4" id="seccionMiUbicacion" data-aos="fade-up">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h6 class="mb-0"><i class="fa-solid fa-location-dot me-2 text-info" aria-hidden="true"></i>Mi ubicación</h6>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-success d-none" id="btnCompartirUbicacion">
+                <i class="fa-solid fa-share-nodes me-1" aria-hidden="true"></i>Compartir ubicación
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger d-none" id="btnDetenerUbicacion">
+                <i class="fa-solid fa-power-off me-1" aria-hidden="true"></i>Dejar de compartir
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div id="mapaMiUbicacion" style="height:340px;width:100%;" role="region" aria-label="Mapa de tu ubicación y del taller"></div>
+        <div class="px-3 py-3 d-flex align-items-start gap-2 text-muted small" id="estadoMiUbicacion">
+            <i class="fa-solid fa-circle-info mt-1" aria-hidden="true"></i>
+            <span>Comparte tu ubicación solo mientras te diriges al taller. Puedes dejar de compartir en cualquier momento.</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+    "use strict";
+    var latTaller = {{ config.WORKSHOP_LATITUDE }};
+    var lngTaller = {{ config.WORKSHOP_LONGITUDE }};
+    var direccionTaller = {{ config.WORKSHOP_ADDRESS|tojson }};
+    var mapaMiUbicacion = null;
+    var marcadorTaller = null;
+    var marcadorCliente = null;
+    var circuloExactitud = null;
+    var watchIdUbicacion = null;
+    var ultimoEnvioUbicacion = 0;
+    var compartiendoUbicacion = false;
+
+    function iconoTaller() {
+        return L.divIcon({ html: '<div class="taller-pin"><i class="fa-solid fa-industry" aria-hidden="true"></i></div>', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -32], className: 'bg-transparent' });
+    }
+
+    function iconoCliente() {
+        return L.divIcon({ html: '<div class="cliente-pin"><i class="fa-solid fa-user" aria-hidden="true"></i></div>', iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28], className: 'bg-transparent' });
+    }
+
+    function initMapaMiUbicacion() {
+        var el = document.getElementById('mapaMiUbicacion');
+        if (typeof L === 'undefined' || !el) {
+            if (el) el.innerHTML = '<div class="p-4 text-center text-muted">No se pudo cargar el mapa (Leaflet no disponible). Recarga la página.</div>';
+            return;
+        }
+        mapaMiUbicacion = L.map('mapaMiUbicacion', { zoomControl: true }).setView([latTaller, lngTaller], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(mapaMiUbicacion);
+        marcadorTaller = L.marker([latTaller, lngTaller], { icon: iconoTaller(), title: 'SIAM Taller' })
+            .addTo(mapaMiUbicacion)
+            .bindPopup('<strong>SIAM Taller</strong><br><small>' + escapeHtml(direccionTaller) + '</small>');
+        setTimeout(function () { mapaMiUbicacion.invalidateSize(); }, 300);
+        cargarEstadoUbicacion();
+    }
+
+    function cargarEstadoUbicacion() {
+        fetch('/api/ubicacion/estado', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d.success) return;
+                var s = d;
+                if (s.tiene_cita_activa && !s.compartiendo) {
+                    mostrarBotonCompartir(true);
+                }
+                if (s.compartiendo) {
+                    compartiendoUbicacion = true;
+                    mostrarBotonCompartir(false);
+                    iniciarGeolocalizacion();
+                    textoEstado('Compartiendo tu ubicación en vivo. El taller puede ver tu viaje.', 'success');
+                } else if (!s.tiene_cita_activa) {
+                    textoEstado('Actualmente no tienes una cita activa. Comparte tu ubicación cuando tengas una cita en camino.', 'secondary');
+                }
+            })
+            .catch(function () {});
+    }
+
+    function mostrarBotonCompartir(esActivo) {
+        var btnCompartir = document.getElementById('btnCompartirUbicacion');
+        var btnDetener = document.getElementById('btnDetenerUbicacion');
+        if (!btnCompartir || !btnDetener) return;
+        btnCompartir.classList.toggle('d-none', !esActivo);
+        btnDetener.classList.toggle('d-none', esActivo);
+    }
+
+    function textoEstado(mensaje, tipo) {
+        var contenedor = document.getElementById('estadoMiUbicacion');
+        if (!contenedor) return;
+        var clases = { success: 'text-success', secondary: 'text-secondary', warning: 'text-warning', danger: 'text-danger' };
+        contenedor.classList.remove('text-success', 'text-secondary', 'text-warning', 'text-danger');
+        contenedor.classList.add(clases[tipo] || 'text-secondary');
+        contenedor.querySelector('span').textContent = mensaje;
+    }
+
+    function pintarClienteEnMapa(lat, lng, accuracy) {
+        var posicion = [lat, lng];
+        if (!marcadorCliente) {
+            marcadorCliente = L.marker(posicion, { icon: iconoCliente(), title: 'Tu ubicación' }).addTo(mapaMiUbicacion);
+        } else {
+            marcadorCliente.setLatLng(posicion);
+        }
+        var hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        marcadorCliente.bindPopup('<strong>Tu ubicación</strong><br><small>Actualizada: ' + hora + '</small>');
+        if (circuloExactitud) mapaMiUbicacion.removeLayer(circuloExactitud);
+        circuloExactitud = L.circle(posicion, {
+            radius: accuracy || 40,
+            color: '#2563eb', weight: 1, fillColor: '#2563eb', fillOpacity: .12
+        }).addTo(mapaMiUbicacion);
+        mapaMiUbicacion.fitBounds(L.latLngBounds([posicion, [latTaller, lngTaller]]).pad(0.15), { maxZoom: 16 });
+    }
+
+    function enviarUbicacion(pos) {
+        fetch('/api/ubicacion/actualizar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' },
+            body: JSON.stringify({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy
+            })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.success) {
+                pintarClienteEnMapa(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+            } else {
+                if (d.error) textoEstado(d.error, 'warning');
+                detenerGeolocalizacion();
+                mostrarBotonCompartir(true);
+            }
+        }).catch(function () {});
+    }
+
+    function iniciarGeolocalizacion() {
+        if (watchIdUbicacion !== null) return;
+        if (!navigator.geolocation) {
+            textoEstado('Tu navegador no soporta geolocalización.', 'warning');
+            return;
+        }
+        watchIdUbicacion = navigator.geolocation.watchPosition(
+            function (pos) {
+                var ahora = Date.now();
+                if (ahora - ultimoEnvioUbicacion < 20000) return;
+                ultimoEnvioUbicacion = ahora;
+                enviarUbicacion(pos);
+            },
+            function (err) {
+                var msgs = { 1: 'Permiso denegado. Habilita la ubicación para compartir tu viaje.', 2: 'No se pudo obtener la ubicación.', 3: 'Tiempo agotado al obtener la ubicación.' };
+                textoEstado(msgs[err.code] || 'Error de ubicación.', 'warning');
+                detenerGeolocalizacion();
+                mostrarBotonCompartir(true);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 20000 }
+        );
+    }
+
+    function detenerGeolocalizacion() {
+        if (watchIdUbicacion !== null) {
+            navigator.geolocation.clearWatch(watchIdUbicacion);
+            watchIdUbicacion = null;
+        }
+        ultimoEnvioUbicacion = 0;
+        compartiendoUbicacion = false;
+    }
+
+    function detenerCompartido() {
+        detenerGeolocalizacion();
+        fetch('/api/ubicacion/detener', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken(), 'Accept': 'application/json' },
+            body: JSON.stringify({})
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.success) {
+                textoEstado('Dejaste de compartir tu ubicación. Puedes volver a activarlo cuando quieras.', 'secondary');
+                mostrarBotonCompartir(true);
+            }
+        }).catch(function () {});
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var btnCompartir = document.getElementById('btnCompartirUbicacion');
+        var btnDetener = document.getElementById('btnDetenerUbicacion');
+        if (btnCompartir) btnCompartir.addEventListener('click', function () {
+            compartiendoUbicacion = true;
+            mostrarBotonCompartir(false);
+            iniciarGeolocalizacion();
+            textoEstado('Compartiendo tu ubicación en vivo. El taller puede ver tu viaje.', 'success');
+        });
+        if (btnDetener) btnDetener.addEventListener('click', detenerCompartido);
+        initMapaMiUbicacion();
+    });
+})();
+</script>
 {% endblock %}

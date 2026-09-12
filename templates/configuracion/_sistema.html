@@ -1,39 +1,51 @@
-<div class="card shadow-sm">
+<div class="card" data-aos="fade-up">
     <div class="card-header bg-transparent">
-        <h5 class="mb-0"><i class="fa-solid fa-server me-2" aria-hidden="true"></i>Sistema</h5>
-        <small class="text-secondary">Información del despliegue y diagnóstico. Solo lectura.</small>
+        <h6 class="mb-0"><i class="fa-solid fa-server text-primary me-2" aria-hidden="true"></i>Sistema</h6>
+        <small class="text-muted">Información del despliegue y diagnóstico. Solo lectura.</small>
     </div>
     <div class="card-body">
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-code-branch me-1" aria-hidden="true"></i> Aplicación</div>
-                    <div class="fs-5 fw-semibold">{{ datos_sistema.app }} v{{ datos_sistema.version }}</div>
+                <div class="metric-box h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Aplicación</div>
+                        <div class="metric-box-value">{{ datos_sistema.app }} v{{ datos_sistema.version }}</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i> Entorno</div>
-                    <div class="fs-5 fw-semibold text-capitalize">{{ datos_sistema.entorno }}</div>
-                    <small class="text-muted">{{ "Modo depuración activo" if datos_sistema.debug else "Modo producción" }}</small>
+                <div class="metric-box metric-info h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Entorno</div>
+                        <div class="metric-box-value text-capitalize">{{ datos_sistema.entorno }}</div>
+                        <small>{{ "Modo depuración activo" if datos_sistema.debug else "Modo producción" }}</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-database me-1" aria-hidden="true"></i> Base de datos</div>
-                    <div class="fs-5 fw-semibold">{{ "Conectada" if datos_sistema.bd_estado == 'conectado' else "No disponible" }}</div>
+                <div class="metric-box {{ 'metric-success' if datos_sistema.bd_estado == 'conectado' else 'metric-danger' }} h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-database" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Base de datos</div>
+                        <div class="metric-box-value">{{ "Conectada" if datos_sistema.bd_estado == 'conectado' else "No disponible" }}</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-arrow-up-wide-short me-1" aria-hidden="true"></i> Migración aplicada</div>
-                    <div class="fs-5 fw-semibold">{{ datos_sistema.migracion or "—" }}</div>
+                <div class="metric-box h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-arrow-up-wide-short" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Migración aplicada</div>
+                        <div class="metric-box-value">{{ datos_sistema.migracion or "—" }}</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <h6 class="text-secondary text-uppercase small fw-semibold">Comprobar sistema</h6>
-        <p class="text-secondary small">Ejecuta un diagnóstico rápido de la base de datos, la configuración y el almacenamiento.</p>
+        <p class="text-muted small">Ejecuta un diagnóstico rápido de la base de datos, la configuración y el almacenamiento.</p>
         <button type="button" id="btnComprobarSistema" class="btn btn-primary">
             <i class="fa-solid fa-stethoscope me-1" aria-hidden="true"></i> Comprobar sistema
         </button>

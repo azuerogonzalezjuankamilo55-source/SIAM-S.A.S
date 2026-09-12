@@ -1,11 +1,18 @@
 {% extends "base.html" %}
+{% from "components/form_section.html" import form_section %}
 {% block title %}{{ "Editar" if cat else "Nueva" }} Categoría{% endblock %}
 {% block content %}
-<h4 class="mb-4">{{ "Editar" if cat else "Nueva" }} Categoría</h4>
-<div class="card">
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-tag" aria-hidden="true"></i> {{ "Editar" if cat else "Nueva" }} Categoría</h4>
+        <small class="text-muted">{{ "Actualiza la información de la categoría" if cat else "Registra una nueva categoría de inventario" }}</small>
+    </div>
+</div>
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         <form method="POST">
             {{ form.hidden_tag() }}
+            {% call form_section(icono="fa-tag", titulo="Datos de la categoría") %}
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">{{ form.nombre.label.text }}</label>
@@ -20,9 +27,10 @@
                     {{ form.descripcion(class="form-control", rows=2) }}
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-                <a href="{{ url_for('inventario.listar_categorias') }}" class="btn btn-secondary">Cancelar</a>
+            {% endcall %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('inventario.listar_categorias') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

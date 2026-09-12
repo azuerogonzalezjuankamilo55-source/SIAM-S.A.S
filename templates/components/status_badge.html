@@ -1,0 +1,15 @@
+{# ============================================================
+   SIAM Component: Status Badge
+   Uso (mapa de estados por página):
+   {% from "components/status_badge.html" import status_badge %}
+   {{ status_badge("pendiente", ESTADOS) }}
+   Donde ESTADOS = {"pendiente": {"bg": "warning", "texto": "Pendiente"}}
+   También se puede pasar directo: {{ status_badge("pagado", {"bg":"success","texto":"Pagado"}) }}
+   ============================================================ #}
+{% macro status_badge(estado, mapa) -%}
+{% set cfg = mapa.get(estado, mapa.get('default', {'bg': 'secondary', 'texto': estado})) %}
+<span class="badge badge-soft-{{ cfg.get('bg', 'secondary') }}">
+    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
+    {{ cfg.get('texto', estado) }}
+</span>
+{%- endmacro %}

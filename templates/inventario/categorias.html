@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Categorías{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Categorías de Inventario</h4>
+<div class="page-header">
     <div>
-        <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary me-2">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+        <h4><i class="fa-solid fa-tags" aria-hidden="true"></i> Categorías de Inventario</h4>
+        <small class="text-muted">Organiza tus productos por categoría</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
         </a>
         <a href="{{ url_for('inventario.crear_categoria') }}" class="btn btn-primary">
-            <i class="fa-solid fa-plus"></i> Nueva Categoría
+            <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Nueva Categoría
         </a>
     </div>
 </div>
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-modern table-hover">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -24,7 +27,7 @@
                         <th>Categoría padre</th>
                         <th>Descripción</th>
                         <th>Productos</th>
-                        <th>Acciones</th>
+                        <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,17 +39,21 @@
                         <td>{{ c.padre.nombre if c.padre else "-" }}</td>
                         <td>{{ c.descripcion or "-" }}</td>
                         <td><span class="badge bg-info">{{ c.items|length }}</span></td>
-                        <td>
-                            <a href="{{ url_for('inventario.editar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-warning">
-                                <i class="fa-solid fa-pen"></i>
-                            </a>
-                            <a href="{{ url_for('inventario.eliminar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar categoría {{ c.nombre }}?">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
+                        <td data-label="Acciones">
+                            <div class="table-actions justify-content-end">
+                                <a href="{{ url_for('inventario.editar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                                </a>
+                                <a href="{{ url_for('inventario.eliminar_categoria', id=c.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar categoría {{ c.nombre }}?" title="Eliminar">
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="7" class="text-center text-muted py-4">Sin categorías registradas</td></tr>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">Sin categorías registradas</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

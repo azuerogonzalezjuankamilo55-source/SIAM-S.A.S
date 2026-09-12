@@ -19,3 +19,4 @@ from routes.notificaciones import notificaciones_bp
 from routes.cotizaciones import cotizaciones_bp
 from routes.garantias import garantias_bp
 from routes.configuracion import configuracion_bp
+from routes.api_ubicacion import api_ubicacion_bp

@@ -1,15 +1,20 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/form_section.html" import form_section %}
+
 {% block title %}{{ "Editar" if servicio else "Nuevo" }} Servicio{% endblock %}
 {% block content %}
-<h4 class="mb-4">{{ "Editar" if servicio else "Nuevo" }} Servicio</h4>
-<div class="card">
+{{ page_header(titulo=("Editar" if servicio else "Nuevo") ~ " Servicio", icono="fa-screwdriver-wrench",
+               subtitulo=("Configura el servicio " ~ servicio.nombre) if servicio else "Agrega un servicio al catálogo del taller") }}
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
+            {% call form_section(icono="fa-tags", titulo="Información del servicio") %}
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" name="nombre" class="form-control" value="{{ servicio.nombre if servicio else '' }}" required>
+                    <label class="form-label">Nombre <span class="required">*</span></label>
+                    <input type="text" name="nombre" class="form-control" value="{{ servicio.nombre if servicio else '' }}" placeholder="Ej: Cambio de aceite" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Categoría</label>
@@ -25,7 +30,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Precio Est.</label>
-                    <input type="number" step="0.01" name="precio_estimado" class="form-control" value="{{ servicio.precio_estimado if servicio else '' }}">
+                    <input type="number" step="0.01" name="precio_estimado" class="form-control" value="{{ servicio.precio_estimado if servicio else '' }}" placeholder="0.00">
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Duración</label>
@@ -33,12 +38,16 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label">Descripción</label>
-                    <textarea name="descripcion" class="form-control" rows="3">{{ servicio.descripcion if servicio else '' }}</textarea>
+                    <textarea name="descripcion" class="form-control" rows="3" placeholder="Detalle del servicio">{{ servicio.descripcion if servicio else '' }}</textarea>
                 </div>
+            </div>
+            {% endcall %}
+            {% call form_section(icono="fa-image", titulo="Imagen del servicio") %}
+            <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Imagen del servicio</label>
+                    <label class="form-label">Imagen</label>
                     <input type="file" name="imagen" class="form-control" accept="image/jpeg,image/png,image/webp">
-                    <small class="text-muted">Opcional · JPG, PNG o WebP · Máx. 5 MB</small>
+                    <div class="form-text">Opcional · JPG, PNG o WebP · Máx. 5 MB</div>
                 </div>
                 {% if servicio and servicio.imagen_path %}
                 <div class="col-md-6">
@@ -47,9 +56,10 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{{ url_for('servicios.listar') }}" class="btn btn-secondary">Cancelar</a>
+            {% endcall %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Guardar</button>
+                <a href="{{ url_for('servicios.listar') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

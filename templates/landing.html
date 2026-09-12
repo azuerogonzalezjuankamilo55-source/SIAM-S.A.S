@@ -185,12 +185,14 @@
                             facturación e inventario desde el panel de control.
                         </p>
                         <div class="d-grid gap-2">
-                            <a href="{{ url_for('auth.login', area='admin') }}" class="btn btn-gradient">
-                                <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar sesión
-                            </a>
+<a href="{{ url_for('auth.login', area='admin') }}" class="btn btn-gradient">
+    <i class="fa-solid fa-right-to-bracket me-1"></i> Ingresar como administrador
+</a>
+                            {% if permite_registrar_admin %}
                             <a href="{{ url_for('auth.registrar_admin') }}" class="btn btn-outline-light">
                                 <i class="fa-solid fa-user-plus me-1"></i> Crear cuenta
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -207,9 +209,9 @@
                             <a href="{{ url_for('auth.login', area='cliente') }}" class="btn btn-gradient">
                                 <i class="fa-solid fa-right-to-bracket me-1"></i> Ingresar como cliente
                             </a>
-                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light">
-                                <i class="fa-solid fa-user-plus me-1"></i> Crear cuenta de cliente
-                            </a>
+<a href="{{ url_for('auth.register') }}" class="btn btn-outline-light">
+    <i class="fa-solid fa-user-plus me-1"></i> Registrarme como cliente
+</a>
                         </div>
                     </div>
                 </div>
@@ -286,7 +288,7 @@
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-wrench fs-3"></i></div>
                             <div>
-                                <h6 class="mb-1">🔧 Necesito mantenimiento</h6>
+                                <h6 class="mb-1"><i class="fa-solid fa-wrench me-1" aria-hidden="true"></i>Necesito mantenimiento</h6>
                                 <small class="text-secondary">Recibe una guía de mantenimiento según tu vehículo</small>
                             </div>
                         </div>
@@ -297,7 +299,7 @@
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-truck-medical fs-3"></i></div>
                             <div>
-                                <h6 class="mb-1">🚨 Estoy varado</h6>
+                                <h6 class="mb-1"><i class="fa-solid fa-truck-ramp-box me-1" aria-hidden="true"></i>Estoy varado</h6>
                                 <small class="text-secondary">Comparte tu ubicación y solicita asistencia</small>
                             </div>
                         </div>
@@ -308,7 +310,7 @@
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-calendar-check fs-3"></i></div>
                             <div>
-                                <h6 class="mb-1">📅 Quiero agendar una cita</h6>
+                                <h6 class="mb-1">Quiero agendar una cita</h6>
                                 <small class="text-secondary">Aparta tu visita al taller en pocos pasos</small>
                             </div>
                         </div>
@@ -319,7 +321,7 @@
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-location-dot fs-3"></i></div>
                             <div>
-                                <h6 class="mb-1">📍 Buscar una sede</h6>
+                                <h6 class="mb-1">Buscar una sede</h6>
                                 <small class="text-secondary">Encuentra la sede más cercana con distancias</small>
                             </div>
                         </div>
@@ -330,7 +332,7 @@
                         <div class="card-body d-flex align-items-center gap-3">
                             <div class="benefit-icon flex-shrink-0"><i class="fa-solid fa-robot fs-3"></i></div>
                             <div>
-                                <h6 class="mb-1">💬 Preguntar al asistente</h6>
+                                <h6 class="mb-1">Preguntar al asistente</h6>
                                 <small class="text-secondary">Resuelve tus dudas de mecánica con IA</small>
                             </div>
                         </div>

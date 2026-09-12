@@ -1,0 +1,34 @@
+{% macro tabla_detalles_factura(factura) %}
+<div class="table-responsive">
+    <table class="table table-modern table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th class="text-end">Precio Unit.</th>
+                <th class="text-center">Cant.</th>
+                <th class="text-end">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in factura.detalles %}
+            <tr>
+                <td>{{ d.servicio.nombre }}</td>
+                <td class="text-end">${{ "%.2f"|format(d.precio_unitario|float) }}</td>
+                <td class="text-center">{{ d.cantidad }}</td>
+                <td class="text-end">${{ "%.2f"|format(d.subtotal|float) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-3">Sin detalles</td></tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr><td colspan="3" class="text-end">Subtotal</td><td class="text-end">${{ "%.2f"|format(factura.subtotal|float) }}</td></tr>
+            <tr><td colspan="3" class="text-end">IVA ({{ factura.iva_porcentaje }}%)</td><td class="text-end">${{ "%.2f"|format(factura.iva|float) }}</td></tr>
+            {% if factura.descuento > 0 %}
+            <tr><td colspan="3" class="text-end">Descuento</td><td class="text-end">-${{ "%.2f"|format(factura.descuento|float) }}</td></tr>
+            {% endif %}
+            <tr><td colspan="3" class="text-end"><strong>Total</strong></td><td class="text-end"><strong>${{ "%.2f"|format(factura.total|float) }}</strong></td></tr>
+        </tfoot>
+    </table>
+</div>
+{% endmacro %}

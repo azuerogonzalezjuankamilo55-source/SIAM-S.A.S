@@ -1,30 +1,37 @@
-<div class="card shadow-sm">
+<div class="card" data-aos="fade-up">
     <div class="card-header bg-transparent">
-        <h5 class="mb-0"><i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i>Sedes y Horarios</h5>
-        <small class="text-secondary">Los horarios y la disponibilidad se administran desde el módulo de Sedes. Aquí se muestra el resumen actual.</small>
+        <h6 class="mb-0"><i class="fa-solid fa-location-dot text-primary me-2" aria-hidden="true"></i>Sedes y Horarios</h6>
+        <small class="text-muted">Los horarios y la disponibilidad se administran desde el módulo de Sedes. Aquí se muestra el resumen actual.</small>
     </div>
     <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="text-secondary small">{{ sedes|length }} sedes activas</div>
-            <a href="{{ url_for('sedes.index') }}" class="btn btn-outline-primary btn-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="text-secondary small">
+                <i class="fa-solid fa-building me-1" aria-hidden="true"></i>{{ sedes|length }} sedes activas
+            </div>
+            <a href="{{ url_for('sedes.index') }}" class="btn btn-soft btn-sm">
                 <i class="fa-solid fa-pen-to-square me-1" aria-hidden="true"></i> Administrar sedes
             </a>
         </div>
         <div class="row g-3">
             {% for sede in sedes %}
             <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
-                    <div class="fw-semibold"><i class="fa-solid fa-location-dot me-1 text-primary" aria-hidden="true"></i>{{ sede.nombre }}</div>
-                    <small class="text-secondary d-block mt-1">{{ sede.direccion }}</small>
-                    <small class="text-secondary d-block">{{ sede.telefono }}</small>
-                    <div class="mt-2">
-                        <span class="badge text-bg-light border"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>{{ sede.horario or "Sin horario definido" }}</span>
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="fw-semibold"><i class="fa-solid fa-location-dot me-1 text-primary" aria-hidden="true"></i>{{ sede.nombre }}</div>
+                        <small class="text-muted d-block mt-1"><i class="fa-solid fa-map-pin me-1" aria-hidden="true"></i>{{ sede.direccion }}</small>
+                        <small class="text-muted d-block"><i class="fa-solid fa-phone me-1" aria-hidden="true"></i>{{ sede.telefono }}</small>
+                        <div class="mt-2">
+                            <span class="badge badge-soft-secondary"><i class="fa-regular fa-clock me-1" aria-hidden="true"></i>{{ sede.horario or "Sin horario definido" }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
             {% else %}
             <div class="col-12">
-                <div class="alert alert-light border mb-0">No hay sedes registradas.</div>
+                <div class="alert alert-info border mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <div>No hay sedes registradas.</div>
+                </div>
             </div>
             {% endfor %}
         </div>

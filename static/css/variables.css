@@ -1,0 +1,215 @@
+/* ============================================================
+   SIAM Design System — CSS Variables & Tokens
+   Paleta: Fondo oscuro grafito + Azul tech #2563EB
+   ============================================================ */
+
+:root {
+    /* Layout */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 68px;
+    --navbar-height: 56px;
+    --transition-speed: 0.3s;
+    --transition-fast: 0.18s;
+
+    /* Typography */
+    --siam-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    /* Border Radius */
+    --radius-sm: 0.45rem;
+    --radius: 0.6rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.15rem;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.05);
+    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.08);
+    --shadow-md: 0 4px 14px rgba(2, 6, 23, 0.12);
+    --shadow-lg: 0 8px 24px rgba(2, 6, 23, 0.18);
+    --shadow-xl: 0 12px 32px rgba(2, 6, 23, 0.28);
+    --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.25);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    --gradient-hero: linear-gradient(160deg, #0B1220 0%, #0F172A 60%, #16213E 100%);
+    --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--surface-secondary) 100%);
+
+    /* Chart palette */
+    --chart-1: #2563EB;
+    --chart-2: #0EA5E9;
+    --chart-3: #14B8A6;
+    --chart-4: #10B981;
+    --chart-5: #6366F1;
+    --chart-6: #F59E0B;
+    --chart-7: #EF4444;
+    --chart-8: #F97316;
+    --chart-9: #94A3B8;
+}
+
+/* ---------- Dark Theme ---------- */
+:root,
+[data-bs-theme="dark"] {
+    /* Background */
+    --bg: #0F172A;
+    --bg-secondary: #0B1220;
+
+    /* Surface */
+    --surface: #1E293B;
+    --surface-secondary: #273449;
+    --surface-hover: #334155;
+
+    /* Text */
+    --text: #E2E8F0;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+
+    /* Border */
+    --border: rgba(148, 163, 184, 0.16);
+    --border-strong: rgba(148, 163, 184, 0.25);
+
+    /* Primary (Azul tech) */
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-light: rgba(37, 99, 235, 0.16);
+    --primary-text: #93C5FD;
+    --primary-border: rgba(37, 99, 235, 0.45);
+
+    /* Semantic */
+    --success: #10B981;
+    --success-light: rgba(16, 185, 129, 0.15);
+    --success-text: #34D399;
+
+    --warning: #F59E0B;
+    --warning-light: rgba(245, 158, 11, 0.16);
+    --warning-text: #FBBF24;
+
+    --danger: #EF4444;
+    --danger-light: rgba(239, 68, 68, 0.15);
+    --danger-text: #F87171;
+
+    --info: #38BDF8;
+    --info-light: rgba(56, 189, 248, 0.15);
+    --info-text: #38BDF8;
+
+    /* Sidebar specific */
+    --sidebar-bg: linear-gradient(180deg, #0B1220 0%, #0F172A 55%, #111C33 100%);
+    --sidebar-text: #94A3B8;
+    --sidebar-text-hover: #E2E8F0;
+    --sidebar-border: rgba(148, 163, 184, 0.10);
+
+    /* Shadows */
+    --shadow: 0 12px 32px rgba(2, 6, 23, 0.4);
+    --shadow-card: 0 1px 3px rgba(2, 6, 23, 0.06);
+
+    /* Scrollbar */
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(148, 163, 184, 0.3);
+
+    /* Bootstrap overrides */
+    --bs-body-bg: #0F172A;
+    --bs-body-bg-rgb: 15, 23, 42;
+    --bs-body-color: #E2E8F0;
+    --bs-body-color-rgb: 226, 232, 240;
+    --bs-secondary-color: #94A3B8;
+    --bs-tertiary-color: #64748B;
+    --bs-border-color: rgba(148, 163, 184, 0.16);
+    --bs-border-color-translucent: rgba(148, 163, 184, 0.16);
+    --bs-primary: #2563EB;
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-primary-bg-subtle: rgba(37, 99, 235, 0.16);
+    --bs-primary-border-subtle: rgba(37, 99, 235, 0.4);
+    --bs-primary-text: #93C5FD;
+    --bs-link-color: #60A5FA;
+    --bs-link-hover-color: #93C5FD;
+    --bs-card-bg: #1E293B;
+    --bs-card-border-color: rgba(148, 163, 184, 0.14);
+    --bs-secondary-bg: #1E293B;
+    --bs-secondary-bg-rgb: 30, 41, 59;
+    --bs-tertiary-bg: #16213E;
+    --bs-emphasis-color: #F1F5F9;
+    --bs-focus-ring-color: rgba(37, 99, 235, 0.35);
+}
+
+/* ---------- Light Theme ---------- */
+[data-bs-theme="light"] {
+    /* Background */
+    --bg: #F8FAFC;
+    --bg-secondary: #EEF2F7;
+
+    /* Surface */
+    --surface: #FFFFFF;
+    --surface-secondary: #F1F5F9;
+    --surface-hover: #E2E8F0;
+
+    /* Text */
+    --text: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+
+    /* Border */
+    --border: rgba(15, 23, 42, 0.10);
+    --border-strong: rgba(15, 23, 42, 0.18);
+
+    /* Primary (Azul tech) */
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-light: rgba(37, 99, 235, 0.10);
+    --primary-text: #1D4ED8;
+    --primary-border: rgba(37, 99, 235, 0.35);
+
+    /* Semantic */
+    --success: #10B981;
+    --success-light: rgba(16, 185, 129, 0.10);
+    --success-text: #047857;
+
+    --warning: #F59E0B;
+    --warning-light: rgba(245, 158, 11, 0.12);
+    --warning-text: #B45309;
+
+    --danger: #EF4444;
+    --danger-light: rgba(239, 68, 68, 0.10);
+    --danger-text: #B91C1C;
+
+    --info: #38BDF8;
+    --info-light: rgba(56, 189, 248, 0.10);
+    --info-text: #0369A1;
+
+    /* Sidebar specific */
+    --sidebar-bg: linear-gradient(180deg, #0B1220 0%, #0F172A 55%, #111C33 100%);
+    --sidebar-text: #94A3B8;
+    --sidebar-text-hover: #E2E8F0;
+    --sidebar-border: rgba(148, 163, 184, 0.12);
+
+    /* Shadows */
+    --shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04);
+
+    /* Scrollbar */
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(15, 23, 42, 0.18);
+
+    /* Bootstrap overrides */
+    --bs-body-bg: #F8FAFC;
+    --bs-body-bg-rgb: 248, 250, 252;
+    --bs-body-color: #0F172A;
+    --bs-body-color-rgb: 15, 23, 42;
+    --bs-secondary-color: #64748B;
+    --bs-tertiary-color: #94A3B8;
+    --bs-border-color: rgba(15, 23, 42, 0.10);
+    --bs-border-color-translucent: rgba(15, 23, 42, 0.10);
+    --bs-primary: #2563EB;
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-primary-bg-subtle: rgba(37, 99, 235, 0.10);
+    --bs-primary-border-subtle: rgba(37, 99, 235, 0.35);
+    --bs-primary-text: #1D4ED8;
+    --bs-link-color: #2563EB;
+    --bs-link-hover-color: #1D4ED8;
+    --bs-card-bg: #FFFFFF;
+    --bs-card-border-color: rgba(15, 23, 42, 0.08);
+    --bs-secondary-bg: #F1F5F9;
+    --bs-secondary-bg-rgb: 241, 245, 249;
+    --bs-tertiary-bg: #EEF2F7;
+    --bs-emphasis-color: #0F172A;
+    --bs-focus-ring-color: rgba(37, 99, 235, 0.25);
+}

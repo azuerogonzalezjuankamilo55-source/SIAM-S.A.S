@@ -36,10 +36,10 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" data-aos="fade-up">
+<div class="page-header mb-3" data-aos="fade-up">
     <div>
-        <h4 class="mb-1"><i class="fa-solid fa-location-dot me-2 text-primary"></i>Sedes y Asistencia</h4>
-        <p class="text-secondary mb-0">Encuentra la sede más cercana o solicita asistencia</p>
+        <h4><i class="fa-solid fa-location-dot text-primary" aria-hidden="true"></i>Sedes y Asistencia</h4>
+        <small class="text-muted">Encuentra la sede más cercana o solicita asistencia</small>
     </div>
     <div class="map-toolbar">
         <input type="text" id="buscarSede" class="form-control form-control-sm" style="min-width:200px;" placeholder="Buscar sede..." aria-label="Buscar sede">
@@ -50,10 +50,13 @@
 </div>
 
 <div class="alert alert-warning border-0 shadow-sm" id="asistenciaPanel" data-aos="fade-up" role="status">
-    <div class="d-flex align-items-center gap-2">
-        <i class="fa-solid fa-truck-medical fs-4"></i>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-3 flex-shrink-0"
+              style="width:40px;height:40px;background:rgba(var(--bs-warning-rgb),.15);color:var(--bs-warning);" aria-hidden="true">
+            <i class="fa-solid fa-truck-medical fs-5"></i>
+        </span>
         <div class="flex-grow-1">
-            <strong>🚨 ¿Estás varado?</strong>
+            <strong><i class="fa-solid fa-truck-ramp-box me-1" aria-hidden="true"></i>¿Estás varado?</strong>
             <div class="small text-secondary">Comparte tu ubicación y SIAM coordinará la asistencia más cercana.</div>
         </div>
         {% if current_user.is_authenticated %}
@@ -349,8 +352,8 @@
         }
         var enCamino = a.estado === 'en_camino';
         estadoBox.innerHTML =
-            '<div class="estado-paso"><i class="icono fa-solid fa-location-dot text-primary"></i><div><strong>📍 Ubicación recibida</strong><br><span class="text-secondary">Coordenadas guardadas.</span></div></div>' +
-            '<div class="estado-paso mt-2 ' + (enCamino ? '' : 'asistencia-pulse') + '"><i class="icono fa-solid fa-truck-fast text-warning"></i><div><strong>' + (enCamino ? '🚗 La asistencia está en camino.' : '🚗 SIAM está buscando asistencia cercana...') + '</strong><br><span class="text-secondary">Solicitud #' + a.id + ' · ' + estadoHtml(a.estado) + '</span></div></div>' +
+            '<div class="estado-paso"><i class="icono fa-solid fa-location-dot text-primary"></i><div><strong>Ubicación recibida</strong><br><span class="text-secondary">Coordenadas guardadas.</span></div></div>' +
+            '<div class="estado-paso mt-2 ' + (enCamino ? '' : 'asistencia-pulse') + '"><i class="icono fa-solid fa-truck-fast text-warning"></i><div><strong>' + (enCamino ? 'La asistencia está en camino.' : 'SIAM está buscando asistencia cercana...') + '</strong><br><span class="text-secondary">Solicitud #' + a.id + ' · ' + estadoHtml(a.estado) + '</span></div></div>' +
             '<div class="mt-2"><button class="btn btn-outline-danger btn-sm" onclick="cancelarAsistencia(' + a.id + ')"><i class="fa-solid fa-xmark me-1"></i>Cancelar solicitud</button></div>';
         iniciarPolling();
     }

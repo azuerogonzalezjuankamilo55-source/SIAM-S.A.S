@@ -15,6 +15,7 @@ from forms import CitaForm
 from services.notification_service import NotificationService
 from services.sede_service import SedeService
 from services.vehiculo_service import VehiculoService
+from services.ubicacion_service import UbicacionService
 from decorators import staff_blueprint_guard
 
 logger = logging.getLogger("siam.routes.citas")
@@ -141,25 +142,6 @@ def editar(id: int) -> Any:
     return render_template("citas/form.html", form=form, cita=cita, clientes=clientes, vehiculos=vehiculos, mecanicos=mecanicos, sedes=sedes, servicios=servicios)
 
 
-@citas_bp.route("/eliminar/<int:id>", methods=["POST"])
-@login_required
-def eliminar(id: int) -> Any:
-    try:
-        cita = db.get_or_404(Cita, id)
-        db.session.delete(cita)
-        safe_commit("No se pudo eliminar.")
-        logger.info("Cita eliminada: #%s", id)
-        if request.is_json:
-            return json_success(message="Eliminada correctamente.")
-        flash("Cita eliminada", "success")
-    except Exception as e:
-        db.session.rollback()
-        if request.is_json:
-            return json_error(message=str(e))
-        flash(str(e), "danger")
-    return redirect(url_for("citas.listar"))
-
-
 @citas_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
 def cambiar_estado(id: int, estado: str) -> Any:
@@ -169,6 +151,12 @@ def cambiar_estado(id: int, estado: str) -> Any:
         cita = db.get_or_404(Cita, id)
         if estado in ESTADOS_CITA:
             cita.estado = estado
+            if estado in ("entregada", "cancelado"):
+                # Cita finalizada: detener el intercambio de ubicación en vivo.
+                try:
+                    UbicacionService.detener(cita.cliente_id, cita.id)
+                except Exception as e:
+                    logger.warning("No se pudo limpiar ubicaciones de cita %s: %s", id, e)
             safe_commit()
             if estado == "entregada":
                 try:

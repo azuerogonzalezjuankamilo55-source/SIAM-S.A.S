@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Mis Facturas{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Mis Facturas</h4>
-    <span class="text-muted">{{ facturas|length }} en total</span>
-</div>
-<div class="card">
-    <div class="card-body">
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+{{ page_header(titulo="Mis Facturas", icono="fa-file-invoice",
+               subtitulo=facturas|length ~ " en total") }}
+<div class="card" data-aos="fade-up">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-modern table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Número</th>
@@ -22,31 +22,29 @@
                 <tbody>
                     {% for f in facturas %}
                     <tr>
-                        <td>{{ f.numero }}</td>
+                        <td class="fw-semibold">{{ f.numero }}</td>
                         <td>{{ f.created_at.strftime('%d/%m/%Y') if f.created_at }}</td>
                         <td class="fw-bold">${{ "%.2f"|format(f.total) }}</td>
                         <td>${{ "%.2f"|format(f.monto_pagado) }}</td>
                         <td>
-                            <span class="badge bg-{{ {
-                                'pendiente': 'warning',
-                                'parcial': 'info',
-                                'pagado': 'success',
-                                'anulado': 'danger'
-                            }[f.estado_actualizado] }}">
+                            <span class="badge badge-soft-{{ bsoft.get(f.estado_color, f.estado_color) }}">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
                                 {{ f.estado_actualizado|replace("_", " ")|title }}
                             </span>
                         </td>
                         <td>
-                            <a href="{{ url_for('portal.factura_detalle', factura_id=f.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fa-solid fa-eye"></i> Ver
-                            </a>
-                            <a href="{{ url_for('portal.factura_pdf', factura_id=f.id) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="fa-solid fa-download"></i> PDF
-                            </a>
+                            <div class="table-actions">
+                                <a href="{{ url_for('portal.factura_detalle', factura_id=f.id) }}" class="btn btn-sm btn-soft">
+                                    <i class="fa-solid fa-eye me-1" aria-hidden="true"></i> Ver
+                                </a>
+                                <a href="{{ url_for('portal.factura_pdf', factura_id=f.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa-solid fa-download me-1" aria-hidden="true"></i> PDF
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">No tienes facturas</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-4">No tienes facturas</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,0 +1,401 @@
+/* ============================================================
+   SIAM Cards — Stat cards, module cards, generic cards
+   ============================================================ */
+
+/* ---------- Generic Card ---------- */
+
+.card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    padding: 0.85rem 1.15rem;
+}
+
+.card-header h6 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-footer {
+    background-color: transparent;
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.15rem;
+}
+
+/* No hover on data tables */
+.card:has(.table) {
+    overflow: visible;
+}
+
+/* ---------- Stat Card ---------- */
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    opacity: 0.05;
+    pointer-events: none;
+    transition: transform 0.4s ease;
+}
+
+.stat-card:hover::before {
+    transform: scale(1.5);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover .stat-card-icon {
+    transform: scale(1.08);
+}
+
+.stat-card-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    margin-bottom: 0.15rem;
+}
+
+.stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 0.1rem;
+}
+
+.stat-card-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.stat-card-sub i {
+    font-size: 0.72rem;
+}
+
+/* Stat card color variants */
+.stat-card-primary { --stat-color: var(--primary); --stat-bg: var(--primary-light); }
+.stat-card-success { --stat-color: var(--success); --stat-bg: var(--success-light); }
+.stat-card-warning { --stat-color: var(--warning); --stat-bg: var(--warning-light); }
+.stat-card-danger { --stat-color: var(--danger); --stat-bg: var(--danger-light); }
+.stat-card-info { --stat-color: var(--info); --stat-bg: var(--info-light); }
+
+.stat-card-primary .stat-card-icon { background: var(--stat-bg); color: var(--stat-color); }
+.stat-card-success .stat-card-icon { background: var(--stat-bg); color: var(--stat-color); }
+.stat-card-warning .stat-card-icon { background: var(--stat-bg); color: var(--stat-color); }
+.stat-card-danger .stat-card-icon { background: var(--stat-bg); color: var(--stat-color); }
+.stat-card-info .stat-card-icon { background: var(--stat-bg); color: var(--stat-color); }
+
+.stat-card-primary::before { background: var(--primary); }
+.stat-card-success::before { background: var(--success); }
+.stat-card-warning::before { background: var(--warning); }
+.stat-card-danger::before { background: var(--danger); }
+.stat-card-info::before { background: var(--info); }
+
+/* ---------- Module Card ---------- */
+
+.mod-card {
+    overflow: hidden;
+    position: relative;
+    border: 0;
+    border-radius: var(--radius-lg);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mod-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.18), transparent 55%);
+    pointer-events: none;
+}
+
+.mod-card::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+.mod-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgba(2, 6, 23, 0.45);
+}
+
+.mod-card:hover::after {
+    transform: scale(1.4);
+}
+
+.mod-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.mod-card .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+/* Module card gradient presets */
+.mod-card-primary { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
+.mod-card-sky { background: linear-gradient(135deg, #0EA5E9, #0369A1); }
+.mod-card-indigo { background: linear-gradient(135deg, #6366F1, #4338CA); }
+.mod-card-teal { background: linear-gradient(135deg, #14B8A6, #0F766E); }
+.mod-card-orange { background: linear-gradient(135deg, #F97316, #EA580C); }
+.mod-card-violet { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+.mod-card-emerald { background: linear-gradient(135deg, #10B981, #047857); }
+.mod-card-rose { background: linear-gradient(135deg, #F43F5E, #BE123C); }
+.mod-card-amber { background: linear-gradient(135deg, #F59E0B, #D97706); }
+
+/* ---------- Mini Stat (for secondary rows) ---------- */
+
+.mini-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+}
+
+.mini-stat-content h6 {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.mini-stat-content h3 {
+    margin: 0.15rem 0 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.mini-stat-content small {
+    color: var(--text-muted);
+}
+
+.mini-stat-icon {
+    font-size: 1.8rem;
+    opacity: 0.6;
+}
+
+/* ---------- Module Card (subtle icon tile variant) ---------- */
+
+.card-module {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid var(--border);
+}
+
+.card-module:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-border);
+    box-shadow: var(--shadow-md);
+}
+
+.module-card-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.card-module:hover .module-card-icon {
+    transform: scale(1.08);
+}
+
+.module-card-title {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.module-card-count {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.module-card-sub {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ---------- Activity Card ---------- */
+
+.activity-list {
+    padding: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-fast) ease;
+}
+
+.activity-item:last-child {
+    border-bottom: 0;
+}
+
+.activity-item:hover {
+    background: var(--surface-hover);
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.activity-icon.activity-cita { background: var(--info-light); color: var(--info); }
+.activity-icon.activity-orden { background: var(--warning-light); color: var(--warning); }
+.activity-icon.activity-factura { background: var(--success-light); color: var(--success); }
+.activity-icon.activity-pago { background: rgba(139, 92, 246, 0.15); color: #8B5CF6; }
+.activity-icon.activity-cliente { background: var(--primary-light); color: var(--primary); }
+.activity-icon.activity-asistencia { background: var(--danger-light); color: var(--danger); }
+
+.activity-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-text .text-body {
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.activity-text small {
+    font-size: 0.75rem;
+}
+
+/* ---------- Empty State ---------- */
+
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: var(--primary);
+    background: var(--primary-light);
+    border-radius: var(--radius-xl);
+}
+
+.empty-state h6 {
+    margin-bottom: 0.35rem;
+    color: var(--text);
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+/* ---------- Quick Action Card (portal) ---------- */
+
+.portal-quick {
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
+    padding: 1.25rem;
+    display: block;
+}
+
+.portal-quick:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-border);
+    box-shadow: var(--shadow-md);
+    color: var(--text);
+}

@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Error interno{% endblock %}
 {% block content %}
-<div class="text-center py-5" data-aos="fade-up">
-    <i class="fa-solid fa-triangle-exclamation display-1 text-danger" aria-hidden="true"></i>
-    <h1 class="display-4 mt-3">500</h1>
-    <p class="lead text-muted">Ocurrió un error inesperado. El equipo ha sido notificado.</p>
-    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">
-        <i class="fa-solid fa-arrows-rotate"></i> Intentar de nuevo
-    </a>
+<div class="d-flex align-items-center justify-content-center py-5" data-aos="fade-up">
+    <div class="card border-0 text-center w-100" style="max-width:520px;">
+        <div class="card-body p-4 p-md-5">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-4"
+                  style="width:96px;height:96px;background:rgba(var(--bs-danger-rgb),.12);color:var(--bs-danger);" aria-hidden="true">
+                <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
+            </span>
+            <h1 class="display-4 fw-bold mb-1">500</h1>
+            <p class="fs-5 fw-semibold mb-1">Error interno</p>
+            <p class="text-muted mb-4">Ocurrió un error inesperado. El equipo ha sido notificado.</p>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary px-4">
+                <i class="fa-solid fa-arrows-rotate me-1" aria-hidden="true"></i> Intentar de nuevo
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

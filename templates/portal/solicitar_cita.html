@@ -1,10 +1,17 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Solicitar Cita{% endblock %}
 {% block content %}
+{{ page_header(titulo="Solicitar Cita", icono="fa-calendar-plus",
+               subtitulo="Agenda una nueva cita en el taller",
+               boton="Volver", boton_icon="fa-arrow-left",
+               boton_url=url_for('portal.citas')) }}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card">
-            <div class="card-header"><strong>Solicitar nueva cita</strong></div>
+        <div class="card" data-aos="fade-up">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fa-solid fa-calendar-plus me-2 text-primary" aria-hidden="true"></i>Solicitar nueva cita</h6>
+            </div>
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {{ form.hidden_tag() }}
@@ -73,7 +80,7 @@
                     {{ form.submit(class="btn btn-primary w-100") }}
                 </form>
                 <div class="alert alert-info mt-3 mb-0 small">
-                    <i class="fa-solid fa-circle-info"></i> Tu cita quedará en estado <strong>pendiente</strong> hasta que el taller la confirme.
+                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i> Tu cita quedará en estado <strong>pendiente</strong> hasta que el taller la confirme.
                 </div>
             </div>
         </div>

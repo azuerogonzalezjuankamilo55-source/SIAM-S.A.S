@@ -91,17 +91,15 @@ class TestNotificationService:
 
 
 class TestNotificacionesApi:
-    def test_api_no_leidas_requiere_login(self, client):
-        resp = client.get("/notificaciones/api/no-leidas")
+    def test_api_requiere_login(self, client):
+        resp = client.get("/notificaciones/api/listar")
         assert resp.status_code == 302
 
-    def test_api_no_leidas_cliente(self, client, db):
+    def test_unread_count_cliente(self, client, db):
         cli, u = _crear_cliente_con_usuario(db)
         NotificationService.notify(u.id, "cita", "Hola")
         _login(client, "cliente_notif@test.com")
-        resp = client.get("/notificaciones/api/no-leidas")
-        assert resp.status_code == 200
-        assert resp.get_json()["count"] == 1
+        assert NotificationService.unread_count(u.id) == 1
 
     def test_api_listar_y_leer(self, client, db):
         cli, u = _crear_cliente_con_usuario(db)
@@ -114,7 +112,7 @@ class TestNotificacionesApi:
         nid = items[0]["id"]
         resp = client.post(f"/notificaciones/api/leer/{nid}")
         assert resp.get_json()["success"] is True
-        assert client.get("/notificaciones/api/no-leidas").get_json()["count"] == 0
+        assert NotificationService.unread_count(u.id) == 0
 
     def test_api_leer_ajena_devuelve_404(self, client, db):
         cli1, u1 = _crear_cliente_con_usuario(db, "Cliente Uno")
@@ -133,7 +131,7 @@ class TestNotificacionesApi:
         _login(client, "cliente_notif@test.com")
         resp = client.post("/notificaciones/api/leer-todas")
         assert resp.get_json()["marcadas"] == 2
-        assert client.get("/notificaciones/api/no-leidas").get_json()["count"] == 0
+        assert NotificationService.unread_count(u.id) == 0
 
 
 class TestNotificacionModelo:

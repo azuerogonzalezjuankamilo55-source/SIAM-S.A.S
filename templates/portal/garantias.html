@@ -1,14 +1,20 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Mis Garantías{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Mis Garantías</h4>
-    <span class="text-muted">{{ garantias|length }} en total</span>
-</div>
-<div class="card">
-    <div class="card-body">
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+{% set garantia_color = {
+    'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'secondary'
+} %}
+{% set garantia_label = {
+    'activa': 'Activa', 'caducada': 'Caducada', 'reclamada': 'Reclamada', 'anulada': 'Anulada'
+} %}
+{{ page_header(titulo="Mis Garantías", icono="fa-shield-halved",
+               subtitulo=garantias|length ~ " en total") }}
+<div class="card" data-aos="fade-up">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-modern table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -21,24 +27,21 @@
                 <tbody>
                     {% for g in garantias %}
                     <tr>
-                        <td>{{ g.codigo }}</td>
+                        <td class="fw-semibold">{{ g.codigo }}</td>
                         <td>{{ g.vehiculo.marca }} {{ g.vehiculo.modelo }} ({{ g.vehiculo.placa }})</td>
                         <td>{{ g.descripcion | truncate(40) }}</td>
                         <td>{{ g.fecha_fin.strftime('%d/%m/%Y') }}</td>
                         <td>
-                            <span class="badge bg-{{
-                                {'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'dark'}[g.estado]
-                            }}">
-                                {% if g.estado == 'activa' %}
-                                Activa ({{ g.dias_restantes }} días)
-                                {% else %}
-                                {{ {'activa': 'Activa', 'caducada': 'Caducada', 'reclamada': 'Reclamada', 'anulada': 'Anulada'}[g.estado] }}
-                                {% endif %}
+                            {% set gc = garantia_color.get(g.estado, 'secondary') %}
+                            {% set gl = garantia_label.get(g.estado, g.estado) %}
+                            <span class="badge badge-soft-{{ bsoft.get(gc, gc) }}">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
+                                {% if g.estado == 'activa' %}{{ gl }} ({{ g.dias_restantes }} días){% else %}{{ gl }}{% endif %}
                             </span>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="5" class="text-center text-muted">No tienes garantías registradas</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-4">No tienes garantías registradas</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

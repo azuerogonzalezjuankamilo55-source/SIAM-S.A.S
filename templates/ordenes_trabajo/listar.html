@@ -1,87 +1,88 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/status_badge.html" import status_badge %}
+{% from "components/empty_state.html" import empty_state %}
+
 {% block title %}Órdenes de Trabajo{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Órdenes de Trabajo</h4>
-    <a href="{{ url_for('ordenes_trabajo.crear') }}" class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Nueva OT
-    </a>
-</div>
-<div class="card">
-    <div class="card-body">
-        <div class="search-input mb-3" style="max-width: 340px;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaOrdenes">
+{{ page_header(titulo="Órdenes de Trabajo", icono="fa-list-check",
+               subtitulo="Seguimiento de las órdenes de reparación",
+               boton="Nueva OT", boton_icon="fa-plus",
+               boton_url=url_for('ordenes_trabajo.crear')) }}
+
+{% set ot_mapa = {
+    'recibido': {'bg': 'secondary', 'texto': 'Recibido'},
+    'diagnostico': {'bg': 'info', 'texto': 'Diagnóstico'},
+    'esperando_repuestos': {'bg': 'warning', 'texto': 'Esperando Repuestos'},
+    'en_reparacion': {'bg': 'primary', 'texto': 'En Reparación'},
+    'pruebas': {'bg': 'info', 'texto': 'En Pruebas'},
+    'listo_entrega': {'bg': 'success', 'texto': 'Listo para Entrega'},
+    'entregado': {'bg': 'dark', 'texto': 'Entregado'},
+    'default': {'bg': 'secondary', 'texto': '—'}
+} %}
+
+<div class="card" data-aos="fade-up">
+    <div class="table-toolbar p-2">
+        <div class="table-toolbar-left w-100">
+            <div class="search-input w-100" style="max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" class="form-control form-control-sm" placeholder="Buscar por número, cliente, placa o mecánico..." aria-label="Buscar órdenes" data-table-search="#tablaOrdenes">
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover" id="tablaOrdenes">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>N° Orden</th>
-                        <th>Cliente</th>
-                        <th>Vehículo</th>
-                        <th>Mecánico</th>
-                        <th>Ingreso</th>
-                        <th>Entrega Est.</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ot in ordenes %}
-                    <tr>
-                        <td>{{ ot.id }}</td>
-                        <td class="fw-bold">{{ ot.numero }}</td>
-                        <td>{{ ot.cliente.nombre }}</td>
-                        <td>{{ ot.vehiculo.placa }} - {{ ot.vehiculo.marca }} {{ ot.vehiculo.modelo }}</td>
-                        <td>{{ ot.mecanico.nombre if ot.mecanico else "Sin asignar" }}</td>
-                        <td>{{ ot.fecha_ingreso }}</td>
-                        <td>{{ ot.fecha_estimada_entrega if ot.fecha_estimada_entrega else "-" }}</td>
-                        <td>
-                            <span class="badge bg-{{ {
-                                'recibido': 'secondary',
-                                'diagnostico': 'info',
-                                'esperando_repuestos': 'warning',
-                                'en_reparacion': 'primary',
-                                'pruebas': 'info',
-                                'listo_entrega': 'success',
-                                'entregado': 'dark',
-                            }[ot.estado] }}">
-                                {{ ot.estado_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('ordenes_trabajo.ver', id=ot.id) }}" class="btn btn-outline-info">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                                {% if ot.estado != "entregado" %}
-                                <a href="{{ url_for('ordenes_trabajo.editar', id=ot.id) }}" class="btn btn-outline-warning">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-outline-danger" data-confirm="¿Eliminar orden {{ ot.numero }}?">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="9">
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></div>
-                                <h6 class="mb-1">Aún no hay órdenes de trabajo</h6>
-                                <p class="text-muted small mb-3">Crea una orden para dar seguimiento a las reparaciones.</p>
-                                <a href="{{ url_for('ordenes_trabajo.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear OT</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-modern table-hover mb-0" id="tablaOrdenes">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>N.º Orden</th>
+                    <th>Cliente</th>
+                    <th>Vehículo</th>
+                    <th>Mecánico</th>
+                    <th>Ingreso</th>
+                    <th>Entrega Est.</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in ordenes %}
+                <tr>
+                    <td data-label="ID">{{ ot.id }}</td>
+                    <td data-label="Orden"><span class="fw-bold">{{ ot.numero }}</span></td>
+                    <td data-label="Cliente">{{ ot.cliente.nombre }}</td>
+                    <td data-label="Vehículo">{{ ot.vehiculo.placa }} · {{ ot.vehiculo.marca }} {{ ot.vehiculo.modelo }}</td>
+                    <td data-label="Mecánico">{{ ot.mecanico.nombre if ot.mecanico else "Sin asignar" }}</td>
+                    <td data-label="Ingreso">{{ ot.fecha_ingreso }}</td>
+                    <td data-label="Entrega est.">{{ ot.fecha_estimada_entrega if ot.fecha_estimada_entrega else "—" }}</td>
+                    <td data-label="Estado">{{ status_badge(ot.estado, ot_mapa) }}</td>
+                    <td data-label="Acciones">
+                        <div class="table-actions justify-content-end">
+                            <a href="{{ url_for('ordenes_trabajo.ver', id=ot.id) }}" class="btn btn-sm btn-outline-info" title="Ver">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </a>
+                            {% if ot.estado != "entregado" %}
+                            <a href="{{ url_for('ordenes_trabajo.editar', id=ot.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                            </a>
+                            <a href="{{ url_for('ordenes_trabajo.eliminar', id=ot.id) }}" class="btn btn-sm btn-outline-danger" title="Eliminar" data-confirm="¿Eliminar orden {{ ot.numero }}?">
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="p-0">
+                        {{ empty_state(icon="fa-list-check", titulo="Aún no hay órdenes de trabajo",
+                                       mensaje="Crea una orden para dar seguimiento a las reparaciones.",
+                                       accion="Crear OT", url=url_for('ordenes_trabajo.crear'), accion_icon="fa-plus") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

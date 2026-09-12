@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var IVA_RATE = (typeof IVA_RATE !== 'undefined') ? IVA_RATE : 0.19;
+    var IVA_RATE = (typeof window.IVA_RATE !== 'undefined' && window.IVA_RATE !== null) ? window.IVA_RATE : 0.19;
 
     function calcular() {
         var rows = document.querySelectorAll('.detalle-row');

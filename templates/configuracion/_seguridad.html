@@ -1,36 +1,45 @@
-<div class="card shadow-sm">
+<div class="card" data-aos="fade-up">
     <div class="card-header bg-transparent">
-        <h5 class="mb-0"><i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i>Seguridad</h5>
-        <small class="text-secondary">Configuración de seguridad activa y acceso del personal. Los secretos del sistema (claves, tokens, credenciales) nunca se muestran aquí.</small>
+        <h6 class="mb-0"><i class="fa-solid fa-shield-halved text-primary me-2" aria-hidden="true"></i>Seguridad</h6>
+        <small class="text-muted">Configuración de seguridad activa y acceso del personal. Los secretos del sistema (claves, tokens, credenciales) nunca se muestran aquí.</small>
     </div>
     <div class="card-body">
         <h6 class="text-secondary text-uppercase small fw-semibold">Protección de sesión</h6>
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-hourglass-half me-1" aria-hidden="true"></i> Tiempo de sesión</div>
-                    <div class="fs-5 fw-semibold">{{ datos_seguridad.sesion_timeout }} h</div>
+                <div class="metric-box h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Tiempo de sesión</div>
+                        <div class="metric-box-value">{{ datos_seguridad.sesion_timeout }} h</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-shield me-1" aria-hidden="true"></i> Protección CSRF</div>
-                    <div class="fs-5 fw-semibold">{{ "Activa" if datos_seguridad.csrf_habilitado else "Desactivada" }}</div>
-                    <small class="text-muted">Tiempo límite: {{ datos_seguridad.csrf_limite }}</small>
+                <div class="metric-box {{ 'metric-success' if datos_seguridad.csrf_habilitado else 'metric-danger' }} h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-shield" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Protección CSRF</div>
+                        <div class="metric-box-value">{{ "Activa" if datos_seguridad.csrf_habilitado else "Desactivada" }}</div>
+                        <small>Tiempo límite: {{ datos_seguridad.csrf_limite }}</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="border rounded p-3 h-100">
-                    <div class="text-secondary small"><i class="fa-solid fa-gauge-high me-1" aria-hidden="true"></i> Límite de peticiones</div>
-                    <div class="fs-5 fw-semibold">{{ "Activo" if datos_seguridad.ratelimit_habilitado else "Desactivado" }}</div>
-                    <small class="text-muted">{{ datos_seguridad.ratelimit_limite }}</small>
+                <div class="metric-box {{ 'metric-success' if datos_seguridad.ratelimit_habilitado else 'metric-danger' }} h-100">
+                    <div class="metric-box-icon"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i></div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="metric-box-label">Límite de peticiones</div>
+                        <div class="metric-box-value">{{ "Activo" if datos_seguridad.ratelimit_habilitado else "Desactivado" }}</div>
+                        <small>{{ datos_seguridad.ratelimit_limite }}</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <h6 class="text-secondary text-uppercase small fw-semibold">Usuarios del sistema</h6>
         <div class="table-responsive">
-            <table class="table table-sm table-hover align-middle">
+            <table class="table table-modern table-sm table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Usuario</th>
@@ -45,9 +54,9 @@
                     <tr>
                         <td>{{ u.nombre }}</td>
                         <td class="text-secondary">{{ u.correo }}</td>
-                        <td><span class="badge text-bg-{{ 'primary' if u.rol == 'admin' else ('info' if u.rol != 'cliente' else 'secondary') }}">{{ u.rol }}</span></td>
+                        <td><span class="badge badge-soft-{{ 'primary' if u.rol == 'admin' else ('info' if u.rol != 'cliente' else 'secondary') }}">{{ u.rol }}</span></td>
                         <td>
-                            {% if u.activo %}<span class="badge text-bg-success">Activo</span>{% else %}<span class="badge text-bg-danger">Inactivo</span>{% endif %}
+                            {% if u.activo %}<span class="badge badge-soft-success">Activo</span>{% else %}<span class="badge badge-soft-danger">Inactivo</span>{% endif %}
                         </td>
                         <td class="text-secondary">
                             {% if u.last_access_at %}{{ u.last_access_at.strftime('%d/%m/%Y %H:%M') }}{% else %}—{% endif %}
@@ -59,9 +68,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="alert alert-light border small mb-0">
-            <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
-            Los roles válidos son: <code>admin</code>, <code>recepcion</code>, <code>mecanico</code> y <code>cliente</code>. Solo administradores pueden modificar la configuración del sistema.
+        <div class="alert alert-info border small mb-0 d-flex align-items-start gap-2">
+            <i class="fa-solid fa-circle-info mt-1" aria-hidden="true"></i>
+            <div>Los roles válidos son: <code>admin</code>, <code>recepcion</code>, <code>mecanico</code> y <code>cliente</code>. Solo administradores pueden modificar la configuración del sistema.</div>
         </div>
     </div>
 </div>

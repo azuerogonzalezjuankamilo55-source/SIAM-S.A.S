@@ -1,0 +1,316 @@
+/* ============================================================
+   SIAM Forms — Modern inputs, selects, sections
+   ============================================================ */
+
+/* ---------- Form Controls ---------- */
+
+.form-control,
+.form-select {
+    border-radius: var(--radius-md);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.85rem;
+    font-size: 0.92rem;
+    color: var(--text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: var(--surface-secondary);
+    opacity: 0.65;
+}
+
+/* ---------- Form Labels ---------- */
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.form-label i {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.form-label .required {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+/* ---------- Input Group ---------- */
+
+.input-group {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.input-group-text {
+    background-color: var(--surface-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    font-size: 0.88rem;
+    padding: 0.55rem 0.75rem;
+}
+
+.input-group > .form-control:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group > .form-control:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group > .btn {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ---------- Form Sections ---------- */
+
+.form-section {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.form-section-header i {
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.form-section-header h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* ---------- Validation ---------- */
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--danger);
+}
+
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px var(--danger-light);
+}
+
+.invalid-feedback {
+    font-size: 0.78rem;
+    color: var(--danger);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.invalid-feedback::before {
+    content: "\f06a";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.72rem;
+}
+
+/* ---------- Checkbox & Radio ---------- */
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ---------- Switch ---------- */
+
+.form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.35em;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* ---------- Textarea ---------- */
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ---------- Form Actions ---------- */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ---------- File Upload ---------- */
+
+.form-control[type="file"] {
+    padding: 0.45rem 0.65rem;
+}
+
+/* ---------- Readonly / Disabled ---------- */
+
+.form-control[readonly] {
+    background-color: var(--surface-secondary);
+}
+
+/* ---------- Auth Form ---------- */
+
+.auth-split {
+    min-height: 100vh;
+    display: flex;
+}
+
+.auth-image {
+    flex: 1 1 55%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    overflow: hidden;
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-image::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 18, 32, 0.4) 0%, rgba(11, 18, 32, 0.7) 60%, rgba(11, 18, 32, 0.95) 100%);
+    z-index: 1;
+}
+
+.auth-image::after {
+    content: "";
+    position: absolute;
+    width: 480px;
+    height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.4), transparent 70%);
+    top: -120px;
+    right: -120px;
+    z-index: 1;
+}
+
+.auth-image > * {
+    position: relative;
+    z-index: 2;
+}
+
+.auth-form {
+    flex: 1 1 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: var(--bg);
+}
+
+.auth-form .card {
+    width: 100%;
+    max-width: 440px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border);
+}
+
+@media (max-width: 991px) {
+    .auth-image {
+        display: none;
+    }
+}
+
+/* ---------- Auth Card ---------- */
+
+.auth-card {
+    padding: 2.25rem 2rem;
+}
+
+.auth-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-lg);
+    color: #fff;
+    background: var(--siam-gradient, linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%));
+    font-size: 1.6rem;
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+    margin-bottom: 1rem;
+}
+
+.auth-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    color: #fff;
+    background: var(--siam-gradient, linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%));
+    font-size: 1.1rem;
+}
+
+.auth-password-toggle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-color: var(--border);
+    background-color: var(--surface-secondary);
+}
+
+.auth-password-toggle:hover {
+    color: var(--text);
+    border-color: var(--primary-border);
+    background-color: var(--surface-secondary);
+}

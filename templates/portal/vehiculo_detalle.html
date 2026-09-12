@@ -1,22 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Vehículo {{ vehiculo.placa }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">
-        <i class="fa-solid {{ 'fa-motorcycle text-info' if vehiculo.tipo == 'moto' else 'fa-car text-primary' }} me-2"></i>
-        {{ vehiculo.marca }} {{ vehiculo.modelo }} <span class="badge bg-primary">{{ vehiculo.placa }}</span>
-    </h4>
-    <div class="d-flex gap-1">
-        <a href="{{ url_for('portal.editar_vehiculo', vehiculo_id=vehiculo.id) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fa-solid fa-pen me-1"></i> Editar
+<div class="page-header">
+    <div>
+        <h4>
+            <i class="fa-solid {{ 'fa-motorcycle text-info' if vehiculo.tipo == 'moto' else 'fa-car text-primary' }}" aria-hidden="true"></i>
+            {{ vehiculo.marca }} {{ vehiculo.modelo }} <span class="badge badge-soft-primary ms-2">{{ vehiculo.placa }}</span>
+        </h4>
+        <small class="text-muted">Detalle del vehículo y solicitudes asociadas</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('portal.editar_vehiculo', vehiculo_id=vehiculo.id) }}" class="btn btn-soft">
+            <i class="fa-solid fa-pen me-1" aria-hidden="true"></i> Editar
         </a>
-        <a href="{{ url_for('portal.vehiculos') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+        <a href="{{ url_for('portal.vehiculos') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Volver
         </a>
     </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="fa-solid fa-car-side me-2 text-primary" aria-hidden="true"></i>Ficha técnica</h6>
+    </div>
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-3 col-6"><strong>Tipo:</strong> {{ vehiculo.tipo_label }}</div>
@@ -34,16 +40,16 @@
     </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <strong>Solicitudes y citas de este vehículo</strong>
+        <h6 class="mb-0"><i class="fa-solid fa-calendar-week me-2 text-warning" aria-hidden="true"></i>Solicitudes y citas de este vehículo</h6>
         <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-sm btn-primary">
-            <i class="fa-solid fa-calendar-plus me-1"></i> Solicitar servicio
+            <i class="fa-solid fa-calendar-plus me-1" aria-hidden="true"></i> Solicitar servicio
         </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-modern table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -70,12 +76,14 @@
                                 'cancelado': ('Cancelada', 'danger')
                             } %}
                             {% set etiqueta = mapa.get(c.estado, (c.estado, 'secondary')) %}
-                            <span class="badge bg-{{ etiqueta[1] }}">{{ etiqueta[0] }}</span>
+                            <span class="badge badge-soft-{{ etiqueta[1] }}">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ etiqueta[0] }}
+                            </span>
                         </td>
                         <td>{{ c.descripcion or "—" }}</td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="4" class="text-center text-muted">Sin solicitudes registradas para este vehículo.</td></tr>
+                    <tr><td colspan="4" class="text-center text-muted py-4">Sin solicitudes registradas para este vehículo.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -88,7 +96,7 @@
       class="text-end">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit" class="btn btn-outline-danger btn-sm">
-        <i class="fa-solid fa-trash me-1"></i> Eliminar vehículo
+        <i class="fa-solid fa-trash me-1" aria-hidden="true"></i> Eliminar vehículo
     </button>
 </form>
 {% endblock %}

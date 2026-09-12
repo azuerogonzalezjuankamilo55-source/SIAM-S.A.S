@@ -25,7 +25,8 @@ inventario_bp.before_request(staff_blueprint_guard)
 @login_required
 def listar() -> Any:
     categoria_id = request.args.get("categoria_id", type=int)
-    stock_bajo = request.args.get("stock_bajo", type=bool)
+    _sb = (request.args.get("stock_bajo") or "").strip().lower()
+    stock_bajo = _sb in ("1", "true", "yes", "on", "si")
     incluir_bajas = request.args.get("incluir_bajas") == "1"
     q = Inventario.query
 

@@ -23,6 +23,7 @@ def login() -> Any:
     area = request.args.get("area") or ""
     if area not in ("admin", "cliente"):
         area = ""
+    permite_registrar_admin = Usuario.query.filter_by(rol="admin").count() == 0
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()
         password = form.password.data
@@ -30,8 +31,8 @@ def login() -> Any:
         if usuario and usuario.check_password(password):
             if not usuario.activo:
                 flash("Tu cuenta está desactivada. Contacta al administrador.", "danger")
-                return render_template("auth/login.html", form=form, area=area)
-            login_user(usuario)
+                return render_template("auth/login.html", form=form, area=area, permite_registrar_admin=permite_registrar_admin)
+            login_user(usuario, remember=request.form.get("remember") == "on")
             logger.info("Login exitoso: %s", correo)
             try:
                 from datetime import datetime
@@ -44,7 +45,7 @@ def login() -> Any:
             return redirect(url_for("dashboard.index"))
         logger.warning("Intento de login fallido: %s", correo)
         flash("Credenciales inválidas", "danger")
-    return render_template("auth/login.html", form=form, area=area)
+    return render_template("auth/login.html", form=form, area=area, permite_registrar_admin=permite_registrar_admin)
 
 
 @auth_bp.route("/logout")
@@ -135,11 +136,19 @@ def register() -> Any:
 
 @auth_bp.route("/registrar-admin", methods=["GET", "POST"])
 def registrar_admin() -> Any:
-    """Registro de cuenta administrativa del taller."""
+    """Registro de cuenta administrativa del taller.
+
+    Sólo es el bootstrap de la primera instalación: si ya existe una cuenta
+    con rol admin, la ruta redirige al login (evita que cualquier visitante
+    anónimo cree cuentas de administrador en producción).
+    """
     if current_user.is_authenticated:
         if current_user.es_cliente:
             return redirect(url_for("portal.index"))
         return redirect(url_for("dashboard.index"))
+    if Usuario.query.filter_by(rol="admin").count() > 0:
+        flash("Ya existe una cuenta de administrador. Inicia sesión para gestionar SIAM.", "warning")
+        return redirect(url_for("auth.login"))
     form = AdminRegisterForm()
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()

@@ -8,6 +8,7 @@ from models.factura import Factura, FacturaDetalle
 from models.servicio import Servicio
 from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
+from services.numeracion import siguiente_numero
 from exceptions import BusinessRuleException, NotFoundException
 
 logger = logging.getLogger("siam.factura_service")
@@ -71,9 +72,7 @@ class FacturaService:
         descuento = input_data.descuento.quantize(Decimal("0.01"))
         total = (subtotal + iva - descuento).quantize(Decimal("0.01"))
 
-        ultima = Factura.query.order_by(Factura.id.desc()).first()
-        prefijo = config.prefijo_factura
-        numero = f"{prefijo}-{(ultima.id + 1) if ultima else 1:06d}"
+        numero = siguiente_numero(Factura, config.prefijo_factura or "FAC")
 
         factura = Factura(
             cita_id=input_data.cita_id,

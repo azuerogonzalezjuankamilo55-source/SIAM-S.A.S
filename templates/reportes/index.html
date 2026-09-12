@@ -1,17 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Reportes{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Reportes</h4>
+<div class="page-header mb-3" data-aos="fade-up">
     <div>
+        <h4><i class="fa-solid fa-chart-line text-primary" aria-hidden="true"></i>Reportes</h4>
+        <small class="text-muted">Indicadores del período seleccionado</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url_for('reportes.excel', desde=desde.isoformat(), hasta=hasta.isoformat()) }}"
-           class="btn btn-success"><i class="fa-solid fa-file-excel"></i> Excel</a>
+           class="btn btn-success">
+            <i class="fa-solid fa-file-excel me-1" aria-hidden="true"></i> Excel
+        </a>
         <a href="{{ url_for('reportes.pdf', desde=desde.isoformat(), hasta=hasta.isoformat()) }}"
-           class="btn btn-danger"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+           class="btn btn-danger">
+            <i class="fa-solid fa-file-pdf me-1" aria-hidden="true"></i> PDF
+        </a>
     </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body py-2">
         <form method="GET" class="row g-2 align-items-end">
             <div class="col-auto">
@@ -23,37 +30,57 @@
                 <input type="date" name="hasta" class="form-control form-control-sm" value="{{ hasta.isoformat() }}">
             </div>
             <div class="col-auto">
-                <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i> Aplicar</button>
+                <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter me-1" aria-hidden="true"></i> Aplicar</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="row g-2 mb-3">
-    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
-        <div class="text-muted small">Ingresos del período</div>
-        <h5 class="mb-0 text-success">${{ "{:,.0f}".format(data.ingresos) }}</h5>
-    </div></div></div>
-    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
-        <div class="text-muted small">Facturas emitidas</div>
-        <h5 class="mb-0">{{ data.facturas_periodo }}</h5>
-    </div></div></div>
-    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
-        <div class="text-muted small">Ticket promedio</div>
-        <h5 class="mb-0">${{ "{:,.0f}".format(data.ticket_promedio) }}</h5>
-    </div></div></div>
-    <div class="col-md-3"><div class="card text-center"><div class="card-body py-3">
-        <div class="text-muted small">Cartera pendiente</div>
-        <h5 class="mb-0 text-danger">${{ "{:,.0f}".format(data.cartera) }}</h5>
-    </div></div></div>
+<div class="row g-2 mb-3" data-aos="fade-up">
+    <div class="col-md-3">
+        <div class="metric-box metric-success h-100">
+            <div class="metric-box-icon"><i class="fa-solid fa-sack-dollar" aria-hidden="true"></i></div>
+            <div class="flex-grow-1 min-w-0">
+                <div class="metric-box-label">Ingresos del período</div>
+                <div class="metric-box-value">${{ "{:,.0f}".format(data.ingresos) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-box metric-info h-100">
+            <div class="metric-box-icon"><i class="fa-solid fa-file-invoice" aria-hidden="true"></i></div>
+            <div class="flex-grow-1 min-w-0">
+                <div class="metric-box-label">Facturas emitidas</div>
+                <div class="metric-box-value">{{ data.facturas_periodo }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-box h-100">
+            <div class="metric-box-icon"><i class="fa-solid fa-receipt" aria-hidden="true"></i></div>
+            <div class="flex-grow-1 min-w-0">
+                <div class="metric-box-label">Ticket promedio</div>
+                <div class="metric-box-value">${{ "{:,.0f}".format(data.ticket_promedio) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-box metric-danger h-100">
+            <div class="metric-box-icon"><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i></div>
+            <div class="flex-grow-1 min-w-0">
+                <div class="metric-box-label">Cartera pendiente</div>
+                <div class="metric-box-value">${{ "{:,.0f}".format(data.cartera) }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row g-3">
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Ingresos por día</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-calendar-day text-primary me-1" aria-hidden="true"></i>Ingresos por día</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Fecha</th><th class="text-end">Ingresos</th></tr></thead>
                     <tbody>
                         {% for dia, total in data.ingresos_por_dia %}
@@ -67,10 +94,10 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Ingresos por método de pago</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-credit-card text-primary me-1" aria-hidden="true"></i>Ingresos por método de pago</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Método</th><th class="text-end">Ingresos</th></tr></thead>
                     <tbody>
                         {% for metodo, total in data.ingresos_por_metodo %}
@@ -84,10 +111,10 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Facturación por cliente</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-users text-primary me-1" aria-hidden="true"></i>Facturación por cliente</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Cliente</th><th class="text-end">Facturas</th><th class="text-end">Total</th></tr></thead>
                     <tbody>
                         {% for f in data.facturacion_clientes %}
@@ -102,10 +129,10 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Servicios más vendidos</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-wrench text-primary me-1" aria-hidden="true"></i>Servicios más vendidos</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Servicio</th><th class="text-end">Cantidad</th><th class="text-end">Total</th></tr></thead>
                     <tbody>
                         {% for s in data.servicios_vendidos %}
@@ -120,10 +147,10 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Órdenes por estado</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-list-check text-primary me-1" aria-hidden="true"></i>Órdenes por estado</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Estado</th><th class="text-end">Total</th></tr></thead>
                     <tbody>
                         {% for estado, total in data.ots_por_estado %}
@@ -137,10 +164,10 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header"><strong>Productividad por mecánico</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-user-gear text-primary me-1" aria-hidden="true"></i>Productividad por mecánico</strong></div>
             <div class="card-body p-0">
-                <table class="table table-sm mb-0">
+                <table class="table table-modern table-sm table-hover mb-0">
                     <thead><tr><th>Mecánico</th><th class="text-end">OTs entregadas</th></tr></thead>
                     <tbody>
                         {% for m in data.productividad_mecanicos %}
@@ -154,22 +181,50 @@
         </div>
     </div>
     <div class="col-12">
-        <div class="card">
-            <div class="card-header"><strong>Movimientos de inventario</strong></div>
+        <div class="card" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-boxes-stacked text-primary me-1" aria-hidden="true"></i>Movimientos de inventario</strong></div>
             <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-3"><div class="text-muted small">Entradas</div>
-                        <h5 class="text-success">{{ data.movimientos_inventario.entradas }}</h5></div>
-                    <div class="col-3"><div class="text-muted small">Salidas</div>
-                        <h5 class="text-danger">{{ data.movimientos_inventario.salidas }}</h5></div>
-                    <div class="col-3"><div class="text-muted small">Ajustes</div>
-                        <h5>{{ data.movimientos_inventario.ajustes }}</h5></div>
-                    <div class="col-3"><div class="text-muted small">Bajas</div>
-                        <h5 class="text-secondary">{{ data.movimientos_inventario.bajas }}</h5></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-3">
+                        <div class="metric-box metric-success h-100">
+                            <div class="metric-box-icon"><i class="fa-solid fa-arrow-down-to-line" aria-hidden="true"></i></div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="metric-box-label">Entradas</div>
+                                <div class="metric-box-value">{{ data.movimientos_inventario.entradas }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="metric-box metric-danger h-100">
+                            <div class="metric-box-icon"><i class="fa-solid fa-arrow-up-from-line" aria-hidden="true"></i></div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="metric-box-label">Salidas</div>
+                                <div class="metric-box-value">{{ data.movimientos_inventario.salidas }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="metric-box h-100">
+                            <div class="metric-box-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="metric-box-label">Ajustes</div>
+                                <div class="metric-box-value">{{ data.movimientos_inventario.ajustes }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="metric-box h-100">
+                            <div class="metric-box-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="metric-box-label">Bajas</div>
+                                <div class="metric-box-value">{{ data.movimientos_inventario.bajas }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <hr>
                 <p class="mb-0"><strong>Valor actual del inventario:</strong>
-                    <span class="text-success">${{ "{:,.0f}".format(data.valor_inventario) }}</span></p>
+                    <span class="text-success fw-semibold">${{ "{:,.0f}".format(data.valor_inventario) }}</span></p>
             </div>
         </div>
     </div>

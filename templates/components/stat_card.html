@@ -1,0 +1,41 @@
+{# ============================================================
+   SIAM Component: Stat Card
+   Uso:
+   {% from "components/stat_card.html" import stat_card %}
+   {{ stat_card(icon="fa-sack-dollar", color="primary", titulo="Ingresos",
+                valor="$123.000", sub="+15% este mes", variacion="up",
+                href="/facturas/") }}
+   ============================================================ #}
+{% macro stat_card(icon, color="primary", titulo="", valor="0", sub="",
+                   variacion=None, href=None) -%}
+<div class="card stat-card stat-card-{{ color }} h-100">
+    <div class="card-body d-flex align-items-center gap-3">
+        <span class="stat-card-icon" aria-hidden="true">
+            <i class="fa-solid {{ icon }}"></i>
+        </span>
+        <div class="flex-grow-1 min-w-0">
+            <div class="stat-card-label">{{ titulo }}</div>
+            {% if href %}
+            <a href="{{ href }}" class="text-decoration-none text-reset">
+                <div class="stat-card-value">{{ valor }}</div>
+            </a>
+            {% else %}
+            <div class="stat-card-value">{{ valor }}</div>
+            {% endif %}
+            <div class="stat-card-sub">
+                {% if variacion == 'up' %}
+                <i class="fa-solid fa-arrow-trend-up text-success" aria-hidden="true"></i>
+                <span class="text-success fw-semibold">
+                {% elif variacion == 'down' %}
+                <i class="fa-solid fa-arrow-trend-down text-danger" aria-hidden="true"></i>
+                <span class="text-danger fw-semibold">
+                {% else %}
+                <span>
+                {% endif %}
+                {{ sub }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}

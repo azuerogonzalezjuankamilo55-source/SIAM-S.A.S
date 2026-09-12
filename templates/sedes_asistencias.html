@@ -13,14 +13,16 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" data-aos="fade-up">
+<div class="page-header mb-3" data-aos="fade-up">
     <div>
-        <h4 class="mb-1"><i class="fa-solid fa-truck-medical me-2 text-danger"></i>Asistencias de Emergencia</h4>
-        <p class="text-secondary mb-0">Solicitudes de asistencia enviadas desde el mapa de sedes</p>
+        <h4><i class="fa-solid fa-truck-medical text-danger" aria-hidden="true"></i>Asistencias de Emergencia</h4>
+        <small class="text-muted">Solicitudes de asistencia enviadas desde el mapa de sedes</small>
     </div>
-    <a href="{{ url_for('sedes.index') }}" class="btn btn-sm btn-soft">
-        <i class="fa-solid fa-map-location-dot me-1"></i>Ver mapa de sedes
-    </a>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('sedes.index') }}" class="btn btn-soft btn-sm">
+            <i class="fa-solid fa-map-location-dot me-1"></i>Ver mapa de sedes
+        </a>
+    </div>
 </div>
 
 <div class="mb-3 d-flex gap-2 flex-wrap" data-aos="fade-up">
@@ -34,7 +36,7 @@
 <div class="row g-3 mb-3" data-aos="fade-up">
     <div class="col-lg-5">
         <div class="card h-100">
-            <div class="card-header"><strong><i class="fa-solid fa-map me-2 text-primary"></i>Ubicaciones</strong></div>
+            <div class="card-header"><strong><i class="fa-solid fa-map text-primary me-2" aria-hidden="true"></i>Ubicaciones</strong></div>
             <div class="card-body p-2"><div id="map"></div></div>
             <div class="card-footer small text-secondary d-flex gap-3 flex-wrap">
                 <span><i class="fa-solid fa-location-dot me-1 text-success"></i>Sedes</span>
@@ -45,12 +47,12 @@
     <div class="col-lg-7">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong><i class="fa-solid fa-list-check me-2 text-info"></i>Solicitudes</strong>
-                <span class="badge text-bg-secondary">{{ asistencias|length }}</span>
+                <strong><i class="fa-solid fa-list-check text-info me-2" aria-hidden="true"></i>Solicitudes</strong>
+                <span class="badge badge-soft-secondary">{{ asistencias|length }}</span>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-modern table-hover align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -71,7 +73,7 @@
                                 </td>
                                 <td class="text-truncate" style="max-width:180px;">{{ a.descripcion or "Sin descripción" }}</td>
                                 <td>
-                                    <span class="badge text-bg-{{ 'warning' if a.estado == 'pendiente' else 'info' if a.estado == 'en_camino' else 'success' if a.estado == 'atendido' else 'secondary' }}" data-rol="estado">
+                                    <span class="badge badge-soft-{{ 'warning' if a.estado == 'pendiente' else 'info' if a.estado == 'en_camino' else 'success' if a.estado == 'atendido' else 'secondary' }}" data-rol="estado">
                                         {{ a.estado|replace("_", " ")|title }}
                                     </span>
                                 </td>

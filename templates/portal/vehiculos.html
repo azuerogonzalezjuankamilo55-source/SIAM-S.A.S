@@ -1,22 +1,23 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/empty_state.html" import empty_state %}
 {% block title %}Mis Vehículos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Mis Vehículos</h4>
-    <a href="{{ url_for('portal.crear_vehiculo') }}" class="btn btn-primary btn-sm">
-        <i class="fa-solid fa-plus me-1"></i> Agregar vehículo
-    </a>
-</div>
+{{ page_header(titulo="Mis Vehículos", icono="fa-car",
+               subtitulo="Gestiona los vehículos registrados",
+               boton="Agregar vehículo", boton_icon="fa-plus",
+               boton_url=url_for('portal.crear_vehiculo')) }}
+
 <div class="row g-3">
     {% for v in vehiculos %}
-    <div class="col-md-6 col-lg-4">
+    <div class="col-md-6 col-lg-4" data-aos="fade-up">
         <div class="card h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <h5 class="mb-1">
-                        <i class="fa-solid {{ 'fa-motorcycle text-info' if v.tipo == 'moto' else 'fa-car text-primary' }} me-2"></i>{{ v.marca }} {{ v.modelo }}
+                        <i class="fa-solid {{ 'fa-motorcycle text-info' if v.tipo == 'moto' else 'fa-car text-primary' }} me-2" aria-hidden="true"></i>{{ v.marca }} {{ v.modelo }}
                     </h5>
-                    <span class="badge bg-primary">{{ v.placa }}</span>
+                    <span class="badge badge-soft-primary">{{ v.placa }}</span>
                 </div>
                 <span class="badge badge-soft-secondary mb-2">{{ v.tipo_label }}</span>
                 <small class="text-muted d-block">
@@ -28,18 +29,18 @@
                 {% if v.vin %}<small class="text-muted d-block">VIN: {{ v.vin }}</small>{% endif %}
             </div>
             <div class="card-footer d-flex justify-content-between align-items-center gap-1 flex-wrap">
-                <a href="{{ url_for('portal.vehiculo_detalle', vehiculo_id=v.id) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Historial
+                <a href="{{ url_for('portal.vehiculo_detalle', vehiculo_id=v.id) }}" class="btn btn-sm btn-soft">
+                    <i class="fa-solid fa-clock-rotate-left me-1" aria-hidden="true"></i> Historial
                 </a>
                 <div class="d-flex gap-1">
                     <a href="{{ url_for('portal.editar_vehiculo', vehiculo_id=v.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar vehículo" aria-label="Editar vehículo">
-                        <i class="fa-solid fa-pen"></i><span class="d-none d-sm-inline ms-1">Editar</span>
+                        <i class="fa-solid fa-pen" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">Editar</span>
                     </a>
                     <form method="POST" action="{{ url_for('portal.eliminar_vehiculo', vehiculo_id=v.id) }}"
                           data-confirm-form="¿Eliminar el vehículo {{ v.placa }}? Esta acción no se puede deshacer.">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar vehículo" aria-label="Eliminar vehículo">
-                            <i class="fa-solid fa-trash"></i>
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
                         </button>
                     </form>
                 </div>
@@ -48,11 +49,10 @@
     </div>
     {% else %}
     <div class="col-12">
-        <div class="alert alert-info text-center">
-            No tienes vehículos registrados.
-            <a href="{{ url_for('portal.crear_vehiculo') }}">Registra tu primer vehículo</a>
-            para solicitar servicios.
-        </div>
+        {{ empty_state(icon="fa-car", titulo="No tienes vehículos registrados",
+                       mensaje="Registra tu primer vehículo para solicitar servicios.",
+                       accion="Registrar vehículo", url=url_for('portal.crear_vehiculo'),
+                       accion_icon="fa-plus") }}
     </div>
     {% endfor %}
 </div>

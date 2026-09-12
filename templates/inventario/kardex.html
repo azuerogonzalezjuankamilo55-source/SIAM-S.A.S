@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Kardex de Inventario{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-book-open me-2 text-primary"></i>Kardex de Inventario</h4>
-    <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-book-open" aria-hidden="true"></i> Kardex de Inventario</h4>
+        <small class="text-muted">Historial de movimientos de inventario</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
+        </a>
+    </div>
 </div>
 
 <div class="card mb-3">
@@ -38,8 +43,8 @@
                 <input type="date" name="fecha_hasta" class="form-control form-control-sm" value="{{ filtro_hasta }}">
             </div>
             <div class="col-auto">
-                <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i> Filtrar</button>
-                <a href="{{ url_for('inventario.kardex') }}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+                <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filtrar</button>
+                <a href="{{ url_for('inventario.kardex') }}" class="btn btn-sm btn-soft">Limpiar</a>
             </div>
         </form>
     </div>
@@ -48,13 +53,13 @@
 <div class="card">
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">Movimientos</h6>
+            <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Movimientos</h6>
             <span class="badge bg-secondary">{{ movimientos|length }} registro(s)</span>
         </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-modern table-sm table-hover mb-0">
                 <thead>
                     <tr>
                         <th>#</th>

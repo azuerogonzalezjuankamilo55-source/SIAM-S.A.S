@@ -48,7 +48,7 @@ class TestDashboardApiResumen:
         resp = client.get("/dashboard/")
         html = resp.data.decode("utf-8")
         assert "refrescarDashboard" in html
-        assert 'data-refresh="ingresos_mes"' in html
+        assert 'data-refresh="total_clientes"' in html
         assert 'data-refresh="citas_hoy"' in html
         assert "Actualizar" in html
 

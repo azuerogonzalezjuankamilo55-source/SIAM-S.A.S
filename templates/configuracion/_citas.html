@@ -1,7 +1,7 @@
-<div class="card shadow-sm">
+<div class="card" data-aos="fade-up">
     <div class="card-header bg-transparent">
-        <h5 class="mb-0"><i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i>Citas y Horarios</h5>
-        <small class="text-secondary">Reglas generales para la programación de citas. Los horarios de cada sede se administran en <a href="{{ url_for('sedes.index') }}">Sedes</a>.</small>
+        <h6 class="mb-0"><i class="fa-solid fa-calendar-check text-primary me-2" aria-hidden="true"></i>Citas y Horarios</h6>
+        <small class="text-muted">Reglas generales para la programación de citas. Los horarios de cada sede se administran en <a href="{{ url_for('sedes.index') }}">Sedes</a>.</small>
     </div>
     <div class="card-body">
         <form method="POST" action="{{ url_for('configuracion.seccion', seccion='citas') }}" data-ajax="true">
@@ -24,9 +24,9 @@
                         {% for e in form.citas_cancelar_limite_horas.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                     </div>
                 </div>
-                <div class="alert alert-light border small mt-3 mb-0">
-                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
-                    Los valores en 0 desactivan la regla correspondiente (sin anticipación mínima ni límite de cancelación).
+                <div class="alert alert-info border small mt-3 mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <div>Los valores en 0 desactivan la regla correspondiente (sin anticipación mínima ni límite de cancelación).</div>
                 </div>
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary" {{ 'disabled' if not puede_editar }}>

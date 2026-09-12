@@ -5,6 +5,7 @@ from database.db import db
 from models.garantia import Garantia, ESTADOS_GARANTIA
 from models.orden_trabajo import OrdenTrabajo
 from models.servicio import Servicio
+from services.numeracion import siguiente_numero
 
 logger = logging.getLogger("siam.garantias")
 
@@ -14,17 +15,6 @@ class GarantiaError(Exception):
 
 
 class GarantiaService:
-    @staticmethod
-    def _generar_codigo() -> str:
-        ultima = Garantia.query.order_by(Garantia.id.desc()).first()
-        if ultima and ultima.codigo and ultima.codigo.startswith("GAR-"):
-            try:
-                last_num = int(ultima.codigo[4:])
-                return f"GAR-{last_num + 1:06d}"
-            except (ValueError, IndexError):
-                pass
-        return "GAR-000001"
-
     @staticmethod
     def _fecha_fin(meses: int, base: date | None = None) -> date:
         return (base or date.today()) + timedelta(days=30 * max(1, meses))
@@ -41,7 +31,7 @@ class GarantiaService:
         if meses_validez <= 0:
             raise GarantiaError("Los meses de validez deben ser positivos")
         garantia = Garantia(
-            codigo=GarantiaService._generar_codigo(),
+            codigo=siguiente_numero(Garantia, "GAR", campo="codigo"),
             cliente_id=cliente_id,
             vehiculo_id=vehiculo_id,
             orden_trabajo_id=orden_trabajo_id or None,

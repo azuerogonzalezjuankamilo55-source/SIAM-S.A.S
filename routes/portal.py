@@ -340,6 +340,11 @@ def cancelar_cita(cita_id: int) -> Any:
             return redirect(url_for("portal.citas"))
     cita.estado = "cancelado"
     try:
+        try:
+            from services.ubicacion_service import UbicacionService
+            UbicacionService.detener(cliente.id, cita.id)
+        except Exception as e:
+            logger.warning("No se pudo limpiar ubicaciones de cita %s: %s", cita_id, e)
         safe_commit()
         NotificationService.notify_staff(
             "cita",

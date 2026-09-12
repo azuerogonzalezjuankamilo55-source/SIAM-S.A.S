@@ -3,9 +3,11 @@
 {% block content %}
 <div class="d-flex flex-column flex-lg-row gap-4">
     <aside class="flex-lg-shrink-0" style="flex:0 0 260px;">
-        <div class="card shadow-sm">
+        <div class="card" data-aos="fade-right">
             <div class="card-body p-2">
-                <div class="px-2 pt-1 pb-2 small text-uppercase text-secondary fw-semibold">Configuración</div>
+                <div class="px-2 pt-1 pb-2 small text-uppercase text-secondary fw-semibold">
+                    <i class="fa-solid fa-gear me-1" aria-hidden="true"></i> Configuración
+                </div>
                 <nav class="nav nav-pills flex-column gap-1" aria-label="Secciones de configuración">
                     <a class="nav-link {{ 'active' if seccion == 'empresa' }}" href="{{ url_for('configuracion.seccion', seccion='empresa') }}">
                         <i class="fa-solid fa-building me-2" aria-hidden="true"></i> Empresa
@@ -40,10 +42,17 @@
     </aside>
 
     <div class="flex-grow-1" style="min-width:0;">
+        <div class="page-header" data-aos="fade-up">
+            <div>
+                <h4><i class="fa-solid fa-sliders" aria-hidden="true"></i> Configuración del Sistema</h4>
+                <small class="text-muted">Personaliza el funcionamiento y la apariencia de tu taller</small>
+            </div>
+        </div>
+
         {% if not puede_editar and seccion in ['empresa', 'apariencia', 'citas', 'notificaciones', 'ia'] %}
-        <div class="alert alert-info" role="alert">
-            <i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>
-            Estás viendo esta sección en modo solo lectura. Solo un administrador puede modificar la configuración.
+        <div class="alert alert-info d-flex align-items-center gap-2" role="alert" data-aos="fade-up">
+            <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+            <div>Estás viendo esta sección en modo solo lectura. Solo un administrador puede modificar la configuración.</div>
         </div>
         {% endif %}
 
@@ -97,11 +106,10 @@
             data.resultados.forEach(function (item) {
                 var icono = item.estado === 'verde' ? 'fa-circle-check text-success'
                     : (item.estado === 'amarillo' ? 'fa-triangle-exclamation text-warning' : 'fa-circle-xmark text-danger');
-                var emoji = item.estado === 'verde' ? '🟢' : (item.estado === 'amarillo' ? '🟡' : '🔴');
                 html += '<li class="list-group-item d-flex align-items-start gap-3">'
-                    + '<span class="fs-6">' + emoji + '</span>'
+                    + '<span class="fs-5"><i class="fa-solid ' + icono + '" aria-hidden="true"></i></span>'
                     + '<div><div class="fw-semibold">' + item.nombre + '</div>'
-                    + '<small class="text-secondary"><i class="fa-solid ' + icono + ' me-1"></i>' + item.detalle + '</small></div></li>';
+                    + '<small class="text-secondary">' + item.detalle + '</small></div></li>';
             });
             cont.classList.remove('d-none');
             cont.innerHTML = html || '<li class="list-group-item">Sin resultados</li>';

@@ -1,0 +1,17 @@
+{# ============================================================
+   SIAM Component: Form Section (divide formularios largos)
+   Uso:
+   {% from "components/form_section.html" import form_section %}
+   {% call form_section(icono="fa-user", titulo="Datos del cliente") %}
+     ...campos...
+   {% endcall %}
+   ============================================================ #}
+{% macro form_section(icono="fa-list-check", titulo="Información") -%}
+<div class="form-section">
+    <div class="form-section-header">
+        <i class="fa-solid {{ icono }}" aria-hidden="true"></i>
+        <h6>{{ titulo }}</h6>
+    </div>
+    {{ caller() }}
+</div>
+{%- endmacro %}

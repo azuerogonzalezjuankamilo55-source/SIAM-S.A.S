@@ -1,218 +1,234 @@
-<nav class="sidebar d-flex flex-column p-3" aria-label="Navegación principal">
-    <a href="{{ url_for('dashboard.index') }}" class="sidebar-brand text-decoration-none mb-3 d-flex align-items-center px-2">
+<nav class="sidebar d-flex flex-column" aria-label="Navegación principal" id="appSidebar">
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Colapsar menú lateral" title="Colapsar menú">
+        <i class="fa-solid fa-angles-left" id="sidebarCollapseIcon" aria-hidden="true"></i>
+    </button>
+
+    <a href="{% if current_user.es_cliente %}{{ url_for('portal.index') }}{% else %}{{ url_for('dashboard.index') }}{% endif %}" class="sidebar-brand">
         {% if taller_config and taller_config.logo_path %}
-        <img src="{{ taller_config.logo_path }}" alt="{{ taller_config.nombre_taller or 'SIAM' }}" class="sidebar-logo-img me-2">
+        <img src="{{ taller_config.logo_path }}" alt="{{ taller_config.nombre_taller or 'SIAM' }}" class="sidebar-logo-img" style="max-height:34px;">
         {% else %}
-        <span class="d-flex align-items-center justify-content-center rounded-3 me-2" style="width:36px;height:36px;background:var(--siam-gradient);color:#fff;">
-            <i class="fa-solid fa-gears" aria-hidden="true"></i>
+        <span class="sidebar-brand-icon" aria-hidden="true">
+            <i class="fa-solid fa-gears"></i>
         </span>
-        <span class="fw-bold fs-5">SIAM</span>
+        <span class="sidebar-brand-text">SIAM</span>
         {% endif %}
     </a>
 
+    <div class="sidebar-nav">
     {% if current_user.es_cliente %}
-    <span class="badge text-bg-info align-self-start mb-2 px-3 py-1">Área del Cliente</span>
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-            <a href="{{ url_for('portal.index') }}" class="nav-link">
-                <i class="fa-solid fa-gauge-high me-2" aria-hidden="true"></i> Mi Portal
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('sedes.index') }}" class="nav-link">
-                <i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i> Sedes y Asistencia
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.vehiculos') }}" class="nav-link">
-                <i class="fa-solid fa-truck me-2" aria-hidden="true"></i> Mis Vehículos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.citas') }}" class="nav-link">
-                <i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i> Mis Citas
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.solicitar_cita') }}" class="nav-link">
-                <i class="fa-solid fa-calendar-plus me-2" aria-hidden="true"></i> Solicitar Cita
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('assistant.index') }}" class="nav-link">
-                <i class="fa-solid fa-robot me-2" aria-hidden="true"></i> Chat SIAM
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.ordenes') }}" class="nav-link">
-                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Mis Reparaciones
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.cotizaciones') }}" class="nav-link">
-                <i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i> Mis Cotizaciones
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.garantias') }}" class="nav-link">
-                <i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i> Mis Garantías
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.facturas') }}" class="nav-link">
-                <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Mis Facturas
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.pagos') }}" class="nav-link">
-                <i class="fa-solid fa-credit-card me-2" aria-hidden="true"></i> Mis Pagos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.historial') }}" class="nav-link">
-                <i class="fa-solid fa-clock-rotate-left me-2" aria-hidden="true"></i> Historial
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.documentos') }}" class="nav-link">
-                <i class="fa-solid fa-folder-open me-2" aria-hidden="true"></i> Mis Documentos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.recordatorios') }}" class="nav-link">
-                <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Recordatorios
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('portal.perfil') }}" class="nav-link">
-                <i class="fa-solid fa-gear me-2" aria-hidden="true"></i> Mi Perfil
-            </a>
-        </li>
-    </ul>
+        <span class="sidebar-badge sidebar-badge-client"><i class="fa-solid fa-user me-1" aria-hidden="true"></i>Área del Cliente</span>
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="{{ url_for('portal.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mi Portal">
+                    <i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Mi Portal</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('sedes.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Sedes y Asistencia">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Sedes y Asistencia</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.vehiculos') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Vehículos">
+                    <i class="fa-solid fa-car" aria-hidden="true"></i><span>Mis Vehículos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.citas') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Citas">
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i><span>Mis Citas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.solicitar_cita') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Solicitar Cita">
+                    <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i><span>Solicitar Cita</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('assistant.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Chat SIAM">
+                    <i class="fa-solid fa-robot" aria-hidden="true"></i><span>Chat SIAM</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.ordenes') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Reparaciones">
+                    <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Mis Reparaciones</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.cotizaciones') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Cotizaciones">
+                    <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Mis Cotizaciones</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.garantias') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Garantías">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Mis Garantías</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.facturas') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Facturas">
+                    <i class="fa-solid fa-file-invoice" aria-hidden="true"></i><span>Mis Facturas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.pagos') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Pagos">
+                    <i class="fa-solid fa-credit-card" aria-hidden="true"></i><span>Mis Pagos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.historial') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Historial">
+                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>Historial</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.documentos') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mis Documentos">
+                    <i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Mis Documentos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.index', _anchor='seccionMiUbicacion') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mi Ubicación">
+                    <i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i><span>Mi Ubicación</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('sedes.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Contacto">
+                    <i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contacto</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.recordatorios') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Recordatorios">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i><span>Recordatorios</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('portal.perfil') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mi Perfil">
+                    <i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Mi Perfil</span>
+                </a>
+            </li>
+        </ul>
     {% else %}
-    <span class="badge text-bg-primary align-self-start mb-2 px-3 py-1">Área Empresarial</span>
-    <div class="px-3 pt-2 pb-1 small text-uppercase text-secondary fw-semibold">General</div>
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-            <a href="{{ url_for('dashboard.index') }}" class="nav-link">
-                <i class="fa-solid fa-gauge-high me-2" aria-hidden="true"></i> Dashboard
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('ia.index') }}" class="nav-link">
-                <i class="fa-solid fa-wand-magic-sparkles me-2" aria-hidden="true"></i> Diagnóstico IA
-            </a>
-        </li>
-        {% if current_user.es_admin %}
-        <li class="nav-item">
-            <a href="{{ url_for('recordatorios.index') }}" class="nav-link">
-                <i class="fa-solid fa-bell me-2" aria-hidden="true"></i> Recordatorios
-            </a>
-        </li>
-        {% endif %}
-        <li class="nav-item">
-            <a href="{{ url_for('sedes.index') }}" class="nav-link">
-                <i class="fa-solid fa-location-dot me-2" aria-hidden="true"></i> Sedes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('sedes.asistencias') }}" class="nav-link">
-                <i class="fa-solid fa-truck-medical me-2" aria-hidden="true"></i> Asistencias
-            </a>
-        </li>
-    </ul>
+        <span class="sidebar-badge sidebar-badge-staff"><i class="fa-solid fa-briefcase me-1" aria-hidden="true"></i>Área Empresarial</span>
+        <div class="sidebar-section">General</div>
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="{{ url_for('dashboard.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
+                    <i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('ia.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Diagnóstico IA">
+                    <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i><span>Diagnóstico IA</span>
+                </a>
+            </li>
+            {% if current_user.es_admin %}
+            <li class="nav-item">
+                <a href="{{ url_for('recordatorios.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Recordatorios">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i><span>Recordatorios</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{{ url_for('sedes.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Sedes">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Sedes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('sedes.asistencias') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Asistencias">
+                    <i class="fa-solid fa-truck-medical" aria-hidden="true"></i><span>Asistencias</span>
+                </a>
+            </li>
+        </ul>
 
-    <div class="px-3 pt-3 pb-1 small text-uppercase text-secondary fw-semibold">Gestión</div>
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-            <a href="{{ url_for('clientes.listar') }}" class="nav-link">
-                <i class="fa-solid fa-users me-2" aria-hidden="true"></i> Clientes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('vehiculos.listar') }}" class="nav-link">
-                <i class="fa-solid fa-truck me-2" aria-hidden="true"></i> Vehículos
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('servicios.listar') }}" class="nav-link">
-                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Servicios
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('mecanicos.listar') }}" class="nav-link">
-                <i class="fa-solid fa-user-gear me-2" aria-hidden="true"></i> Mecánicos
-            </a>
-        </li>
-    </ul>
+        <div class="sidebar-section">Gestión</div>
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="{{ url_for('clientes.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Clientes">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i><span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('vehiculos.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Vehículos">
+                    <i class="fa-solid fa-car" aria-hidden="true"></i><span>Vehículos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('servicios.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Servicios">
+                    <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Servicios</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('mecanicos.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mecánicos">
+                    <i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>Mecánicos</span>
+                </a>
+            </li>
+        </ul>
 
-    <div class="px-3 pt-3 pb-1 small text-uppercase text-secondary fw-semibold">Operación</div>
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-            <a href="{{ url_for('citas.listar') }}" class="nav-link">
-                <i class="fa-solid fa-calendar-check me-2" aria-hidden="true"></i> Citas
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('ordenes_trabajo.listar') }}" class="nav-link">
-                <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i> Órdenes de Trabajo
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('cotizaciones.listar') }}" class="nav-link">
-                <i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i> Cotizaciones
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('garantias.listar') }}" class="nav-link">
-                <i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i> Garantías
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('facturas.listar') }}" class="nav-link">
-                <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i> Facturas
-            </a>
-            <ul class="nav flex-column ms-3 mt-1 small">
-                <li class="nav-item">
-                    <a href="{{ url_for('configuracion.seccion', seccion='empresa') }}" class="nav-link py-0">
-                        <i class="fa-solid fa-gear me-1"></i> Configuración del Sistema
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('inventario.listar') }}" class="nav-link">
-                <i class="fa-solid fa-boxes-stacked me-2" aria-hidden="true"></i> Inventario
-            </a>
-            <ul class="nav flex-column ms-3 mt-1 small">
-                <li class="nav-item">
-                    <a href="{{ url_for('inventario.kardex') }}" class="nav-link py-0">
-                        <i class="fa-solid fa-book-open me-1"></i> Kardex
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('inventario.listar_categorias') }}" class="nav-link py-0">
-                        <i class="fa-solid fa-tags me-1"></i> Categorías
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('inventario.alertas') }}" class="nav-link py-0">
-                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Alertas
-                    </a>
-                </li>
-            </ul>
-        </li>
-        {% if current_user.es_admin %}
-        <li class="nav-item">
-            <a href="{{ url_for('reportes.index') }}" class="nav-link">
-                <i class="fa-solid fa-chart-line me-2" aria-hidden="true"></i> Reportes
-            </a>
-        </li>
-        {% endif %}
-    </ul>
+        <div class="sidebar-section">Operación</div>
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="{{ url_for('citas.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Citas">
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i><span>Citas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('ordenes_trabajo.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Órdenes de Trabajo">
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><span>Órdenes de Trabajo</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('cotizaciones.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Cotizaciones">
+                    <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Cotizaciones</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('garantias.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Garantías">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Garantías</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('facturas.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Facturas">
+                    <i class="fa-solid fa-file-invoice" aria-hidden="true"></i><span>Facturas</span>
+                </a>
+                <ul class="nav flex-column ms-3 mt-1 sidebar-subnav">
+                    <li class="nav-item">
+                        <a href="{{ url_for('configuracion.seccion', seccion='empresa') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Configuración del Sistema">
+                            <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Configuración del Sistema</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('inventario.listar') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Inventario">
+                    <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i><span>Inventario</span>
+                </a>
+                <ul class="nav flex-column ms-3 mt-1 sidebar-subnav">
+                    <li class="nav-item">
+                        <a href="{{ url_for('inventario.kardex') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Kardex">
+                            <i class="fa-solid fa-book-open" aria-hidden="true"></i><span>Kardex</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('inventario.listar_categorias') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Categorías">
+                            <i class="fa-solid fa-tags" aria-hidden="true"></i><span>Categorías</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('inventario.alertas') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Alertas">
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>Alertas</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            {% if current_user.es_admin %}
+            <li class="nav-item">
+                <a href="{{ url_for('reportes.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Reportes">
+                    <i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Reportes</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
     {% endif %}
+    </div>
 
-    <div class="mt-auto pt-3">
-        <span class="text-secondary small d-block text-center px-2">La gestión de cuenta está en la barra superior.</span>
+    <div class="sidebar-footer">
+        <span class="sidebar-footer-text"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>La gestión de cuenta está en la barra superior.</span>
     </div>
 </nav>

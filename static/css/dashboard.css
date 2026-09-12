@@ -1,0 +1,332 @@
+/* ============================================================
+   SIAM Dashboard — KPIs, charts, activity, panels
+   ============================================================ */
+
+/* ---------- Dashboard Grid ---------- */
+
+.dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.dashboard-modules {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.dashboard-secondary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.dashboard-charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.dashboard-panels {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* ---------- Chart Card ---------- */
+
+.chart-card .card-body {
+    padding: 1rem 1.15rem;
+}
+
+.chart-card canvas {
+    max-height: 260px;
+}
+
+/* ---------- Upcoming Appointments Panel ---------- */
+
+.cita-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-fast) ease;
+}
+
+.cita-item:last-child {
+    border-bottom: 0;
+}
+
+.cita-item:hover {
+    background: var(--surface-hover);
+}
+
+.cita-time {
+    text-align: center;
+    min-width: 50px;
+    padding: 0.35rem 0.5rem;
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+}
+
+.cita-time .time {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: block;
+    line-height: 1.2;
+}
+
+.cita-time .date {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+.cita-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cita-info .client {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text);
+}
+
+.cita-info .vehicle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Vehicle in Workshop ---------- */
+
+.vehicle-workshop-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-fast) ease;
+}
+
+.vehicle-workshop-item:last-child {
+    border-bottom: 0;
+}
+
+.vehicle-workshop-item:hover {
+    background: var(--surface-hover);
+}
+
+.vehicle-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-secondary);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.vehicle-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vehicle-info .plate {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.vehicle-info .detail {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.vehicle-progress {
+    width: 60px;
+}
+
+.vehicle-progress .progress {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--surface-secondary);
+    overflow: hidden;
+}
+
+.vehicle-progress .progress-bar {
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+/* ---------- Section Title ---------- */
+
+.section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 0 0 0.85rem;
+}
+
+.section-title i {
+    color: var(--primary);
+}
+
+/* ---------- Metric Box (secondary KPIs) ---------- */
+
+.metric-box {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.metric-box-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--warning-light);
+    color: var(--warning);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+}
+
+.metric-warning { border-left-color: color-mix(in srgb, var(--warning) 65%, transparent); }
+.metric-info { border-left-color: color-mix(in srgb, var(--info) 65%, transparent); }
+.metric-danger { border-left-color: color-mix(in srgb, var(--danger) 65%, transparent); }
+.metric-success { border-left-color: color-mix(in srgb, var(--success) 65%, transparent); }
+
+.metric-warning .metric-box-icon { background: var(--warning-light); color: var(--warning); }
+.metric-info .metric-box-icon { background: var(--info-light); color: var(--info); }
+.metric-danger .metric-box-icon { background: var(--danger-light); color: var(--danger); }
+.metric-success .metric-box-icon { background: var(--success-light); color: var(--success); }
+
+.metric-box-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.metric-box-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.metric-box small {
+    font-size: 0.75rem;
+}
+
+/* ---------- Chart Box ---------- */
+
+.chart-box {
+    position: relative;
+    height: 240px;
+}
+
+.chart-box canvas {
+    max-height: 100%;
+}
+
+/* ---------- Upcoming Appointments Panel ---------- */
+
+.cita-fecha {
+    text-align: center;
+    min-width: 68px;
+    padding: 0.4rem 0.5rem;
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.cita-fecha-dia {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: block;
+    line-height: 1.25;
+}
+
+.cita-fecha-nombre {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    display: block;
+    text-transform: capitalize;
+}
+
+/* ---------- Vehicle in Workshop (progress) ---------- */
+
+.ot-progress-item {
+    display: block;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ot-progress-item:hover {
+    border-color: var(--primary-border);
+    background: var(--surface-hover);
+}
+
+.ot-progress {
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface-secondary);
+    overflow: hidden;
+}
+
+.ot-progress .progress-bar {
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+/* ---------- Utilities ---------- */
+
+.shrink-0 {
+    flex-shrink: 0;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1200px) {
+    .dashboard-kpis { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-modules { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-secondary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .dashboard-kpis { grid-template-columns: 1fr; }
+    .dashboard-modules { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-secondary { grid-template-columns: 1fr 1fr; }
+    .dashboard-charts { grid-template-columns: 1fr; }
+    .dashboard-panels { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 430px) {
+    .dashboard-modules { grid-template-columns: 1fr; }
+}

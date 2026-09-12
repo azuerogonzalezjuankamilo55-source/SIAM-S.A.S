@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Mis Pagos{% endblock %}
 {% block content %}
-<h4 class="mb-3">Mis Pagos</h4>
-<div class="card">
-    <div class="card-body">
+{{ page_header(titulo="Mis Pagos", icono="fa-credit-card",
+               subtitulo=pagos|length ~ " pagos registrados") }}
+<div class="card" data-aos="fade-up">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-modern table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Factura</th>
@@ -18,14 +20,18 @@
                 <tbody>
                     {% for p in pagos %}
                     <tr>
-                        <td>{{ p.factura.numero }}</td>
+                        <td class="fw-semibold">{{ p.factura.numero }}</td>
                         <td>{{ p.created_at.strftime('%d/%m/%Y') if p.created_at }}</td>
                         <td>{{ p.metodo_pago_display }}</td>
                         <td class="fw-bold">${{ "%.2f"|format(p.monto) }}</td>
-                        <td><span class="badge bg-success">{{ p.estado }}</span></td>
+                        <td>
+                            <span class="badge badge-soft-success">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ p.estado }}
+                            </span>
+                        </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="5" class="text-center text-muted">No has realizado pagos</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-4">No has realizado pagos</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

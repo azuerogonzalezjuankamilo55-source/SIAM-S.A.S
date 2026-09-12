@@ -157,36 +157,6 @@ class TestPaginasGarantiasStaff:
         assert g is not None
         assert g.codigo == "GAR-000001"
 
-    def test_generar_desde_ot(self, client, db):
-        _crear_staff(db)
-        c = Cliente(nombre="Cli", correo="got@test.com")
-        db.session.add(c)
-        db.session.commit()
-        v = _crear_vehiculo(db, c, "GGOT")
-        ot = _crear_ot(db, c, v, estado="entregado")
-        _login(client, "admin_gar@test.com")
-        resp = client.post(f"/garantias/generar-ot/{ot.id}", data={"meses_validez": 3},
-                           follow_redirects=True)
-        assert resp.status_code == 200
-        g = Garantia.query.filter_by(orden_trabajo_id=ot.id).first()
-        assert g is not None
-
-    def test_generar_desde_servicio(self, client, db):
-        _crear_staff(db)
-        c = Cliente(nombre="Cli", correo="gss@test.com")
-        db.session.add(c)
-        db.session.commit()
-        v = _crear_vehiculo(db, c, "GGSS")
-        ot = _crear_ot(db, c, v, estado="entregado")
-        s = Servicio(nombre="Pintura", precio_estimado=300000, garantia_meses=12)
-        db.session.add(s)
-        db.session.commit()
-        _login(client, "admin_gar@test.com")
-        resp = client.post(f"/garantias/generar-servicio/{ot.id}/{s.id}", follow_redirects=True)
-        assert resp.status_code == 200
-        g = Garantia.query.filter_by(orden_trabajo_id=ot.id, servicio_id=s.id).first()
-        assert g is not None
-
     def test_reclamar_desde_ver(self, client, db):
         _crear_staff(db)
         c = Cliente(nombre="Cli", correo="grc@test.com")

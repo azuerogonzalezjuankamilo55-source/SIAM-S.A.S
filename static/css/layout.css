@@ -1,0 +1,146 @@
+/* ============================================================
+   SIAM Layout — Base, Typography, Shell, Scrollbar
+   ============================================================ */
+
+/* ---------- Base ---------- */
+
+body {
+    overflow-x: hidden;
+    background-color: var(--bg);
+    color: var(--bs-body-color);
+    font-family: var(--siam-font);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+a {
+    transition: color 0.2s ease;
+}
+
+::selection {
+    background: rgba(37, 99, 235, 0.35);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* ---------- Shell ---------- */
+
+.main-content {
+    min-height: 100vh;
+    width: calc(100% - var(--sidebar-width));
+    background-color: var(--bg);
+    transition: width var(--transition-speed) ease;
+}
+
+.sidebar-collapsed ~ .main-content {
+    width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+/* ---------- Page Header ---------- */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.page-header h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-header h4 i {
+    color: var(--primary);
+    font-size: 1.1em;
+}
+
+/* ---------- Section Title ---------- */
+
+.section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+/* ---------- Utilities ---------- */
+
+.text-gradient {
+    background: linear-gradient(90deg, #60A5FA, #93C5FD);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.glass {
+    background-color: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.border-subtle {
+    border: 1px solid var(--border);
+}
+
+/* ---------- Links ---------- */
+
+.link-primary {
+    color: var(--primary-text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.link-primary:hover {
+    color: var(--primary);
+}
+
+/* ---------- Focus visible ---------- */
+
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}

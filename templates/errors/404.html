@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Página no encontrada{% endblock %}
 {% block content %}
-<div class="text-center py-5" data-aos="fade-up">
-    <i class="fa-regular fa-face-frown display-1 text-warning" aria-hidden="true"></i>
-    <h1 class="display-4 mt-3">404</h1>
-    <p class="lead text-muted">La página que buscas no existe.</p>
-    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary mt-3">
-        <i class="fa-solid fa-house"></i> Volver al inicio
-    </a>
+<div class="d-flex align-items-center justify-content-center py-5" data-aos="fade-up">
+    <div class="card border-0 text-center w-100" style="max-width:520px;">
+        <div class="card-body p-4 p-md-5">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-4"
+                  style="width:96px;height:96px;background:rgba(var(--bs-warning-rgb),.12);color:var(--bs-warning);" aria-hidden="true">
+                <i class="fa-regular fa-face-frown fa-2x"></i>
+            </span>
+            <h1 class="display-4 fw-bold mb-1">404</h1>
+            <p class="fs-5 fw-semibold mb-1">Página no encontrada</p>
+            <p class="text-muted mb-4">La página que buscas no existe.</p>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary px-4">
+                <i class="fa-solid fa-house me-1" aria-hidden="true"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

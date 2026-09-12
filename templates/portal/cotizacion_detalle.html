@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "partials/_cotizacion_items.html" import tabla_items_cotizacion %}
 {% block title %}Cotización {{ cotizacion.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Cotización {{ cotizacion.numero }}</h4>
-    <a href="{{ url_for('portal.cotizaciones') }}" class="btn btn-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
-</div>
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+{{ page_header(titulo="Cotización " ~ cotizacion.numero, icono="fa-file-lines",
+               subtitulo="Resumen y opciones de la cotización",
+               boton="Volver", boton_icon="fa-arrow-left",
+               boton_url=url_for('portal.cotizaciones')) }}
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-4">
@@ -17,9 +18,9 @@
             </div>
             <div class="col-md-4">
                 <h6 class="text-muted text-uppercase small">Estado</h6>
-                <span class="badge bg-{{
-                    {'pendiente': 'warning', 'aprobada': 'success', 'rechazada': 'danger', 'convertida': 'primary', 'vencida': 'secondary'}[cotizacion.estado]
-                }}">{{ labels[cotizacion.estado] }}</span>
+                <span class="badge badge-soft-{{ bsoft.get(cotizacion.estado_color, cotizacion.estado_color) }}">
+                    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ labels[cotizacion.estado] }}
+                </span>
             </div>
             <div class="col-md-4">
                 <h6 class="text-muted text-uppercase small">Validez</h6>
@@ -34,29 +35,28 @@
     </div>
 </div>
 
-{% from "partials/_cotizacion_items.html" import tabla_items_cotizacion %}
-<div class="card">
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         {{ tabla_items_cotizacion(cotizacion) }}
 
         {% if cotizacion.estado == "pendiente" %}
-        <div class="d-flex gap-2 justify-content-end">
+        <div class="d-flex gap-2 justify-content-end mt-3">
             <form method="POST" action="{{ url_for('portal.cotizacion_responder', cotizacion_id=cotizacion.id, estado='rechazada') }}" data-confirm-form="¿Rechazar esta cotización?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-xmark me-1"></i>Rechazar</button>
+                <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-xmark me-1" aria-hidden="true"></i>Rechazar</button>
             </form>
             <form method="POST" action="{{ url_for('portal.cotizacion_responder', cotizacion_id=cotizacion.id, estado='aprobada') }}" data-confirm-form="¿Aprobar esta cotización?">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Aprobar</button>
+                <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Aprobar</button>
             </form>
         </div>
         {% elif cotizacion.estado == "aprobada" %}
         <div class="text-end">
-            <span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i>Has aprobado esta cotización</span>
+            <span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>Has aprobado esta cotización</span>
         </div>
         {% elif cotizacion.estado == "rechazada" %}
         <div class="text-end">
-            <span class="text-danger fw-bold"><i class="fa-solid fa-circle-xmark me-1"></i>Rechazaste esta cotización</span>
+            <span class="text-danger fw-bold"><i class="fa-solid fa-circle-xmark me-1" aria-hidden="true"></i>Rechazaste esta cotización</span>
         </div>
         {% endif %}
     </div>

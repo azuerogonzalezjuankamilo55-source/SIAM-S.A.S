@@ -1,19 +1,23 @@
 {% extends "base.html" %}
+{% from "partials/_factura_detalles.html" import tabla_detalles_factura %}
 {% block title %}Factura {{ factura.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Factura {{ factura.numero }}</h4>
+<div class="page-header">
     <div>
+        <h4><i class="fa-solid fa-file-invoice" aria-hidden="true"></i> Factura {{ factura.numero }}</h4>
+        <small class="text-muted">Detalle de factura y pagos</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url_for('facturas.pdf', id=factura.id) }}" class="btn btn-primary" target="_blank">
-            <i class="fa-solid fa-file-pdf"></i> Descargar PDF
+            <i class="fa-solid fa-file-pdf me-1" aria-hidden="true"></i>Descargar PDF
         </a>
         {% if factura.estado != "pagado" and factura.estado != "anulado" %}
         <a href="{{ url_for('facturas.pagar', id=factura.id) }}" class="btn btn-success">
-            <i class="fa-solid fa-money-bill"></i> Registrar Pago
+            <i class="fa-solid fa-money-bill me-1" aria-hidden="true"></i>Registrar Pago
         </a>
         {% endif %}
-        <a href="{{ url_for('facturas.listar') }}" class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+        <a href="{{ url_for('facturas.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
         </a>
     </div>
 </div>
@@ -50,12 +54,7 @@
             <div class="card-body text-center">
                 <h6 class="card-title text-muted small">Estado</h6>
                 <h3 class="mb-0">
-                    <span class="badge bg-{{ {
-                        'pendiente': 'warning',
-                        'parcial': 'info',
-                        'pagado': 'success',
-                        'anulado': 'danger'
-                    }[factura.estado_actualizado] }} fs-6">
+                    <span class="badge bg-{{ factura.estado_color }} fs-6">
                         {{ factura.estado_actualizado|title }}
                     </span>
                 </h3>
@@ -99,39 +98,10 @@
 
 <div class="card mb-3">
     <div class="card-header">
-        <h6 class="mb-0">Servicios</h6>
+        <h6 class="mb-0"><i class="fa-solid fa-wrench"></i> Servicios</h6>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Servicio</th>
-                        <th class="text-end">Precio Unit.</th>
-                        <th class="text-center">Cant.</th>
-                        <th class="text-end">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in factura.detalles %}
-                    <tr>
-                        <td>{{ d.servicio.nombre }}</td>
-                        <td class="text-end">${{ "%.2f"|format(d.precio_unitario|float) }}</td>
-                        <td class="text-center">{{ d.cantidad }}</td>
-                        <td class="text-end">${{ "%.2f"|format(d.subtotal|float) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr><td colspan="3" class="text-end">Subtotal</td><td class="text-end">${{ "%.2f"|format(factura.subtotal|float) }}</td></tr>
-                    <tr><td colspan="3" class="text-end">IVA ({{ factura.iva_porcentaje }}%)</td><td class="text-end">${{ "%.2f"|format(factura.iva|float) }}</td></tr>
-                    {% if factura.descuento > 0 %}
-                    <tr><td colspan="3" class="text-end">Descuento</td><td class="text-end">-${{ "%.2f"|format(factura.descuento|float) }}</td></tr>
-                    {% endif %}
-                    <tr><td colspan="3" class="text-end"><strong>Total</strong></td><td class="text-end"><strong>${{ "%.2f"|format(factura.total|float) }}</strong></td></tr>
-                </tfoot>
-            </table>
-        </div>
+        {{ tabla_detalles_factura(factura) }}
     </div>
 </div>
 
@@ -142,7 +112,7 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-modern table-sm table-hover mb-0">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -165,7 +135,7 @@
                         <td>{{ p.notas or "-" }}</td>
                         <td>
                             <a href="{{ url_for('facturas.eliminar_pago', pago_id=p.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar este pago?">
-                                <i class="fa-solid fa-trash"></i>
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </a>
                         </td>
                     </tr>

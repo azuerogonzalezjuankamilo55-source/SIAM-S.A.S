@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Garantía {{ garantia.codigo }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Garantía {{ garantia.codigo }}</h4>
-    <a href="{{ url_for('garantias.listar') }}" class="btn btn-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Garantía {{ garantia.codigo }}</h4>
+        <small class="text-muted">Detalle de garantía del servicio</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('garantias.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
+        </a>
+    </div>
 </div>
 
 <div class="row g-3">
@@ -33,7 +38,10 @@
                 <p class="mb-0">Inicio: {{ garantia.fecha_inicio.strftime('%d/%m/%Y') }}</p>
                 <p class="mb-0">Vence: {{ garantia.fecha_fin.strftime('%d/%m/%Y') }} ({{ garantia.meses_validez }} meses)</p>
                 {% if garantia.estado == "activa" %}
-                <span class="badge bg-{{ 'success' if garantia.dias_restantes > 15 else 'warning' }} mt-2">{{ garantia.dias_restantes }} días restantes</span>
+                <span class="badge badge-soft-{{ 'success' if garantia.dias_restantes > 15 else 'warning' }} mt-2">
+                    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
+                    {{ garantia.dias_restantes }} días restantes
+                </span>
                 {% endif %}
             </div>
         </div>
@@ -42,9 +50,12 @@
         <div class="card h-100">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase small">Estado</h6>
-                <span class="badge bg-{{
-                    {'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'dark'}[garantia.estado]
-                }}">{{ labels[garantia.estado] }}</span>
+                <span class="badge badge-soft-{{
+                    {'activa': 'success', 'caducada': 'secondary', 'reclamada': 'danger', 'anulada': 'secondary'}[garantia.estado]
+                }}">
+                    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
+                    {{ labels[garantia.estado] }}
+                </span>
                 {% if garantia.orden_trabajo_id %}
                 <p class="small mt-2 mb-0">
                     OT: <a href="{{ url_for('ordenes_trabajo.ver', id=garantia.orden_trabajo_id) }}">{{ garantia.orden_trabajo.numero if garantia.orden_trabajo else garantia.orden_trabajo_id }}</a>
@@ -88,7 +99,7 @@
                     <textarea name="nota" class="form-control" rows="3" required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-warning">Registrar</button>
                 </div>
             </form>

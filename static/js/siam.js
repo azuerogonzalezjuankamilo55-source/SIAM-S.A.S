@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', function () {
     initTooltips();
     initSidebar();
+    initSidebarCollapse();
     initAnimations();
     initToast();
     initDeleteLinks();
     initConfirmForms();
     initDarkMode();
     initAjaxForms();
-    initAjaxDelete();
     initLocationButton();
     initTableSearch();
     initFormLabels();
     initPasswordToggles();
     initNotificaciones();
+    initNavbarSearch();
 });
 
 /* Mostrar/ocultar contraseña en formularios de acceso y registro */
@@ -60,6 +61,7 @@ function initSidebar() {
             backdrop.className = 'sidebar-backdrop';
             backdrop.addEventListener('click', closeSidebar);
             document.body.appendChild(backdrop);
+            requestAnimationFrame(function () { backdrop.classList.add('active'); });
         }
     }
 
@@ -82,6 +84,139 @@ function initSidebar() {
     navLinks.forEach(function (link) {
         if (link.getAttribute('href') === currentPath) {
             link.classList.add('active');
+        }
+    });
+}
+
+/* Sidebar collapse: desktop icon-only mode with tooltips */
+function initSidebarCollapse() {
+    var sidebar = document.querySelector('.sidebar');
+    var btn = document.getElementById('sidebarCollapseBtn');
+    if (!sidebar || !btn) return;
+
+    var isMobile = function () { return window.innerWidth <= 768; };
+
+    function setTooltips(collapsed) {
+        if (typeof bootstrap === 'undefined') return;
+        sidebar.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            var tp = bootstrap.Tooltip.getInstance(el);
+            if (tp) tp.dispose();
+        });
+        if (collapsed) {
+            sidebar.querySelectorAll('.nav-link').forEach(function (link) {
+                link.setAttribute('data-bs-toggle', 'tooltip');
+                link.setAttribute('data-bs-placement', 'right');
+                link.setAttribute('title', link.textContent.trim());
+            });
+            var list = [].slice.call(sidebar.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            list.forEach(function (el) { return new bootstrap.Tooltip(el); });
+        } else {
+            sidebar.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+                el.removeAttribute('data-bs-toggle');
+                el.removeAttribute('title');
+            });
+        }
+    }
+
+    function apply() {
+        var collapsed = sidebar.classList.contains('collapsed');
+        var icon = document.getElementById('sidebarCollapseIcon');
+        if (icon) {
+            icon.className = collapsed ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left';
+        }
+        if (btn) {
+            btn.setAttribute('aria-label', collapsed ? 'Expandir menú lateral' : 'Colapsar menú lateral');
+        }
+        setTooltips(collapsed && !isMobile());
+    }
+
+    if (!isMobile()) {
+        var saved = localStorage.getItem('sidebarCollapsed');
+        if (saved === '1') {
+            sidebar.classList.add('collapsed');
+        }
+    }
+
+    apply();
+
+    btn.addEventListener('click', function () {
+        if (isMobile()) return;
+        sidebar.classList.toggle('collapsed');
+        try {
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+        } catch (e) {}
+        apply();
+        if (typeof AOS !== 'undefined') {
+            AOS.refreshHard ? AOS.refreshHard() : AOS.refresh();
+        }
+    });
+
+    window.addEventListener('resize', function () {
+        if (isMobile()) {
+            sidebar.classList.remove('collapsed');
+        } else {
+            var saved = localStorage.getItem('sidebarCollapsed');
+            if (saved === '1') {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+        }
+        apply();
+    });
+}
+
+/* Navbar global search: redirects to relevant module filter */
+function initNavbarSearch() {
+    var input = document.getElementById('navbarSearch');
+    if (!input) return;
+
+    document.addEventListener('keydown', function (e) {
+        var active = document.activeElement;
+        var isTyping = active && (
+            active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' ||
+            active.tagName === 'SELECT' || active.isContentEditable
+        );
+        if (e.key === '/' && !isTyping) {
+            e.preventDefault();
+            input.focus();
+            input.select();
+        }
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            var q = input.value.trim();
+            if (!q) return;
+            var paths = {
+                clientes: '/clientes/',
+                vehiculos: '/vehiculos/',
+                servicios: '/servicios/',
+                mecanicos: '/mecanicos/',
+                citas: '/citas/',
+                facturas: '/facturas/',
+                inventario: '/inventario/',
+                ordenes: '/ordenes-trabajo/',
+                'ordenes de trabajo': '/ordenes-trabajo/',
+                cotizaciones: '/cotizaciones/',
+                garantias: '/garantias/',
+                reportes: '/reportes/',
+                asistencias: '/sedes/asistencias'
+            };
+            var ql = q.toLowerCase();
+            for (var key in paths) {
+                if (ql === key || (ql.length > 3 && key.indexOf(ql) !== -1)) {
+                    window.location.href = paths[key];
+                    return;
+                }
+            }
+            var url = paths[ql];
+            if (url) {
+                window.location.href = url;
+            } else {
+                showToast('Ingresa "clientes", "vehículos", "facturas", etc.', 'info');
+            }
         }
     });
 }
@@ -271,9 +406,6 @@ function initAjaxForms() {
                         setTimeout(function () { window.location.href = redirect; }, 800);
                     } else if (result.data.redirect) {
                         setTimeout(function () { window.location.href = result.data.redirect; }, 800);
-                    } else {
-                        var table = document.querySelector('table[data-ajax-table]');
-                        if (table) refreshTable(table);
                     }
                 } else {
                     showToast(result.data.error || 'Error al guardar.', 'danger');
@@ -282,38 +414,6 @@ function initAjaxForms() {
             .catch(function (err) {
                 setLoading(btn, false);
                 showToast('Error de conexión. Intenta nuevamente.', 'danger');
-            });
-        });
-    });
-}
-
-function initAjaxDelete() {
-    document.querySelectorAll('[data-ajax-delete]').forEach(function (el) {
-        el.addEventListener('click', function (e) {
-            e.preventDefault();
-            var msg = el.getAttribute('data-confirm') || '¿Estás seguro de eliminar?';
-            if (!confirm(msg)) return;
-            var url = el.getAttribute('href');
-            var row = el.closest('tr');
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                    'Accept': 'application/json'
-                }
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data.success) {
-                    showToast('Eliminado correctamente.', 'success');
-                    if (row) { row.remove(); }
-                } else {
-                    showToast(data.error || 'Error al eliminar.', 'danger');
-                }
-            })
-            .catch(function () {
-                showToast('Error de conexión.', 'danger');
             });
         });
     });
@@ -338,21 +438,6 @@ function clearFormErrors(form) {
     form.querySelectorAll('.invalid-feedback').forEach(function (el) {
         el.remove();
     });
-}
-
-function refreshTable(table) {
-    if (!table) return;
-    var url = table.getAttribute('data-ajax-table');
-    if (!url) return;
-    fetch(url, { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.rows) {
-                var tbody = table.querySelector('tbody');
-                if (tbody) tbody.innerHTML = data.rows;
-            }
-        })
-        .catch(function () {});
 }
 
 /* ============================================================

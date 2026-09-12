@@ -17,6 +17,14 @@ ESTADOS_COTIZACION_LABELS = {
     "vencida": "Vencida",
 }
 
+COLORES_ESTADO_COTIZACION = {
+    "pendiente": "warning",
+    "aprobada": "success",
+    "rechazada": "danger",
+    "convertida": "primary",
+    "vencida": "secondary",
+}
+
 
 class Cotizacion(db.Model):
     __tablename__ = "cotizaciones"
@@ -53,6 +61,10 @@ class Cotizacion(db.Model):
     @property
     def estado_display(self) -> str:
         return ESTADOS_COTIZACION_LABELS.get(self.estado, self.estado)
+
+    @property
+    def estado_color(self) -> str:
+        return COLORES_ESTADO_COTIZACION.get(self.estado, "secondary")
 
     def __repr__(self) -> str:
         return f"<Cotizacion {self.numero}:{self.estado}>"

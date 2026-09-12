@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Diagnóstico IA{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-star me-2 text-primary"></i>Diagnóstico Inteligente</h4>
+<div class="page-header mb-3" data-aos="fade-up">
+    <div>
+        <h4><i class="fa-solid fa-star text-primary" aria-hidden="true"></i>Diagnóstico Inteligente</h4>
+        <small class="text-muted">Identifica fallas y recibe recomendaciones de mantenimiento</small>
+    </div>
 </div>
 
-<div class="card mb-3 border-primary">
+<div class="card mb-3 border-primary" data-aos="fade-up">
     <div class="card-body">
         <div class="d-flex align-items-center">
-            <i class="fa-solid fa-microchip fs-2 me-3 text-primary"></i>
+            <span class="d-inline-flex align-items-center justify-content-center rounded-3 me-3"
+                  style="width:48px;height:48px;background:rgba(var(--bs-primary-rgb),.12);color:var(--bs-primary);" aria-hidden="true">
+                <i class="fa-solid fa-microchip fs-4"></i>
+            </span>
             <div>
                 <strong>Resumen del taller</strong>
                 <p class="mb-0 text-muted">{{ resumen }}</p>
@@ -19,8 +25,8 @@
 
 <div class="row g-3">
     <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header"><strong><i class="fa-solid fa-magnifying-glass"></i> Diagnóstico por síntomas</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-magnifying-glass text-primary me-1" aria-hidden="true"></i> Diagnóstico por síntomas</strong></div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('ia.diagnosticar') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
@@ -40,7 +46,7 @@
                         <textarea name="sintomas" class="form-control" rows="3" required
                                   placeholder="Ej: el motor hace un ruido y pierde fuerza, o vibra al frenar">{{ sintomas or "" }}</textarea>
                     </div>
-                    <button class="btn btn-primary"><i class="fa-solid fa-star"></i> Diagnosticar</button>
+                    <button class="btn btn-primary"><i class="fa-solid fa-star me-1" aria-hidden="true"></i> Diagnosticar</button>
                 </form>
                 <hr>
                 <small class="text-muted">Ejemplos: <em>"ruido en el motor"</em>, <em>"vibra al frenar"</em>,
@@ -50,8 +56,8 @@
     </div>
 
     <div class="col-lg-5">
-        <div class="card">
-            <div class="card-header"><strong><i class="fa-solid fa-heart-pulse"></i> Recomendaciones de mantenimiento</strong></div>
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header"><strong><i class="fa-solid fa-heart-pulse text-success me-1" aria-hidden="true"></i> Recomendaciones de mantenimiento</strong></div>
             <div class="card-body">
                 <form method="GET" action="{{ url_for('ia.mantenimiento', vehiculo_id=0) }}" id="form-mant">
                     <div class="input-group">
@@ -61,7 +67,7 @@
                             <option value="{{ v.id }}">{{ v.placa }} · {{ v.marca }} {{ v.modelo }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-success" type="submit"><i class="fa-solid fa-calendar-check"></i> Ver</button>
+                        <button class="btn btn-success" type="submit"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Ver</button>
                     </div>
                 </form>
                 <script>
@@ -77,10 +83,10 @@
 </div>
 
 {% if resultado %}
-<div class="card mt-3">
+<div class="card mt-3" data-aos="fade-up">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <strong><i class="fa-solid fa-heart-pulse me-1"></i> Resultado del diagnóstico</strong>
-        <span class="badge bg-{{ 'danger' if resultado.urgencia == 'alta' else 'warning' if resultado.urgencia == 'media' else 'success' }}">
+        <strong><i class="fa-solid fa-heart-pulse text-danger me-1" aria-hidden="true"></i> Resultado del diagnóstico</strong>
+        <span class="badge badge-soft-{{ 'danger' if resultado.urgencia == 'alta' else 'warning' if resultado.urgencia == 'media' else 'success' }}">
             Prioridad {{ resultado.urgencia|upper }}
         </span>
     </div>
@@ -103,7 +109,7 @@
             {% for s in resultado.servicios_sugeridos %}
             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                 {{ s.nombre }}
-                {% if s.precio %}<span class="badge bg-primary">${{ "{:,.0f}".format(s.precio) }}</span>{% endif %}
+                {% if s.precio %}<span class="badge badge-soft-primary">${{ "{:,.0f}".format(s.precio) }}</span>{% endif %}
             </li>
             {% endfor %}
         </ul>

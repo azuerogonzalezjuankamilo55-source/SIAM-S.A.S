@@ -65,12 +65,27 @@ class ImageService:
             raise ImageError("El archivo no es una imagen válida")
 
     @staticmethod
-    def validar_tamano(size: int | None) -> None:
-        limite = DEFAULT_MAX_FILE_MB * 1024 * 1024
+    def max_image_mb() -> float:
+        """Límite configurable: config de Flask → env → default."""
+        try:
+            from flask import current_app
+
+            val = current_app.config.get("FILE_MAX_IMAGE_MB")
+            if val:
+                return float(val)
+        except RuntimeError:
+            pass
+        try:
+            return float(os.getenv("FILE_MAX_IMAGE_MB", DEFAULT_MAX_FILE_MB))
+        except (TypeError, ValueError):
+            return DEFAULT_MAX_FILE_MB
+
+    @classmethod
+    def validar_tamano(cls, size: int | None) -> None:
+        max_mb = cls.max_image_mb()
+        limite = max_mb * 1024 * 1024
         if size and size > limite:
-            raise ImageError(
-                f"La imagen supera el tamaño máximo de {DEFAULT_MAX_FILE_MB} MB"
-            )
+            raise ImageError(f"La imagen supera el tamaño máximo de {max_mb:g} MB")
 
     @staticmethod
     def validar(file, filename: str | None = None, size: int | None = None) -> str:

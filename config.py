@@ -40,6 +40,24 @@ class Config:
     RATELIMIT_DEFAULT: str = "200/hour;20/minute"
     JSON_AS_ASCII: bool = False
 
+    # Taller (sede principal) para geolocalización de clientes en camino.
+    # Coordenadas verificadas en OSM (Colegio Departamental Compartir,
+    # Calle 26 Sur, barrio Compartir, Soacha) — punto de referencia de la
+    # dirección Cl. 26 Sur #3c Sur10 No 5B. Ajustables en .env.
+    WORKSHOP_ADDRESS: str = os.getenv(
+        "WORKSHOP_ADDRESS",
+        "Cl. 26 Sur #3c Sur10 No 5B, Soacha, Cundinamarca, Colombia",
+    )
+    WORKSHOP_LATITUDE: float = float(os.getenv("WORKSHOP_LATITUDE", "4.5712283"))
+    WORKSHOP_LONGITUDE: float = float(os.getenv("WORKSHOP_LONGITUDE", "-74.2390573"))
+
+    # OSRM (rutas servidor-público). VACÍO desactiva las rutas (el mapa sigue
+    # funcionando con marcadores) y es lo que usan los tests para no depender
+    # de red. URL guarda silencio: sin punto y coma final nunca se exponen.
+    OSRM_BASE_URL: str = os.getenv(
+        "OSRM_BASE_URL", "https://router.project-osrm.org"
+    ).strip().rstrip("/")
+
     # Límites de subida de archivos (MB), configurables por variables de entorno.
     FILE_MAX_IMAGE_MB: float = float(os.getenv("FILE_MAX_IMAGE_MB", "5"))
     FILE_MAX_VIDEO_MB: float = float(os.getenv("FILE_MAX_VIDEO_MB", "100"))
@@ -100,6 +118,8 @@ class TestingConfig(Config):
     SQLALCHEMY_ENGINE_OPTIONS: dict = {}
     WTF_CSRF_ENABLED: bool = False
     RATELIMIT_ENABLED: bool = False
+    # Sin red en tests: OSRM desactivado (el mapa funciona con marcadores).
+    OSRM_BASE_URL: str = ""
 
 
 config_by_name: dict[str, type[Config]] = {

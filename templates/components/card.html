@@ -1,0 +1,29 @@
+{# ============================================================
+   SIAM Component: Card wrapper con header opcional
+   Uso:
+   {% from "components/card.html" import card %}
+   {% call card(titulo="Últimas Facturas", icono="fa-receipt",
+                accion="Ver todas", accion_url="/facturas/") %}
+     ... contenido ...
+   {% endcall %}
+   ============================================================ #}
+{% macro card(titulo=None, icono=None, subtitulo=None,
+              accion=None, accion_url="#" ) -%}
+<div class="card h-100">
+    {% if titulo %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6>
+            {% if icono %}<i class="fa-solid {{ icono }} text-primary" aria-hidden="true"></i>{% endif %}
+            {{ titulo }}
+            {% if subtitulo %}<small class="text-muted ms-2 fw-normal">{{ subtitulo }}</small>{% endif %}
+        </h6>
+        {% if accion %}
+        <a href="{{ accion_url }}" class="btn btn-sm btn-soft">{{ accion }}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="card-body">
+        {{ caller() }}
+    </div>
+</div>
+{%- endmacro %}

@@ -20,6 +20,13 @@ METODOS_PAGO = [
 
 ESTADOS_FACTURA = ["pendiente", "parcial", "pagado", "anulado"]
 
+COLORES_ESTADO_FACTURA = {
+    "pendiente": "warning",
+    "parcial": "info",
+    "pagado": "success",
+    "anulado": "danger",
+}
+
 
 class Factura(db.Model):
     __tablename__ = "facturas"
@@ -68,6 +75,10 @@ class Factura(db.Model):
         if pagado > 0:
             return "parcial"
         return self.estado
+
+    @property
+    def estado_color(self) -> str:
+        return COLORES_ESTADO_FACTURA.get(self.estado_actualizado, "secondary")
 
     def __repr__(self) -> str:
         return f"<Factura {self.id}:{self.numero} total={self.total}>"

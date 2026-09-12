@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Notificaciones{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="mb-0">Notificaciones</h4>
-    <div class="d-flex gap-2">
+<div class="page-header mb-3" data-aos="fade-up">
+    <div>
+        <h4><i class="fa-solid fa-bell" aria-hidden="true"></i> Notificaciones</h4>
+        <small class="text-muted">Avisos de citas, órdenes, facturas, garantías y más</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         {% if no_leidas > 0 %}
         <form method="post" action="{{ url_for('notificaciones.api_leer_todas') }}" class="d-inline" data-ajax="true" data-redirect="{{ url_for('notificaciones.index') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="btn btn-outline-primary btn-sm">
+            <button type="submit" class="btn btn-soft">
                 <i class="fa-solid fa-check-double me-1"></i> Marcar todas como leídas
             </button>
         </form>
@@ -15,25 +18,25 @@
     </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body py-2">
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="{{ url_for('notificaciones.index') }}" class="btn btn-sm {{ 'btn-primary' if not filtro_tipo and not solo_no_leidas else 'btn-outline-secondary' }}">
-                Todas <span class="badge bg-secondary ms-1">{{ por_tipo.values()|sum }}</span>
+            <a href="{{ url_for('notificaciones.index') }}" class="btn btn-sm {{ 'btn-primary' if not filtro_tipo and not solo_no_leidas else 'btn-soft' }}">
+                Todas <span class="badge badge-soft-secondary ms-1">{{ por_tipo.values()|sum }}</span>
             </a>
-            <a href="{{ url_for('notificaciones.index', pendientes='1') }}" class="btn btn-sm {{ 'btn-primary' if solo_no_leidas else 'btn-outline-secondary' }}">
-                Sin leer <span class="badge bg-danger ms-1">{{ no_leidas }}</span>
+            <a href="{{ url_for('notificaciones.index', pendientes='1') }}" class="btn btn-sm {{ 'btn-primary' if solo_no_leidas else 'btn-soft' }}">
+                Sin leer <span class="badge badge-soft-danger ms-1">{{ no_leidas }}</span>
             </a>
             {% for t in tipos %}
-            <a href="{{ url_for('notificaciones.index', tipo=t) }}" class="btn btn-sm {{ 'btn-primary' if filtro_tipo == t else 'btn-outline-secondary' }}">
-                {{ tipos_labels[t] }} <span class="badge bg-secondary ms-1">{{ por_tipo.get(t, 0) }}</span>
+            <a href="{{ url_for('notificaciones.index', tipo=t) }}" class="btn btn-sm {{ 'btn-primary' if filtro_tipo == t else 'btn-soft' }}">
+                {{ tipos_labels[t] }} <span class="badge badge-soft-secondary ms-1">{{ por_tipo.get(t, 0) }}</span>
             </a>
             {% endfor %}
         </div>
     </div>
 </div>
 
-<div class="card">
+<div class="card" data-aos="fade-up">
     <div class="card-body p-0">
         {% if items %}
         <ul class="list-group list-group-flush">
@@ -49,8 +52,8 @@
                     </div>
                     {% if n.mensaje %}<div class="small text-muted">{{ n.mensaje }}</div>{% endif %}
                     <div class="d-flex gap-2 align-items-center mt-1">
-                        <span class="badge bg-secondary">{{ n.tipo_label }}</span>
-                        {% if not n.leida %}<span class="badge bg-primary">Nueva</span>{% endif %}
+                        <span class="badge badge-soft-secondary">{{ n.tipo_label }}</span>
+                        {% if not n.leida %}<span class="badge badge-soft-primary">Nueva</span>{% endif %}
                         {% if n.url %}
                         <a href="{{ n.url }}" class="small text-decoration-none">Ver detalle <i class="fa-solid fa-arrow-right"></i></a>
                         {% endif %}

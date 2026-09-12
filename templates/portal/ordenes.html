@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
 {% block title %}Mis Reparaciones{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Mis Reparaciones</h4>
-    <span class="text-muted">{{ ordenes|length }} en total</span>
-</div>
-<div class="card">
-    <div class="card-body">
+{% set bsoft = {'dark':'secondary', 'light':'secondary'} %}
+{{ page_header(titulo="Mis Reparaciones", icono="fa-screwdriver-wrench",
+               subtitulo=ordenes|length ~ " en total") }}
+<div class="card" data-aos="fade-up">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-modern table-hover mb-0">
                 <thead>
                     <tr>
                         <th>Número</th>
@@ -22,31 +22,26 @@
                 <tbody>
                     {% for o in ordenes %}
                     <tr>
-                        <td>{{ o.numero }}</td>
+                        <td class="fw-semibold">{{ o.numero }}</td>
                         <td>{{ o.vehiculo.marca }} {{ o.vehiculo.modelo }} ({{ o.vehiculo.placa }})</td>
                         <td>{{ o.fecha_ingreso }}</td>
                         <td>
-                            <span class="badge bg-{{ {
-                                'recibido': 'secondary',
-                                'diagnostico': 'info',
-                                'esperando_repuestos': 'warning',
-                                'en_reparacion': 'primary',
-                                'pruebas': 'info',
-                                'listo_entrega': 'success',
-                                'entregado': 'dark'
-                            }[o.estado] }}">
+                            <span class="badge badge-soft-{{ bsoft.get(o.estado_color, o.estado_color) }}">
+                                <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>
                                 {{ o.estado_display }}
                             </span>
                         </td>
                         <td>{{ o.fecha_estimada_entrega or "—" }}</td>
                         <td>
-                            <a href="{{ url_for('portal.orden_detalle', orden_id=o.id) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fa-solid fa-eye"></i> Ver
-                            </a>
+                            <div class="table-actions">
+                                <a href="{{ url_for('portal.orden_detalle', orden_id=o.id) }}" class="btn btn-sm btn-soft">
+                                    <i class="fa-solid fa-eye me-1" aria-hidden="true"></i> Ver
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="6" class="text-center text-muted">No tienes órdenes de trabajo</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-4">No tienes órdenes de trabajo</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

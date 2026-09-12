@@ -6,6 +6,7 @@ from models.cotizacion import Cotizacion, ESTADOS_COTIZACION
 from models.cotizacion_item import CotizacionItem
 from models.servicio import Servicio
 from models.orden_trabajo import OrdenTrabajo
+from services.numeracion import siguiente_numero
 
 logger = logging.getLogger("siam.cotizaciones")
 
@@ -17,17 +18,6 @@ class CotizacionError(Exception):
 
 
 class CotizacionService:
-    @staticmethod
-    def _generar_numero() -> str:
-        ultimo = Cotizacion.query.order_by(Cotizacion.id.desc()).first()
-        if ultimo and ultimo.numero and ultimo.numero.startswith("COT-"):
-            try:
-                last_num = int(ultimo.numero[4:])
-                return f"COT-{last_num + 1:06d}"
-            except (ValueError, IndexError):
-                pass
-        return "COT-000001"
-
     @staticmethod
     def _recalcular(cotizacion: Cotizacion) -> None:
         subtotal = sum((i.subtotal or Decimal("0")) for i in cotizacion.items)
@@ -47,7 +37,7 @@ class CotizacionService:
         iva_porcentaje: Decimal = IVA_DEFAULT,
     ) -> Cotizacion:
         cotizacion = Cotizacion(
-            numero=CotizacionService._generar_numero(),
+            numero=siguiente_numero(Cotizacion, "COT"),
             cliente_id=cliente_id,
             vehiculo_id=vehiculo_id,
             sede_id=sede_id or None,
@@ -142,14 +132,7 @@ class CotizacionService:
             raise CotizacionError("Solo se convierten cotizaciones aprobadas")
         if cotizacion.orden_trabajo_id:
             raise CotizacionError("Esta cotización ya fue convertida en una OT")
-        ultimo = OrdenTrabajo.query.order_by(OrdenTrabajo.id.desc()).first()
-        if ultimo and ultimo.numero and ultimo.numero.startswith("OT-"):
-            try:
-                numero = f"OT-{int(ultimo.numero[3:]) + 1:06d}"
-            except (ValueError, IndexError):
-                numero = "OT-000001"
-        else:
-            numero = "OT-000001"
+        numero = siguiente_numero(OrdenTrabajo, "OT")
         descripcion = cotizacion.descripcion or "Cotización aprobada"
         ot = OrdenTrabajo(
             numero=numero,

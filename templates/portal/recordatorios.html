@@ -1,24 +1,24 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/empty_state.html" import empty_state %}
 {% block title %}Mis Recordatorios{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-bell me-2 text-warning"></i>Mis Recordatorios</h4>
-    <a href="{{ url_for('portal.index') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
-</div>
+{{ page_header(titulo="Mis Recordatorios", icono="fa-bell",
+               subtitulo="Mantenimientos y recordatorios pendientes",
+               boton="Volver", boton_icon="fa-arrow-left",
+               boton_url=url_for('portal.index')) }}
 
 {% if recordatorios %}
-<div class="card">
+<div class="card" data-aos="fade-up">
     <ul class="list-group list-group-flush">
         {% for r in recordatorios %}
         <li class="list-group-item d-flex justify-content-between align-items-start py-3">
             <div class="me-3">
                 <div class="d-flex align-items-center gap-2">
                     <strong>{{ r.titulo }}</strong>
-                    <span class="badge bg-{{
-                        'warning text-dark' if r.estado == 'pendiente' else 'info'
-                    }}">{{ r.estado_label }}</span>
+                    <span class="badge badge-soft-{{ 'warning' if r.estado == 'pendiente' else 'info' }}">
+                        <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ r.estado_label }}
+                    </span>
                 </div>
                 <small class="text-muted d-block">
                     {% if r.vehiculo %}
@@ -32,7 +32,7 @@
             <div class="text-end">
                 <small class="text-muted d-block mb-2">Programado: {{ r.fecha_programada.strftime('%d/%m/%Y') }}</small>
                 <a href="{{ url_for('portal.solicitar_cita') }}" class="btn btn-sm btn-primary">
-                    <i class="fa-solid fa-calendar-plus"></i> Agendar cita
+                    <i class="fa-solid fa-calendar-plus me-1" aria-hidden="true"></i> Agendar cita
                 </a>
             </div>
         </li>
@@ -40,11 +40,7 @@
     </ul>
 </div>
 {% else %}
-<div class="card">
-    <div class="card-body text-center text-muted py-5">
-        <i class="fa-solid fa-bell-slash fs-1 d-block mb-2"></i>
-        No tienes recordatorios pendientes. ¡Estás al día!
-    </div>
-</div>
+{{ empty_state(icon="fa-bell-slash", titulo="Sin recordatorios pendientes",
+               mensaje="No tienes recordatorios pendientes. ¡Estás al día!") }}
 {% endif %}
 {% endblock %}

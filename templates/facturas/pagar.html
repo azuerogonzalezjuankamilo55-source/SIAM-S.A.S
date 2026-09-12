@@ -1,30 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Pagar {{ factura.numero }}{% endblock %}
+{% block title %}Registrar Pago - {{ factura.numero }}{% endblock %}
 {% block content %}
-<h4 class="mb-4">Registrar Pago - {{ factura.numero }}</h4>
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-money-bill" aria-hidden="true"></i> Registrar Pago</h4>
+        <small class="text-muted">Factura {{ factura.numero }}</small>
+    </div>
+</div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="card text-bg-primary h-100">
+        <div class="card h-100">
             <div class="card-body text-center">
-                <h6 class="card-title text-uppercase small">Total</h6>
-                <h2 class="mb-0">${{ "%.2f"|format(factura.total|float) }}</h2>
+                <h6 class="card-title text-muted small">Total</h6>
+                <h2 class="text-primary mb-0">${{ "%.2f"|format(factura.total|float) }}</h2>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card text-bg-success h-100">
+        <div class="card h-100">
             <div class="card-body text-center">
-                <h6 class="card-title text-uppercase small">Pagado</h6>
-                <h2 class="mb-0">${{ "%.2f"|format(factura.monto_pagado|float) }}</h2>
+                <h6 class="card-title text-muted small">Pagado</h6>
+                <h2 class="text-success mb-0">${{ "%.2f"|format(factura.monto_pagado|float) }}</h2>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card text-bg-danger h-100">
+        <div class="card h-100">
             <div class="card-body text-center">
-                <h6 class="card-title text-uppercase small">Saldo Pendiente</h6>
-                <h2 class="mb-0">${{ "%.2f"|format(factura.saldo_pendiente|float) }}</h2>
+                <h6 class="card-title text-muted small">Saldo Pendiente</h6>
+                <h2 class="text-danger mb-0">${{ "%.2f"|format(factura.saldo_pendiente|float) }}</h2>
             </div>
         </div>
     </div>
@@ -53,9 +58,9 @@
                     {{ form.notas(class="form-control", rows=2) }}
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
-                <a href="{{ url_for('facturas.ver', id=factura.id) }}" class="btn btn-secondary">Cancelar</a>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('facturas.ver', id=factura.id) }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

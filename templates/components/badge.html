@@ -1,0 +1,15 @@
+{# ============================================================
+   SIAM Component: Badge / Pill simple
+   Uso:
+   {% from "components/badge.html" import badge %}
+   {{ badge("Completado", "success") }}
+   ============================================================ #}
+{% macro badge(texto="", color="secondary") -%}
+<span class="badge badge-soft-{{ color }}">{{ texto }}</span>
+{%- endmacro %}
+
+{% macro badge_dot(texto="", color="secondary") -%}
+<span class="badge badge-soft-{{ color }}">
+    <i class="fa-solid fa-circle me-1" style="font-size:.45em;" aria-hidden="true"></i>{{ texto }}
+</span>
+{%- endmacro %}

@@ -1,27 +1,30 @@
 {% extends "base.html" %}
 {% block title %}{{ item.nombre }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">{{ item.nombre }}</h4>
+<div class="page-header">
     <div>
+        <h4><i class="fa-solid fa-box" aria-hidden="true"></i> {{ item.nombre }}</h4>
+        <small class="text-muted">Detalle del producto e historial de movimientos</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         {% if not item.es_baja %}
         <a href="{{ url_for('inventario.movimiento', id=item.id) }}" class="btn btn-primary">
-            <i class="fa-solid fa-arrows-left-right"></i> Registrar Movimiento
+            <i class="fa-solid fa-arrows-left-right me-1" aria-hidden="true"></i>Registrar Movimiento
         </a>
         <a href="{{ url_for('inventario.editar', id=item.id) }}" class="btn btn-outline-warning">
-            <i class="fa-solid fa-pen"></i> Editar
+            <i class="fa-solid fa-pen me-1" aria-hidden="true"></i>Editar
         </a>
         <button class="btn btn-outline-danger" onclick="document.getElementById('bajaModal').showModal()">
-            <i class="fa-solid fa-box-archive"></i> Dar de baja
+            <i class="fa-solid fa-box-archive me-1" aria-hidden="true"></i>Dar de baja
         </button>
         {% else %}
         <form method="POST" action="{{ url_for('inventario.restaurar', id=item.id) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token()|safe }}">
-            <button class="btn btn-success"><i class="fa-solid fa-rotate-left"></i> Restaurar</button>
+            <button class="btn btn-success"><i class="fa-solid fa-rotate-left me-1" aria-hidden="true"></i>Restaurar</button>
         </form>
         {% endif %}
-        <a href="{{ url_for('inventario.listar') }}" class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+        <a href="{{ url_for('inventario.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
         </a>
     </div>
 </div>
@@ -46,7 +49,7 @@
         <textarea name="motivo" class="form-control mb-2" rows="3"
                   placeholder="Motivo de la baja (obligatorio)" required></textarea>
         <div class="text-end">
-            <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+            <button type="button" class="btn btn-sm btn-soft me-1"
                     onclick="document.getElementById('bajaModal').close()">Cancelar</button>
             <button class="btn btn-sm btn-danger">Confirmar baja</button>
         </div>
@@ -55,7 +58,7 @@
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card border-success h-100">
+        <div class="card h-100">
             <div class="card-body text-center">
                 <h6 class="card-title text-muted small">Stock Actual</h6>
                 <h2 class="text-success mb-0 {% if item.es_baja %}text-secondary{% elif item.stock_critico_alcanzado %}text-danger{% elif item.stock_bajo %}text-warning{% endif %}">
@@ -104,9 +107,9 @@
 <div class="row g-3">
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header"><h6 class="mb-0">Detalles del Producto</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fa-solid fa-circle-info"></i> Detalles del Producto</h6></div>
             <div class="card-body">
-                <table class="table table-sm">
+                <table class="table table-modern table-sm mb-0">
                     <tr><th>SKU</th><td><code>{{ item.sku or "-" }}</code></td></tr>
                     <tr><th>Código de barras</th><td><code>{{ item.codigo_barras or "-" }}</code></td></tr>
                     <tr><th>Categoría</th><td>{{ item.categoria_nombre or "-" }}</td></tr>
@@ -121,7 +124,7 @@
     </div>
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header"><h6 class="mb-0">Descripción</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fa-solid fa-align-left"></i> Descripción</h6></div>
             <div class="card-body">
                 <p class="mb-0">{{ item.descripcion or "Sin descripción" }}</p>
             </div>
@@ -131,12 +134,12 @@
 
 <div class="card mt-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="mb-0">Historial de Movimientos</h6>
+        <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Movimientos</h6>
         <span class="badge bg-secondary">{{ movimientos|length }} registro(s)</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-modern table-sm table-hover mb-0">
                 <thead>
                     <tr>
                         <th>#</th>

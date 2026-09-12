@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 {% block title %}OT {{ orden.numero }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Orden de Trabajo {{ orden.numero }}</h4>
-    <div class="btn-group">
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Orden de Trabajo {{ orden.numero }}</h4>
+        <small class="text-muted">Detalle, checklist, repuestos y seguimiento</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url_for('ordenes_trabajo.editar', id=orden.id) }}" class="btn btn-outline-warning">
-            <i class="fa-solid fa-pen"></i> Editar
+            <i class="fa-solid fa-pen me-1" aria-hidden="true"></i>Editar
         </a>
-        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Volver
+        <a href="{{ url_for('ordenes_trabajo.listar') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>Volver
         </a>
     </div>
 </div>
@@ -17,44 +20,36 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h6 class="mb-0">Información de la Orden</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-circle-info"></i> Información de la Orden</h6>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="text-muted small">Cliente</label>
+                        <small class="text-muted d-block">Cliente</small>
                         <p class="fw-bold mb-0">{{ orden.cliente.nombre }}</p>
                         {% if orden.cliente.telefono %}<small class="text-muted">{{ orden.cliente.telefono }}</small>{% endif %}
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Vehículo</label>
+                        <small class="text-muted d-block">Vehículo</small>
                         <p class="fw-bold mb-0">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
                         <small class="text-muted">{{ orden.vehiculo.placa }}{% if orden.vehiculo.anio %} · {{ orden.vehiculo.anio }}{% endif %}</small>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Mecánico Asignado</label>
+                        <small class="text-muted d-block">Mecánico Asignado</small>
                         <p class="fw-bold mb-0">{{ orden.mecanico.nombre if orden.mecanico else "Sin asignar" }}</p>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Fecha de Ingreso</label>
+                        <small class="text-muted d-block">Fecha de Ingreso</small>
                         <p class="fw-bold mb-0">{{ orden.fecha_ingreso }}</p>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Fecha Estimada de Entrega</label>
+                        <small class="text-muted d-block">Fecha Estimada de Entrega</small>
                         <p class="fw-bold mb-0">{{ orden.fecha_estimada_entrega if orden.fecha_estimada_entrega else "No definida" }}</p>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Estado Actual</label>
+                        <small class="text-muted d-block">Estado Actual</small>
                         <p class="mb-0">
-                            <span class="badge fs-6 bg-{{ {
-                                'recibido': 'secondary',
-                                'diagnostico': 'info',
-                                'esperando_repuestos': 'warning',
-                                'en_reparacion': 'primary',
-                                'pruebas': 'info',
-                                'listo_entrega': 'success',
-                                'entregado': 'dark',
-                            }[orden.estado] }}">
+                            <span class="badge fs-6 bg-{{ orden.estado_color }}">
                                 {{ orden.estado_display }}
                             </span>
                         </p>
@@ -62,26 +57,26 @@
                 </div>
                 {% if orden.diagnostico_inicial %}
                 <hr>
-                <label class="text-muted small">Diagnóstico Inicial</label>
+                <small class="text-muted d-block">Diagnóstico Inicial</small>
                 <p class="mb-0" style="white-space: pre-wrap;">{{ orden.diagnostico_inicial }}</p>
                 {% endif %}
                 {% if orden.observaciones %}
                 <hr>
-                <label class="text-muted small">Observaciones</label>
+                <small class="text-muted d-block">Observaciones</small>
                 <p class="mb-0" style="white-space: pre-wrap;">{{ orden.observaciones }}</p>
                 {% endif %}
                 <hr>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="text-muted small">Kilometraje Ingreso</label>
+                        <small class="text-muted d-block">Kilometraje Ingreso</small>
                         <p class="fw-bold mb-0">{{ orden.kms_ingreso if orden.kms_ingreso is not none else "—" }} km</p>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Combustible Ingreso</label>
+                        <small class="text-muted d-block">Combustible Ingreso</small>
                         <p class="fw-bold mb-0">{{ orden.nivel_combustible_ingreso or "—" }}</p>
                     </div>
                     <div class="col-md-4">
-                        <label class="text-muted small">Total Repuestos</label>
+                        <small class="text-muted d-block">Total Repuestos</small>
                         <p class="fw-bold mb-0">${{ "{:,.0f}".format(orden.total_repuestos) }}</p>
                     </div>
                 </div>
@@ -148,7 +143,7 @@
             <div class="card-body">
                 {% if orden.repuestos %}
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover">
+                    <table class="table table-modern table-sm table-hover mb-0">
                         <thead>
                             <tr>
                                 <th>Repuesto</th>
@@ -268,12 +263,7 @@
                     {% for f in orden.facturas %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <a href="{{ url_for('facturas.ver', id=f.id) }}">{{ f.numero }}</a>
-                        <span class="badge bg-{{ {
-                            'pendiente': 'warning',
-                            'parcial': 'info',
-                            'pagado': 'success',
-                            'anulado': 'danger'
-                        }[f.estado_actualizado] }}">{{ f.estado_actualizado|title }}</span>
+                        <span class="badge bg-{{ f.estado_color }}">{{ f.estado_actualizado|title }}</span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -363,7 +353,7 @@
         {% if orden.estado != "entregado" %}
         <div class="card mb-3">
             <div class="card-header">
-                <h6 class="mb-0">Cambiar Estado</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-arrows-rotate"></i> Cambiar Estado</h6>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('ordenes_trabajo.cambiar_estado', id=orden.id) }}">
@@ -388,7 +378,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h6 class="mb-0">Historial de Cambios</h6>
+                <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Cambios</h6>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
@@ -396,15 +386,7 @@
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge bg-{{ {
-                                    'recibido': 'secondary',
-                                    'diagnostico': 'info',
-                                    'esperando_repuestos': 'warning',
-                                    'en_reparacion': 'primary',
-                                    'pruebas': 'info',
-                                    'listo_entrega': 'success',
-                                    'entregado': 'dark',
-                                }[h.estado_nuevo] }} small">
+                                <span class="badge bg-{{ h.estado_color }} small">
                                     {{ h.estado_nuevo|replace("_", " ")|title }}
                                 </span>
                                 {% if h.estado_anterior %}

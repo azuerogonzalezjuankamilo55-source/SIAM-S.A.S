@@ -1,14 +1,19 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/form_section.html" import form_section %}
+
 {% block title %}{{ "Editar" if cita else "Nueva" }} Cita{% endblock %}
 {% block content %}
-<h4 class="mb-4">{{ "Editar" if cita else "Nueva" }} Cita</h4>
-<div class="card">
+{{ page_header(titulo=("Editar" if cita else "Nueva") ~ " Cita", icono="fa-calendar-check",
+               subtitulo=("Programa la cita " ~ (cita.fecha|string)) if cita else "Agenda una nueva cita para un cliente") }}
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         <form method="POST">
             {{ form.hidden_tag() }}
+            {% call form_section(icono="fa-user-check", titulo="Cliente, vehículo y asignación") %}
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Cliente *</label>
+                    <label class="form-label">Cliente <span class="required">*</span></label>
                     <select name="cliente_id" id="cliente_id" class="form-select" required>
                         <option value="">Seleccione...</option>
                         {% for c in clientes %}
@@ -17,7 +22,7 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Vehículo *</label>
+                    <label class="form-label">Vehículo <span class="required">*</span></label>
                     <select name="vehiculo_id" id="vehiculo_id" class="form-select" required>
                         <option value="">Primero seleccione un cliente</option>
                         {% if cita %}
@@ -52,18 +57,22 @@
                         {% endfor %}
                     </select>
                 </div>
+            </div>
+            {% endcall %}
+            {% call form_section(icono="fa-clock", titulo="Fecha y hora") %}
+            <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Fecha *</label>
+                    <label class="form-label">Fecha <span class="required">*</span></label>
                     <input type="date" name="fecha" id="fecha" class="form-control" value="{{ cita.fecha if cita else '' }}" required>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">Hora *</label>
+                <div class="col-md-3">
+                    <label class="form-label">Hora <span class="required">*</span></label>
                     <input type="time" name="hora" id="hora" class="form-control" value="{{ cita.hora if cita else '' }}" list="listaHoras" required>
                     <datalist id="listaHoras"></datalist>
                     <div class="form-text" id="hintHoras"></div>
                 </div>
                 {% if cita %}
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label">Estado</label>
                     <select name="estado" class="form-select">
                         {% for estado, etiqueta in [
@@ -83,14 +92,14 @@
                     </select>
                 </div>
                 {% endif %}
-                <div class="col-12">
-                    <label class="form-label">Descripción / Observaciones</label>
-                    <textarea name="descripcion" class="form-control" rows="3">{{ cita.descripcion if cita else '' }}</textarea>
-                </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{{ url_for('citas.listar') }}" class="btn btn-secondary">Cancelar</a>
+            {% endcall %}
+            {% call form_section(icono="fa-comment", titulo="Descripción / observaciones") %}
+            <textarea name="descripcion" class="form-control" rows="3" placeholder="Detalles de la cita">{{ cita.descripcion if cita else '' }}</textarea>
+            {% endcall %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Guardar</button>
+                <a href="{{ url_for('citas.listar') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

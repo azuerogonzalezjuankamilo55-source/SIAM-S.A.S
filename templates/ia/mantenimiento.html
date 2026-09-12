@@ -1,20 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Mantenimiento {{ datos.resumen }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="fa-solid fa-calendar-check me-2 text-success"></i>Plan de mantenimiento</h4>
-    <a href="{{ url_for('ia.index') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-    </a>
+<div class="page-header mb-3" data-aos="fade-up">
+    <div>
+        <h4><i class="fa-solid fa-calendar-check text-success" aria-hidden="true"></i>Plan de mantenimiento</h4>
+        <small class="text-muted">Recomendaciones basadas en el historial del vehículo</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('ia.index') }}" class="btn btn-soft">
+            <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Volver
+        </a>
+    </div>
 </div>
 
-<div class="card mb-3">
+<div class="card mb-3" data-aos="fade-up">
     <div class="card-body">
         <div class="d-flex align-items-center">
-            <i class="fa-solid fa-truck fs-2 me-3 text-primary"></i>
+            <span class="d-inline-flex align-items-center justify-content-center rounded-3 me-3"
+                  style="width:48px;height:48px;background:rgba(var(--bs-primary-rgb),.12);color:var(--bs-primary);" aria-hidden="true">
+                <i class="fa-solid fa-truck fs-4"></i>
+            </span>
             <div>
                 <h5 class="mb-0">{{ datos.vehiculo.marca }} {{ datos.vehiculo.modelo }}
-                    <span class="badge bg-primary">{{ datos.vehiculo.placa }}</span></h5>
+                    <span class="badge badge-soft-primary ms-1">{{ datos.vehiculo.placa }}</span></h5>
                 {% if datos.kms_ultimo %}
                 <small class="text-muted">Último kilometraje registrado: {{ datos.kms_ultimo }} km</small>
                 {% endif %}
@@ -23,8 +31,8 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header"><strong>Recomendaciones basadas en el historial</strong></div>
+<div class="card" data-aos="fade-up">
+    <div class="card-header"><strong><i class="fa-solid fa-list-check text-primary me-1" aria-hidden="true"></i>Recomendaciones basadas en el historial</strong></div>
     <div class="card-body p-0">
         <ul class="list-group list-group-flush">
             {% for r in datos.recomendaciones %}
@@ -33,7 +41,7 @@
                     <strong>{{ r.nombre }}</strong>
                     <small class="d-block text-muted">{{ r.detalle }}</small>
                 </div>
-                <span class="badge bg-{{
+                <span class="badge badge-soft-{{
                     'success' if r.estado == 'al_dia' else
                     'warning' if r.estado == 'pendiente' else
                     'danger' if r.estado == 'vencido' else 'secondary'

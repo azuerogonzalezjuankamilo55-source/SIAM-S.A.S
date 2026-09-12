@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Configuración del Taller{% endblock %}
 {% block content %}
-<h4 class="mb-4">Configuración del Taller</h4>
+<div class="page-header">
+    <div>
+        <h4><i class="fa-solid fa-gear" aria-hidden="true"></i> Configuración del Taller</h4>
+        <small class="text-muted">Ajustes generales, facturación y datos legales</small>
+    </div>
+</div>
 {% if config.logo_path %}
 <div class="card mb-3">
     <div class="card-body d-flex align-items-center flex-wrap gap-3">
@@ -60,9 +65,9 @@
                     <small class="text-muted">Formatos: JPG, PNG, WebP · Máx. 5 MB</small>
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-                <a href="{{ url_for('facturas.listar') }}" class="btn btn-secondary">Cancelar</a>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>{{ form.submit.label.text }}</button>
+                <a href="{{ url_for('facturas.listar') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>

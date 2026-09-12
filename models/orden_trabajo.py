@@ -34,6 +34,16 @@ ESTADOS_OT_LABELS = {
     "entregado": "Entregado",
 }
 
+COLORES_ESTADO_OT = {
+    "recibido": "secondary",
+    "diagnostico": "info",
+    "esperando_repuestos": "warning",
+    "en_reparacion": "primary",
+    "pruebas": "info",
+    "listo_entrega": "success",
+    "entregado": "dark",
+}
+
 ESTADOS_OT_CHOICES = [(estado, ESTADOS_OT_LABELS[estado]) for estado in ESTADOS_OT]
 
 
@@ -85,16 +95,11 @@ class OrdenTrabajo(db.Model):
 
     @property
     def estado_display(self) -> str:
-        labels = {
-            "recibido": "Recibido",
-            "diagnostico": "Diagnóstico",
-            "esperando_repuestos": "Esperando Repuestos",
-            "en_reparacion": "En Reparación",
-            "pruebas": "En Pruebas",
-            "listo_entrega": "Listo para Entrega",
-            "entregado": "Entregado",
-        }
-        return labels.get(self.estado, self.estado)
+        return ESTADOS_OT_LABELS.get(self.estado, self.estado)
+
+    @property
+    def estado_color(self) -> str:
+        return COLORES_ESTADO_OT.get(self.estado, "secondary")
 
     @property
     def items_completados(self) -> int:

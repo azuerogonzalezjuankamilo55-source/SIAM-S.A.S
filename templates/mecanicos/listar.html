@@ -1,76 +1,74 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/status_badge.html" import status_badge %}
+{% from "components/empty_state.html" import empty_state %}
+
 {% block title %}Mecánicos{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Mecánicos</h4>
-    <a href="{{ url_for('mecanicos.crear') }}" class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Nuevo Mecánico
-    </a>
-</div>
-<div class="card">
-    <div class="card-body">
-        <div class="search-input mb-3" style="max-width: 340px;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" class="form-control form-control-sm" placeholder="Buscar..." aria-label="Buscar" data-table-search="#tablaMecanicos">
+{{ page_header(titulo="Mecánicos", icono="fa-user-gear",
+               subtitulo="Equipo de trabajo del taller",
+               boton="Nuevo Mecánico", boton_icon="fa-plus",
+               boton_url=url_for('mecanicos.crear')) }}
+
+<div class="card" data-aos="fade-up">
+    <div class="table-toolbar p-2">
+        <div class="table-toolbar-left w-100">
+            <div class="search-input w-100" style="max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" class="form-control form-control-sm" placeholder="Buscar por nombre, teléfono o especialidad..." aria-label="Buscar mecánicos" data-table-search="#tablaMecanicos">
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover" id="tablaMecanicos">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Foto</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Especialidad</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in mecanicos %}
-                    <tr>
-                        <td>{{ m.id }}</td>
-                        <td>
-                            {% if m.foto_path %}
-                            <img src="{{ m.foto_path }}" alt="{{ m.nombre }}" class="avatar">
-                            {% else %}
-                            <div class="avatar d-inline-flex align-items-center justify-content-center bg-body-tertiary text-muted">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            {% endif %}
-                        </td>
-                        <td>{{ m.nombre }}</td>
-                        <td>{{ m.telefono or "-" }}</td>
-                        <td>{{ m.especialidad or "-" }}</td>
-                        <td>
-                            <span class="badge bg-{{ "success" if m.activo else "secondary" }}">
-                                {{ "Activo" if m.activo else "Inactivo" }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ url_for('mecanicos.editar', id=m.id) }}" class="btn btn-sm btn-outline-warning">
-                                <i class="fa-solid fa-pen"></i>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-modern table-hover mb-0" id="tablaMecanicos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Especialidad</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in mecanicos %}
+                <tr>
+                    <td data-label="ID">{{ m.id }}</td>
+                    <td data-label="Foto">
+                        {% if m.foto_path %}
+                        <img src="{{ m.foto_path }}" alt="{{ m.nombre }}" class="avatar">
+                        {% else %}
+                        <div class="table-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></div>
+                        {% endif %}
+                    </td>
+                    <td data-label="Nombre"><span class="fw-semibold">{{ m.nombre }}</span></td>
+                    <td data-label="Teléfono">{{ m.telefono or "—" }}</td>
+                    <td data-label="Especialidad">{{ m.especialidad or "—" }}</td>
+                    <td data-label="Estado">{{ status_badge('activo' if m.activo else 'inactivo', {'activo': {'bg':'success','texto':'Activo'}, 'inactivo': {'bg':'secondary','texto':'Inactivo'}}) }}</td>
+                    <td data-label="Acciones">
+                        <div class="table-actions justify-content-end">
+                            <a href="{{ url_for('mecanicos.editar', id=m.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
                             </a>
-                            <a href="{{ url_for('mecanicos.eliminar', id=m.id) }}" class="btn btn-sm btn-outline-danger" data-confirm="¿Eliminar mecánico?">
-                                <i class="fa-solid fa-trash"></i>
+                            <a href="{{ url_for('mecanicos.eliminar', id=m.id) }}" class="btn btn-sm btn-outline-danger" title="Eliminar" data-confirm="¿Eliminar mecánico?">
+                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
                             </a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fa-solid fa-user-gear" aria-hidden="true"></i></div>
-                                <h6 class="mb-1">Aún no hay mecánicos registrados</h6>
-                                <p class="text-muted small mb-3">Registra tu equipo para asignar órdenes de trabajo.</p>
-                                <a href="{{ url_for('mecanicos.crear') }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i>Crear mecánico</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="p-0">
+                        {{ empty_state(icon="fa-user-gear", titulo="Aún no hay mecánicos registrados",
+                                       mensaje="Registra tu equipo para asignar órdenes de trabajo.",
+                                       accion="Crear mecánico", url=url_for('mecanicos.crear'), accion_icon="fa-plus") }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

@@ -1,14 +1,19 @@
 {% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/form_section.html" import form_section %}
+
 {% block title %}{{ "Editar" if vehiculo else "Nuevo" }} Vehículo{% endblock %}
 {% block content %}
-<h4 class="mb-4">{{ "Editar" if vehiculo else "Nuevo" }} Vehículo</h4>
-<div class="card">
+{{ page_header(titulo=("Editar" if vehiculo else "Nuevo") ~ " Vehículo", icono="fa-car",
+               subtitulo=("Datos del vehículo de " ~ vehiculo.cliente.nombre) if vehiculo else "Registra el vehículo de un cliente") }}
+<div class="card" data-aos="fade-up">
     <div class="card-body">
         <form method="POST">
             {{ form.hidden_tag() }}
+            {% call form_section(icono="fa-car-side", titulo="Vehículo") %}
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Cliente *</label>
+                    <label class="form-label">Cliente <span class="required">*</span></label>
                     <select name="cliente_id" class="form-select" required>
                         <option value="">Seleccione...</option>
                         {% for c in clientes %}
@@ -17,33 +22,34 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Placa *</label>
-                    <input type="text" name="placa" class="form-control" value="{{ vehiculo.placa if vehiculo else '' }}" required>
+                    <label class="form-label">Placa <span class="required">*</span></label>
+                    <input type="text" name="placa" class="form-control" value="{{ vehiculo.placa if vehiculo else '' }}" placeholder="ABC-123" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Marca *</label>
-                    <input type="text" name="marca" class="form-control" value="{{ vehiculo.marca if vehiculo else '' }}" required>
+                    <label class="form-label">Marca <span class="required">*</span></label>
+                    <input type="text" name="marca" class="form-control" value="{{ vehiculo.marca if vehiculo else '' }}" placeholder="Toyota" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Modelo *</label>
-                    <input type="text" name="modelo" class="form-control" value="{{ vehiculo.modelo if vehiculo else '' }}" required>
+                    <label class="form-label">Modelo <span class="required">*</span></label>
+                    <input type="text" name="modelo" class="form-control" value="{{ vehiculo.modelo if vehiculo else '' }}" placeholder="Corolla" required>
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Año</label>
-                    <input type="number" name="anio" class="form-control" value="{{ vehiculo.anio if vehiculo else '' }}">
+                    <input type="number" name="anio" class="form-control" value="{{ vehiculo.anio if vehiculo else '' }}" placeholder="2020">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">VIN</label>
-                    <input type="text" name="vin" class="form-control" value="{{ vehiculo.vin if vehiculo else '' }}">
+                    <input type="text" name="vin" class="form-control" value="{{ vehiculo.vin if vehiculo else '' }}" placeholder="Número de chasis">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Color</label>
-                    <input type="text" name="color" class="form-control" value="{{ vehiculo.color if vehiculo else '' }}">
+                    <input type="text" name="color" class="form-control" value="{{ vehiculo.color if vehiculo else '' }}" placeholder="Negro">
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-secondary">Cancelar</a>
+            {% endcall %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>Guardar</button>
+                <a href="{{ url_for('vehiculos.listar') }}" class="btn btn-soft">Cancelar</a>
             </div>
         </form>
     </div>
