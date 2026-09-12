@@ -1,4 +1,4 @@
-"""FASE 15 - Panel de Configuración Centralizado de SIAM."""
+﻿"""FASE 15 - Panel de ConfiguraciÃ³n Centralizado de SIAM."""
 import json
 from datetime import date, timedelta
 
@@ -55,16 +55,27 @@ class TestPermisosPanel:
         assert r.status_code == 302
         assert r.headers.get("Location", "").endswith("/configuracion/empresa")
 
-    def test_staff_puede_leer_todas_las_secciones(self, app, client):
+    def test_staff_puede_leer_secciones_permitidas(self, app, client):
         with app.app_context():
             _crear_usuario(db, "recep_cfg@test.com", "recepcion")
             _crear_usuario(db, "mec_cfg@test.com", "mecanico")
+
+        secciones_restringidas = {"archivos", "sistema", "seguridad"}
+
         for correo in ("recep_cfg@test.com", "mec_cfg@test.com"):
-            client.post("/auth/login", data={"correo": correo, "password": "clave1234"})
+            _login(client, correo)
+
             for seccion in SECCIONES:
                 r = client.get(f"/configuracion/{seccion}")
-                assert r.status_code == 200, f"{correo} no pudo leer {seccion}"
 
+                if seccion in secciones_restringidas:
+                    assert r.status_code == 302, (
+                        f"{correo} no debería poder leer {seccion}"
+                    )
+                else:
+                    assert r.status_code == 200, (
+                        f"{correo} no pudo leer {seccion}"
+                    )
     def test_admin_puede_leer_todas_las_secciones(self, app, client):
         with app.app_context():
             _crear_usuario(db, "admin_cfg@test.com", "admin")
@@ -85,7 +96,7 @@ class TestPermisosPanel:
         _login(client, "admin_cfg@test.com")
         for seccion in SECCIONES_LECTURA:
             r = client.post(f"/configuracion/{seccion}")
-            assert r.status_code == 405, f"POST {seccion} debía ser 405"
+            assert r.status_code == 405, f"POST {seccion} debÃ­a ser 405"
 
 
 class TestEscrituraSoloAdmin:
@@ -178,7 +189,7 @@ class TestPersistenciaSecciones:
             data={
                 "nombre_taller": "Taller Central SAS",
                 "nit": "900123456",
-                "ciudad": "Bogotá",
+                "ciudad": "BogotÃ¡",
                 "telefono": "555-0100",
                 "whatsapp": "3001234567",
                 "email": "info@tallercentral.co",
@@ -192,7 +203,7 @@ class TestPersistenciaSecciones:
         with app.app_context():
             config = ConfiguracionTaller.get_config()
             assert config.nombre_taller == "Taller Central SAS"
-            assert config.ciudad == "Bogotá"
+            assert config.ciudad == "BogotÃ¡"
             assert config.whatsapp == "3001234567"
             assert config.sitio_web == "https://tallercentral.co"
 
@@ -248,9 +259,9 @@ class TestPersistenciaSecciones:
                 "ia_activado": "y",
                 "ia_nombre": "Asistente SIAM",
                 "ia_tono": "Amigable",
-                "ia_mensaje_bienvenida": "Hola, ¿en qué te ayudo?",
+                "ia_mensaje_bienvenida": "Hola, Â¿en quÃ© te ayudo?",
                 "ia_contacto": "WhatsApp 3001234567",
-                "ia_preguntas_sugeridas": "¿Cuál es el horario?\n¿Cómo agendo una cita?",
+                "ia_preguntas_sugeridas": "Â¿CuÃ¡l es el horario?\nÂ¿CÃ³mo agendo una cita?",
             },
             headers=_ajax_headers(),
         )
@@ -259,22 +270,22 @@ class TestPersistenciaSecciones:
         with app.app_context():
             config = ConfiguracionTaller.get_config()
             assert config.ia_nombre == "Asistente SIAM"
-            assert config.ia_mensaje_bienvenida == "Hola, ¿en qué te ayudo?"
+            assert config.ia_mensaje_bienvenida == "Hola, Â¿en quÃ© te ayudo?"
             preguntas = json.loads(config.ia_preguntas_sugeridas)
-            assert preguntas == ["¿Cuál es el horario?", "¿Cómo agendo una cita?"]
+            assert preguntas == ["Â¿CuÃ¡l es el horario?", "Â¿CÃ³mo agendo una cita?"]
 
     def test_ia_get_muestra_preguntas_una_por_linea(self, app, client):
         with app.app_context():
             _crear_usuario(db, "admin_cfg@test.com", "admin")
             config = ConfiguracionTaller.get_config()
             config.ia_preguntas_sugeridas = json.dumps(
-                ["¿Cuál es el horario?", "¿Cómo agendo una cita?"], ensure_ascii=False
+                ["Â¿CuÃ¡l es el horario?", "Â¿CÃ³mo agendo una cita?"], ensure_ascii=False
             )
             db.session.commit()
         _login(client, "admin_cfg@test.com")
         r = client.get("/configuracion/ia")
         html = r.get_data(as_text=True)
-        assert "¿Cuál es el horario?\n¿Cómo agendo una cita?" in html
+        assert "Â¿CuÃ¡l es el horario?\nÂ¿CÃ³mo agendo una cita?" in html
 
 
 class TestSeguridadYEstado:
@@ -293,7 +304,7 @@ class TestSeguridadYEstado:
     def test_seguridad_muestra_usuarios(self, app, client):
         with app.app_context():
             _crear_usuario(db, "admin_cfg@test.com", "admin", nombre="Admin")
-            _crear_usuario(db, "recep_cfg@test.com", "recepcion", nombre="Recepción")
+            _crear_usuario(db, "recep_cfg@test.com", "recepcion", nombre="RecepciÃ³n")
         _login(client, "admin_cfg@test.com")
         html = client.get("/configuracion/seguridad").get_data(as_text=True)
         assert "admin_cfg@test.com" in html
@@ -461,3 +472,5 @@ class TestRecordatorioAnticipacionConfig:
             ).first()
             assert rec is not None
             assert rec.fecha_programada == esperado
+
+

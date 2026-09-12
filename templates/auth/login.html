@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Iniciar Sesión - SIAM{% endblock %}
+
 {% block auth_content %}
 {% set area_icon = 'fa-car-side' if area == 'cliente' else ('fa-user-shield' if area == 'admin' else 'fa-gears') %}
 {% set area_titulo = 'Acceso clientes' if area == 'cliente' else ('Área administrativa' if area == 'admin' else 'Bienvenido de nuevo') %}
@@ -10,77 +11,189 @@
         <span class="auth-logo" aria-hidden="true">
             <i class="fa-solid {{ area_icon }}"></i>
         </span>
+
         <h1 class="h4 fw-bold mb-1">{{ area_titulo }}</h1>
         <p class="text-muted mb-0 small">{{ area_subtitulo }}</p>
     </div>
+
     <form method="POST" novalidate>
         {{ form.hidden_tag() }}
+
         <div class="mb-3">
             <label class="form-label" for="correo">Correo electrónico</label>
             <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
-                <input type="email" name="correo" id="correo" value="{{ form.correo.data or '' }}" class="form-control" placeholder="{% if area == 'admin' %}admin@taller.com{% else %}correo@ejemplo.com{% endif %}" required autofocus>
+                <span class="input-group-text">
+                    <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                </span>
+                <input
+                    type="email"
+                    name="correo"
+                    id="correo"
+                    value="{{ form.correo.data or '' }}"
+                    class="form-control"
+                    placeholder="{% if area == 'admin' %}admin@taller.com{% else %}correo@ejemplo.com{% endif %}"
+                    required
+                    autofocus
+                >
             </div>
         </div>
+
         <div class="mb-3">
             <label class="form-label" for="password">Contraseña</label>
             <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
-                <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
-                <button class="btn btn-outline-secondary auth-password-toggle" type="button" data-toggle-password="#password" aria-label="Mostrar u ocultar contraseña" tabindex="-1">
+                <span class="input-group-text">
+                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                </span>
+
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    class="form-control"
+                    placeholder="••••••••"
+                    required
+                >
+
+                <button
+                    class="btn btn-outline-secondary auth-password-toggle"
+                    type="button"
+                    data-toggle-password="#password"
+                    aria-label="Mostrar u ocultar contraseña"
+                    tabindex="-1"
+                >
                     <i class="fa-solid fa-eye" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                <label class="form-check-label" for="remember">Recordarme</label>
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="remember"
+                    id="remember"
+                >
+                <label class="form-check-label" for="remember">
+                    Recordarme
+                </label>
             </div>
-            <a href="{{ url_for('sedes.index') }}" class="small text-decoration-none text-primary">¿Necesitas ayuda? Contacta al taller</a>
+
+            <a
+                href="{{ url_for('sedes.index') }}"
+                class="small text-decoration-none text-primary"
+            >
+                ¿Necesitas ayuda? Contacta al taller
+            </a>
         </div>
+
         <button type="submit" class="btn btn-primary w-100 mt-1 py-2">
-            <i class="fa-solid fa-right-to-bracket me-1" aria-hidden="true"></i> Ingresar
+            <i class="fa-solid fa-right-to-bracket me-1" aria-hidden="true"></i>
+            Ingresar
         </button>
     </form>
+
+    {% if area == 'admin' %}
     <p class="text-center mt-3 mb-0 small">
-        {% if area == 'admin' and permite_registrar_admin %}
-        ¿No tienes cuenta? <a href="{{ url_for('auth.registrar_admin') }}" class="text-decoration-none fw-semibold">Crea cuenta administrativa aquí</a>
-        {% elif area == 'admin' %}
-        <span class="text-muted">Inicia sesión para acceder al panel administrativo.</span>
+        {% if permite_registrar_admin %}
+            ¿No tienes cuenta administrativa?
+            <a
+                href="{{ url_for('auth.registrar_admin') }}"
+                class="text-decoration-none fw-semibold"
+            >
+                Registrarme como administrador
+            </a>
         {% else %}
-        ¿No tienes cuenta? <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-semibold">Regístrate aquí</a>
+            <span class="text-muted">
+                ¿Necesitas una cuenta administrativa?
+                Contacta a un administrador existente.
+            </span>
         {% endif %}
     </p>
-    {% if area != 'admin' %}
-    <hr class="my-3">
-    <p class="text-center small mb-0 text-muted">
-        <i class="fa-solid fa-user-shield me-1" aria-hidden="true"></i>¿Eres parte del taller?
-        <a href="{{ url_for('auth.login', area='admin') }}" class="text-decoration-none">Acceso administrativo</a>
+    {% elif area == 'cliente' %}
+    <p class="text-center mt-3 mb-0 small">
+        ¿No tienes cuenta de cliente?
+        <a
+            href="{{ url_for('auth.register') }}"
+            class="text-decoration-none fw-semibold"
+        >
+            Registrarme como cliente
+        </a>
     </p>
     {% else %}
-    <p class="text-center small mt-2 mb-0 text-muted">
-        <i class="fa-solid fa-car-side me-1" aria-hidden="true"></i>¿Eres cliente?
-        <a href="{{ url_for('auth.login', area='cliente') }}" class="text-decoration-none">Ingresar como cliente</a>
+    <p class="text-center mt-3 mb-0 small">
+        <a
+            href="{{ url_for('auth.login', area='cliente') }}"
+            class="text-decoration-none fw-semibold"
+        >
+            Ingresar como cliente
+        </a>
+        <span class="mx-2 text-muted">|</span>
+        <a
+            href="{{ url_for('auth.login', area='admin') }}"
+            class="text-decoration-none fw-semibold"
+        >
+            Ingresar como administrador
+        </a>
+    </p>
+    {% endif %}
+
+    <hr class="my-3">
+
+    {% if area == 'admin' %}
+    <p class="text-center small mb-0 text-muted">
+        <i class="fa-solid fa-car-side me-1" aria-hidden="true"></i>
+        ¿Eres cliente?
+        <a
+            href="{{ url_for('auth.login', area='cliente') }}"
+            class="text-decoration-none"
+        >
+            Ingresar como cliente
+        </a>
+    </p>
+    {% elif area == 'cliente' %}
+    <p class="text-center small mb-0 text-muted">
+        <i class="fa-solid fa-user-shield me-1" aria-hidden="true"></i>
+        ¿Eres parte del taller?
+        <a
+            href="{{ url_for('auth.login', area='admin') }}"
+            class="text-decoration-none"
+        >
+            Acceso administrativo
+        </a>
     </p>
     {% endif %}
 </div>
 {% endblock %}
+
 {% block auth_side %}
 <div class="d-flex align-items-center gap-2" data-aos="fade-right">
     {% if taller_config and taller_config.logo_path %}
-    <img src="{{ taller_config.logo_path }}" alt="Logo" class="logo-img bg-white p-1 rounded">
+    <img
+        src="{{ taller_config.logo_path }}"
+        alt="Logo"
+        class="logo-img bg-white p-1 rounded"
+    >
     {% else %}
-    <span class="auth-brand-mark" aria-hidden="true"><i class="fa-solid fa-gears"></i></span>
-    <span class="fw-bold fs-4">{{ taller_config.nombre_taller if taller_config else "SIAM" }}</span>
+    <span class="auth-brand-mark" aria-hidden="true">
+        <i class="fa-solid fa-gears"></i>
+    </span>
+    <span class="fw-bold fs-4">
+        {{ taller_config.nombre_taller if taller_config else "SIAM" }}
+    </span>
     {% endif %}
 </div>
+
 <div data-aos="fade-up" data-aos-delay="150">
-    <h1 class="fw-bold display-6 mb-3">Tu taller, <span class="text-primary">en orden</span></h1>
+    <h1 class="fw-bold display-6 mb-3">
+        Tu taller, <span class="text-primary">en orden</span>
+    </h1>
+
     <p class="lead mb-4 text-white-50">
         Gestiona clientes, vehículos, servicios, facturas e inventario
         desde una sola plataforma. Sin papeles, sin caos.
     </p>
+
     <div class="row g-3 hero-stats mt-2">
         <div class="col-4">
             <div class="stat">
@@ -88,12 +201,14 @@
                 <small class="text-white-50">Acceso web</small>
             </div>
         </div>
+
         <div class="col-4">
             <div class="stat">
                 <h3 class="mb-0 fw-bold text-success">1 solo</h3>
                 <small class="text-white-50">Sistema</small>
             </div>
         </div>
+
         <div class="col-4">
             <div class="stat">
                 <h3 class="mb-0 fw-bold text-warning">100%</h3>
@@ -101,13 +216,27 @@
             </div>
         </div>
     </div>
+
     <div class="d-flex gap-4 mt-4 text-white-50 small">
-        <span><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i> Citas</span>
-        <span><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i> Órdenes</span>
-        <span><i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i> Facturación</span>
+        <span>
+            <i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>
+            Citas
+        </span>
+
+        <span>
+            <i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>
+            Órdenes
+        </span>
+
+        <span>
+            <i class="fa-solid fa-circle-check text-success me-1" aria-hidden="true"></i>
+            Facturación
+        </span>
     </div>
 </div>
+
 <div class="text-white-50 small" data-aos="fade-up">
-    <i class="fa-solid fa-shield-halved me-1" aria-hidden="true"></i> SIAM · Sistema Integral Automotriz
+    <i class="fa-solid fa-shield-halved me-1" aria-hidden="true"></i>
+    SIAM · Sistema Integral Automotriz
 </div>
 {% endblock %}

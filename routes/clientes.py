@@ -9,7 +9,7 @@ from models.cliente import Cliente
 from database.db import db
 from forms import ClienteForm
 from database.commit import safe_commit, json_success, json_error
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.clientes")
 clientes_bp = Blueprint("clientes", __name__, url_prefix="/clientes")
@@ -18,6 +18,7 @@ clientes_bp.before_request(staff_blueprint_guard)
 
 @clientes_bp.route("/")
 @login_required
+@roles_required("admin", "recepcion")
 def listar() -> Any:
     clientes = Cliente.query.order_by(Cliente.created_at.desc()).all()
     return render_template("clientes/listar.html", clientes=clientes)
@@ -25,6 +26,7 @@ def listar() -> Any:
 
 @clientes_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = ClienteForm()
     if form.validate_on_submit():
@@ -54,6 +56,7 @@ def crear() -> Any:
 
 @clientes_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     cliente = db.get_or_404(Cliente, id)
     form = ClienteForm(obj=cliente)
@@ -77,6 +80,7 @@ def editar(id: int) -> Any:
 
 @clientes_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

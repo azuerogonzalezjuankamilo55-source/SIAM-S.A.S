@@ -18,7 +18,7 @@ from services.cotizacion_service import CotizacionService, CotizacionError
 from services.sede_service import SedeService
 from services.vehiculo_service import VehiculoService
 from services.notification_service import NotificationService
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.cotizaciones")
 cotizaciones_bp = Blueprint("cotizaciones", __name__, url_prefix="/cotizaciones")
@@ -57,6 +57,7 @@ def listar() -> Any:
 
 @cotizaciones_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = CotizacionForm()
     clientes, vehiculos, sedes = _opciones_form(form)
@@ -97,6 +98,7 @@ def ver(id: int) -> Any:
 
 @cotizaciones_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     cotizacion = db.get_or_404(Cotizacion, id)
     if cotizacion.estado not in ("pendiente", "aprobada"):
@@ -126,6 +128,7 @@ def editar(id: int) -> Any:
 
 @cotizaciones_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def eliminar(id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -150,6 +153,7 @@ def eliminar(id: int) -> Any:
 
 @cotizaciones_bp.route("/items/agregar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def agregar_item(id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -176,6 +180,7 @@ def agregar_item(id: int) -> Any:
 
 @cotizaciones_bp.route("/items/agregar-libre/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def agregar_item_libre(id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -206,6 +211,7 @@ def agregar_item_libre(id: int) -> Any:
 
 @cotizaciones_bp.route("/items/eliminar/<int:item_id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def eliminar_item(item_id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -229,6 +235,7 @@ def eliminar_item(item_id: int) -> Any:
 
 @cotizaciones_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def cambiar_estado(id: int, estado: str) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -250,6 +257,7 @@ def cambiar_estado(id: int, estado: str) -> Any:
 
 @cotizaciones_bp.route("/enviar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def enviar(id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:
@@ -280,6 +288,7 @@ def enviar(id: int) -> Any:
 
 @cotizaciones_bp.route("/convertir-ot/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def convertir_ot(id: int) -> Any:
     if not _validar_csrf():
         if request.is_json:

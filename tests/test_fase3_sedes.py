@@ -1,4 +1,4 @@
-"""FASE 3 - Sedes en base de datos y citas con sede/servicio + validación de horarios."""
+﻿"""FASE 3 - Sedes en base de datos y citas con sede/servicio + validaciÃ³n de horarios."""
 from datetime import date, time
 
 from models import Usuario, Cliente, Vehiculo, Cita
@@ -182,6 +182,7 @@ class TestCitaConSedeStaff:
     def test_crear_guarda_sede_y_servicio(self, client, db):
         from models import Servicio
         _crear_staff(db)
+        _crear_staff(db, correo="recepcion@test.com", rol="recepcion")
         c = Cliente(nombre="Cli", correo="cc@test.com")
         db.session.add(c)
         db.session.commit()
@@ -190,7 +191,7 @@ class TestCitaConSedeStaff:
         sv = Servicio(nombre="Cambio de aceite", precio_estimado=50000)
         db.session.add(sv)
         db.session.commit()
-        _login(client, "mecanico@test.com")
+        _login(client, "recepcion@test.com")
         resp = client.post("/citas/crear", data={
             "cliente_id": c.id,
             "vehiculo_id": v.id,
@@ -204,3 +205,6 @@ class TestCitaConSedeStaff:
         assert cita is not None
         assert cita.sede_id == 1
         assert cita.servicio_id == sv.id
+
+
+

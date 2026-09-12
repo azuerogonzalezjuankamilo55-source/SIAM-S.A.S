@@ -5,7 +5,7 @@ from decimal import Decimal
 from flask import Blueprint, render_template, redirect, url_for, request, flash, send_file
 from flask_login import login_required, current_user
 from flask_wtf.csrf import validate_csrf
-from decorators import admin_required, staff_blueprint_guard
+from decorators import admin_required, staff_blueprint_guard, roles_required
 
 from models.cita import Cita
 from models.servicio import Servicio
@@ -28,6 +28,7 @@ facturas_bp.before_request(staff_blueprint_guard)
 
 @facturas_bp.route("/")
 @login_required
+@roles_required("admin", "recepcion")
 def listar() -> Any:
     estado = request.args.get("estado")
     q = Factura.query
@@ -39,6 +40,7 @@ def listar() -> Any:
 
 @facturas_bp.route("/crear/<int:cita_id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear(cita_id: int) -> Any:
     cita = db.get_or_404(Cita, cita_id)
     servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
@@ -92,6 +94,7 @@ def crear(cita_id: int) -> Any:
 
 @facturas_bp.route("/crear-desde-ot/<int:ot_id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear_desde_ot(ot_id: int) -> Any:
     ot = db.get_or_404(OrdenTrabajo, ot_id)
     servicios = Servicio.query.filter_by(activo=True).order_by(Servicio.nombre).all()
@@ -151,6 +154,7 @@ def crear_desde_ot(ot_id: int) -> Any:
 
 @facturas_bp.route("/ver/<int:id>")
 @login_required
+@roles_required("admin", "recepcion")
 def ver(id: int) -> Any:
     factura = db.get_or_404(Factura, id)
     config = ConfiguracionTaller.get_config()
@@ -159,6 +163,7 @@ def ver(id: int) -> Any:
 
 @facturas_bp.route("/pdf/<int:id>")
 @login_required
+@roles_required("admin", "recepcion")
 def pdf(id: int) -> Any:
     try:
         from weasyprint import HTML
@@ -186,6 +191,7 @@ def pdf(id: int) -> Any:
 
 @facturas_bp.route("/pagar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def pagar(id: int) -> Any:
     factura = db.get_or_404(Factura, id)
     if factura.estado == "anulado":
@@ -235,6 +241,7 @@ def pagar(id: int) -> Any:
 
 @facturas_bp.route("/anular/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def anular(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
@@ -343,6 +350,7 @@ def quitar_logo() -> Any:
 
 @facturas_bp.route("/eliminar-pago/<int:pago_id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar_pago(pago_id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

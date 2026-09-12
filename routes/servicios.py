@@ -11,7 +11,7 @@ from database.commit import safe_commit, json_success, json_error
 from forms import ServicioForm
 from exceptions import BusinessRuleException
 from services.image_service import ImageService, ImageError
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.servicios")
 servicios_bp = Blueprint("servicios", __name__, url_prefix="/servicios")
@@ -41,6 +41,7 @@ def listar() -> Any:
 
 @servicios_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin")
 def crear() -> Any:
     form = ServicioForm()
     if form.validate_on_submit():
@@ -71,6 +72,7 @@ def crear() -> Any:
 
 @servicios_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin")
 def editar(id: int) -> Any:
     servicio = db.get_or_404(Servicio, id)
     form = ServicioForm(obj=servicio)
@@ -94,6 +96,7 @@ def editar(id: int) -> Any:
 
 @servicios_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

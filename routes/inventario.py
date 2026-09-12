@@ -14,7 +14,7 @@ from database.db import db
 from forms import InventarioForm, MovimientoInventarioForm, CategoriaInventarioForm
 from database.commit import safe_commit, json_success, json_error
 from services.inventario_service import InventarioService
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.inventario")
 inventario_bp = Blueprint("inventario", __name__, url_prefix="/inventario")
@@ -50,6 +50,7 @@ def listar() -> Any:
 
 @inventario_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = InventarioForm()
     if form.validate_on_submit():
@@ -101,6 +102,7 @@ def ver(id: int) -> Any:
 
 @inventario_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     item = db.get_or_404(Inventario, id)
     form = InventarioForm(obj=item)
@@ -131,6 +133,7 @@ def editar(id: int) -> Any:
 
 @inventario_bp.route("/baja/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def baja(id: int) -> Any:
     item = db.get_or_404(Inventario, id)
     motivo = request.form.get("motivo") or ""
@@ -151,6 +154,7 @@ def baja(id: int) -> Any:
 
 @inventario_bp.route("/restaurar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def restaurar(id: int) -> Any:
     item = db.get_or_404(Inventario, id)
     try:
@@ -213,6 +217,11 @@ def movimiento(id: int) -> Any:
         try:
             tipo = form.tipo.data
             cantidad = form.cantidad.data
+            if tipo == "ajuste" and current_user.rol != "admin":
+                if request.is_json:
+                    return json_error(message="Solo un administrador puede realizar ajustes de inventario.", status_code=403)
+                flash("Solo un administrador puede realizar ajustes de inventario.", "danger")
+                return redirect(url_for("inventario.ver", id=item.id))
             InventarioService.registrar_movimiento(
                 item=item,
                 tipo=tipo,
@@ -296,6 +305,7 @@ def listar_categorias() -> Any:
 
 @inventario_bp.route("/categorias/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin")
 def crear_categoria() -> Any:
     form = CategoriaInventarioForm()
     if form.validate_on_submit():
@@ -322,6 +332,7 @@ def crear_categoria() -> Any:
 
 @inventario_bp.route("/categorias/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin")
 def editar_categoria(id: int) -> Any:
     cat = db.get_or_404(CategoriaInventario, id)
     form = CategoriaInventarioForm(obj=cat)
@@ -346,6 +357,7 @@ def editar_categoria(id: int) -> Any:
 
 @inventario_bp.route("/categorias/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar_categoria(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

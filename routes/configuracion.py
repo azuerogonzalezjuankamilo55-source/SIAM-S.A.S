@@ -73,6 +73,11 @@ def index() -> Any:
 def seccion(seccion: str) -> Any:
     if seccion not in ConfiguracionService.SECCIONES:
         abort(404)
+    if seccion in {"seguridad", "sistema", "archivos"} and current_user.rol != "admin":
+        if _es_ajax():
+            return json_error("No tienes permisos de administrador.", 403)
+        flash("No tienes permisos de administrador.", "danger")
+        return redirect(url_for("dashboard.index"))
     if seccion in SECCIONES_LECTURA and request.method == "POST":
         abort(405)
 

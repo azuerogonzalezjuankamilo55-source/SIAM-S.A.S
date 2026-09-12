@@ -14,7 +14,7 @@ from forms import VehiculoForm
 from database.commit import safe_commit, json_success, json_error
 from services.historial_service import HistorialService
 from services.image_service import ImageService, ImageError
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.vehiculos")
 vehiculos_bp = Blueprint("vehiculos", __name__, url_prefix="/vehiculos")
@@ -158,6 +158,7 @@ def eliminar_foto_historial(foto_id: int) -> Any:
 
 @vehiculos_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = VehiculoForm()
     clientes = Cliente.query.order_by(Cliente.nombre).all()
@@ -190,6 +191,7 @@ def crear() -> Any:
 
 @vehiculos_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     vehiculo = db.get_or_404(Vehiculo, id)
     form = VehiculoForm(obj=vehiculo)
@@ -214,6 +216,7 @@ def editar(id: int) -> Any:
 
 @vehiculos_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")

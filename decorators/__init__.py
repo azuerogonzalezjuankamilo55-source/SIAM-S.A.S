@@ -1,5 +1,6 @@
 from decorators.decorators import (
     admin_required,
+    roles_required,
     staff_required,
     staff_blueprint_guard,
     STAFF_ROLES,
@@ -9,6 +10,7 @@ from decorators.decorators import (
 
 __all__ = [
     "admin_required",
+    "roles_required",
     "staff_required",
     "staff_blueprint_guard",
     "STAFF_ROLES",

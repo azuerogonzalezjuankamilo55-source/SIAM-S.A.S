@@ -23,7 +23,7 @@ from services.numeracion import siguiente_numero
 from services.notification_service import NotificationService
 from services.vehiculo_service import VehiculoService
 from exceptions import BusinessRuleException, NotFoundException
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.ordenes_trabajo")
 ordenes_trabajo_bp = Blueprint("ordenes_trabajo", __name__, url_prefix="/ordenes-trabajo")
@@ -54,6 +54,7 @@ def listar() -> Any:
 
 @ordenes_trabajo_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = OrdenTrabajoForm()
     clientes = Cliente.query.order_by(Cliente.nombre).all()
@@ -121,6 +122,7 @@ def ver(id: int) -> Any:
 
 @ordenes_trabajo_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     orden = db.get_or_404(OrdenTrabajo, id)
     form = OrdenTrabajoForm(obj=orden)
@@ -149,6 +151,7 @@ def editar(id: int) -> Any:
 
 @ordenes_trabajo_bp.route("/eliminar/<int:id>", methods=["POST"])
 @login_required
+@roles_required("admin")
 def eliminar(id: int) -> Any:
     try:
         csrf_token = request.headers.get("X-CSRFToken") or request.form.get("csrf_token")
@@ -232,6 +235,7 @@ def cambiar_estado(id: int) -> Any:
 
 @ordenes_trabajo_bp.route("/obtener-vehiculos/<int:cliente_id>")
 @login_required
+@roles_required("admin", "recepcion")
 def obtener_vehiculos(cliente_id: int) -> Any:
     return jsonify(VehiculoService.listar_para_select(cliente_id))
 

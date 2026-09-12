@@ -16,7 +16,7 @@ from services.notification_service import NotificationService
 from services.sede_service import SedeService
 from services.vehiculo_service import VehiculoService
 from services.ubicacion_service import UbicacionService
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.citas")
 citas_bp = Blueprint("citas", __name__, url_prefix="/citas")
@@ -43,6 +43,7 @@ def listar() -> Any:
 
 @citas_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = CitaForm()
     clientes, vehiculos, mecanicos, sedes, servicios = _opciones_cita_form(form)
@@ -104,6 +105,7 @@ def crear() -> Any:
 
 @citas_bp.route("/editar/<int:id>", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def editar(id: int) -> Any:
     cita = db.get_or_404(Cita, id)
     form = CitaForm(obj=cita)
@@ -144,6 +146,7 @@ def editar(id: int) -> Any:
 
 @citas_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def cambiar_estado(id: int, estado: str) -> Any:
     # Compatibilidad con estados legados de la versión anterior.
     estado = {"completado": "entregada", "en_proceso": "en_revision"}.get(estado, estado)
@@ -194,5 +197,6 @@ def cambiar_estado(id: int, estado: str) -> Any:
 
 @citas_bp.route("/obtener-vehiculos/<int:cliente_id>")
 @login_required
+@roles_required("admin", "recepcion")
 def obtener_vehiculos(cliente_id: int) -> Any:
     return jsonify(VehiculoService.listar_para_select(cliente_id))

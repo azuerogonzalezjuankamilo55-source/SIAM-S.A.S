@@ -16,7 +16,7 @@ from forms import GarantiaForm
 from services.garantia_service import GarantiaService, GarantiaError
 from services.notification_service import NotificationService
 from services.vehiculo_service import VehiculoService
-from decorators import staff_blueprint_guard
+from decorators import staff_blueprint_guard, roles_required
 
 logger = logging.getLogger("siam.routes.garantias")
 garantias_bp = Blueprint("garantias", __name__, url_prefix="/garantias")
@@ -57,6 +57,7 @@ def listar() -> Any:
 
 @garantias_bp.route("/crear", methods=["GET", "POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def crear() -> Any:
     form = GarantiaForm()
     clientes, vehiculos, servicios, ordenes = _opciones_form(form)
@@ -98,6 +99,7 @@ def ver(id: int) -> Any:
 
 @garantias_bp.route("/cambiar-estado/<int:id>/<estado>", methods=["POST"])
 @login_required
+@roles_required("admin", "recepcion")
 def cambiar_estado(id: int, estado: str) -> Any:
     if not _validar_csrf():
         if request.is_json:
