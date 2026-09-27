@@ -70,6 +70,17 @@
         {% endif %}
     </div>
     <div id="asistenciaEstado" class="mt-2 small d-none"></div>
+    {% if current_user.is_authenticated %}
+    <div class="mt-2" id="asistenciaVehiculoBox">
+        <label class="form-label small mb-1" for="asistenciaVehiculo">
+            <i class="fa-solid fa-car me-1"></i>¿Asistencia para qué vehículo?
+        </label>
+        <select id="asistenciaVehiculo" class="form-select form-select-sm">
+            <option value="">Cargando tus vehículos...</option>
+        </select>
+        <div class="form-text" id="asistenciaVehiculoHint"></div>
+    </div>
+    {% endif %}
     <div id="misSolicitudes" class="mt-2 d-none"></div>
 </div>
 
@@ -328,18 +339,37 @@
 
     function pintarMisSolicitudes(items) {
         if (!misSolicitudes || !items || !items.length) return;
-        var activas = items.filter(function (a) { return a.estado === 'pendiente' || a.estado === 'en_camino'; });
-        var terminadas = items.filter(function (a) { return a.estado === 'atendido' || a.estado === 'cancelado'; });
         var html = '<div class="small fw-semibold text-secondary mb-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Mis solicitudes</div>';
         html += '<div class="d-flex flex-column gap-1">';
         items.slice(0, 5).forEach(function (a) {
             html += '<div class="d-flex justify-content-between align-items-center bg-dark bg-opacity-25 rounded-3 px-2 py-1">' +
-                '<span class="text-truncate me-2">#' + a.id + ' · ' + escapeHtml(a.descripcion || '') + '</span>' +
+                '<span class="text-truncate me-2">#' + a.id +
+                (a.vehiculo ? ' · ' + escapeHtml(a.vehiculo) : '') +
+                (a.descripcion ? ' · ' + escapeHtml(a.descripcion) : '') + '</span>' +
                 estadoHtml(a.estado) + '</div>';
         });
         html += '</div>';
         misSolicitudes.innerHTML = html;
         misSolicitudes.classList.remove('d-none');
+    }
+
+    function cargarVehiculosAsistencia() {
+        var sel = document.getElementById('asistenciaVehiculo');
+        var hint = document.getElementById('asistenciaVehiculoHint');
+        if (!sel) return;
+        fetch('/api/vehiculos/mios', { headers: { Accept: 'application/json' } })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (data) {
+                poblarSelectVehiculos(sel, data && data.length ? 'Sin especificar' : 'No tienes vehículos registrados', data);
+                if (hint) {
+                    hint.textContent = data && data.length
+                        ? 'El taller verá la placa para enviar la asistencia correcta.'
+                        : 'Registra un vehículo en tu portal para identificarlo en la solicitud.';
+                }
+            })
+            .catch(function () {
+                poblarSelectVehiculos(sel, 'No se pudieron cargar tus vehículos', []);
+            });
     }
 
     function pintarAsistencia(a) {
@@ -420,11 +450,13 @@
         navigator.geolocation.getCurrentPosition(function (pos) {
             btnAsistencia.disabled = false;
             btnAsistencia.innerHTML = '<i class="fa-solid fa-share-location me-1"></i> Compartir mi ubicación';
+            var selVeh = document.getElementById('asistenciaVehiculo');
             var body = {
                 latitude: pos.coords.latitude,
                 longitude: pos.coords.longitude,
                 accuracy: pos.coords.accuracy,
-                descripcion: 'Solicitud de asistencia desde Sedes y Asistencia'
+                descripcion: 'Solicitud de asistencia desde Sedes y Asistencia',
+                vehiculo_id: selVeh && selVeh.value ? selVeh.value : null
             };
             fetch('/api/ubicacion', {
                 method: 'POST',
@@ -460,6 +492,7 @@
         document.getElementById('btnUsarUbicacion').addEventListener('click', usarUbicacion);
         document.getElementById('buscarSede').addEventListener('input', buscarSede);
         if (btnAsistencia) btnAsistencia.addEventListener('click', solicitarAsistencia);
+        cargarVehiculosAsistencia();
         cargarSolicitudes();
     });
 })();

@@ -57,6 +57,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Cliente</th>
+                                <th>Vehículo</th>
                                 <th>Descripción</th>
                                 <th>Estado</th>
                                 <th>Recibida</th>
@@ -65,16 +66,26 @@
                         </thead>
                         <tbody>
                             {% for a in asistencias %}
-                            <tr class="fila-asistencia" data-id="{{ a.id }}" data-estado="{{ a.estado }}" data-lat="{{ a.latitud or '' }}" data-lng="{{ a.longitud or '' }}">
+                            <tr class="fila-asistencia" data-id="{{ a.id }}" data-estado="{{ a.estado }}" data-lat="{{ a.latitud or '' }}" data-lng="{{ a.longitud or '' }}"
+                                data-solicitante="{{ a.solicitante }}" data-vehiculo="{{ a.vehiculo_label }}">
                                 <td>#{{ a.id }}</td>
                                 <td>
-                                    <strong>{{ a.cliente_nombre or "—" }}</strong><br>
+                                    <strong>{{ a.solicitante }}</strong><br>
                                     <small class="text-secondary"><i class="fa-solid fa-phone me-1"></i>{{ a.telefono or "—" }}</small>
+                                </td>
+                                <td>
+                                    {% if a.vehiculo %}
+                                    <span class="badge badge-soft-primary">{{ a.vehiculo.placa }}</span><br>
+                                    <small class="text-secondary">{{ a.vehiculo.marca }} {{ a.vehiculo.modelo }}{% if a.vehiculo.anio %} · {{ a.vehiculo.anio }}{% endif %}</small><br>
+                                    <small class="text-muted">{{ a.vehiculo.tipo_label }}</small>
+                                    {% else %}
+                                    <small class="text-muted"><i class="fa-solid fa-circle-question me-1"></i>No indicado</small>
+                                    {% endif %}
                                 </td>
                                 <td class="text-truncate" style="max-width:180px;">{{ a.descripcion or "Sin descripción" }}</td>
                                 <td>
                                     <span class="badge badge-soft-{{ 'warning' if a.estado == 'pendiente' else 'info' if a.estado == 'en_camino' else 'success' if a.estado == 'atendido' else 'secondary' }}" data-rol="estado">
-                                        {{ a.estado|replace("_", " ")|title }}
+                                        {{ a.estado_label }}
                                     </span>
                                 </td>
                                 <td><small>{{ a.created_at.strftime('%d/%m/%Y %H:%M') if a.created_at }}</small></td>
@@ -91,7 +102,7 @@
                                 </td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="6" class="text-center text-muted py-4">No hay solicitudes{% if estado %} en estado "{{ estado|replace('_', ' ')|title }}"{% endif %}.</td></tr>
+                            <tr><td colspan="7" class="text-center text-muted py-4">No hay solicitudes{% if estado %} en estado "{{ estado|replace('_', ' ')|title }}"{% endif %}.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -112,7 +123,14 @@
 
     function initMap() {
         var puntos = filas.map(function (f) {
-            return { lat: parseFloat(f.getAttribute('data-lat')), lng: parseFloat(f.getAttribute('data-lng')), id: f.getAttribute('data-id'), estado: f.getAttribute('data-estado') };
+            return {
+                lat: parseFloat(f.getAttribute('data-lat')),
+                lng: parseFloat(f.getAttribute('data-lng')),
+                id: f.getAttribute('data-id'),
+                estado: f.getAttribute('data-estado'),
+                solicitante: f.getAttribute('data-solicitante') || '',
+                vehiculo: f.getAttribute('data-vehiculo') || ''
+            };
         }).filter(function (p) { return !isNaN(p.lat) && !isNaN(p.lng); });
         var centrado = (puntos.length ? [puntos[0].lat, puntos[0].lng] : (sedes.length ? [sedes[0].latitud, sedes[0].longitud] : [4.7110, -74.0721]));
         map = L.map('map', { zoomControl: true }).setView(centrado, 10);
@@ -130,7 +148,11 @@
         conLat.forEach(function (p) {
             var marcador = L.marker([p.lat, p.lng], {
                 icon: L.divIcon({ html: '<div class="pin-asistencia"><i class="fa-solid fa-user"></i></div>', iconSize: [30, 30], iconAnchor: [15, 30], className: 'bg-transparent' })
-            }).addTo(map).bindPopup('Solicitud #' + p.id);
+            }).addTo(map).bindPopup(
+                '<strong>Solicitud #' + escapeHtml(p.id) + '</strong><br>' +
+                escapeHtml(p.solicitante) +
+                (p.vehiculo ? '<br><small>' + escapeHtml(p.vehiculo) + '</small>' : '')
+            );
             marcador.on('click', function () { verFila(p.id); });
         });
         if (conLat.length + sedes.filter(function (s) { return s.latitud && s.longitud; }).length > 1) {

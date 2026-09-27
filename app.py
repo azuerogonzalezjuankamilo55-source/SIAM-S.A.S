@@ -517,6 +517,47 @@ def register_template_processors(app: Flask) -> None:
             ruta_publica
         )
 
+    @app.template_filter("vehiculo_label")
+    def vehiculo_label_filter(vehiculo) -> str:
+        """Identificacion legible y unica de un vehiculo (fase 26.1).
+
+        Unica fuente de verdad para los <select> de vehiculos: placa, marca,
+        modelo, anio y tipo. Los datos salen del modelo; no se inventan.
+        """
+        from services.vehiculo_service import (
+            VehiculoService
+        )
+
+        return VehiculoService.descriptor(vehiculo)
+
+    @app.context_processor
+    def inject_area_actual():
+        """Contexto de area y rol (fases 26.2 y 26.3).
+
+        La interfaz debe dejar claro si el usuario esta en el Area
+        Administrativa o en el Portal del Cliente, y que rol tiene. El backend
+        ya valida los permisos; esto solo hace visible el contexto.
+        """
+        from flask_login import current_user as _cu
+
+        if not _cu.is_authenticated:
+
+            return {
+                "area_actual": "publico",
+                "area_label": "Sitio publico",
+                "area_icon": "fa-globe",
+                "area_home": "index",
+                "rol_label": "",
+            }
+
+        return {
+            "area_actual": _cu.area,
+            "area_label": _cu.area_label,
+            "area_icon": _cu.area_icon,
+            "area_home": _cu.area_home,
+            "rol_label": _cu.rol_label,
+        }
+
 
 # ==============================================================
 # LOGIN

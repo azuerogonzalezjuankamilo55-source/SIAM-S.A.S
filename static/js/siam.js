@@ -700,6 +700,56 @@ function escapeHtml(s) {
     });
 }
 
+/**
+ * Llena un <select> de vehiculos con la descripcion completa que devuelve el
+ * servidor (placa, marca, modelo, anio y tipo) para que un cliente con varios
+ * vehiculos pueda distinguirlos. Usa textContent: los datos vienen de la base de
+ * datos y no deben interpretarse como HTML.
+ */
+function poblarSelectVehiculos(select, placeholder, vehiculos) {
+    if (!select) return;
+    select.innerHTML = '';
+    var vacia = document.createElement('option');
+    vacia.value = '';
+    vacia.textContent = placeholder;
+    select.appendChild(vacia);
+    (vehiculos || []).forEach(function (v) {
+        var opcion = document.createElement('option');
+        opcion.value = v.id;
+        opcion.textContent = v.texto || v.placa || ('Vehiculo ' + v.id);
+        opcion.setAttribute(
+            'data-placa',
+            [v.placa, v.marca, v.modelo, v.anio, v.tipo_label].filter(Boolean).join(' ')
+        );
+        select.appendChild(opcion);
+    });
+}
+
+/**
+ * Conecta un <select> de clientes con su <select> de vehiculos dependiente.
+ * endpoint: '/citas/obtener-vehiculos' | '/ordenes-trabajo/obtener-vehiculos' | ...
+ */
+function conectarVehiculosPorCliente(selectCliente, selectVehiculo, endpoint) {
+    if (!selectCliente || !selectVehiculo) return;
+    selectCliente.addEventListener('change', function () {
+        if (!this.value) {
+            poblarSelectVehiculos(selectVehiculo, 'Primero seleccione un cliente', []);
+            return;
+        }
+        poblarSelectVehiculos(selectVehiculo, 'Cargando...', []);
+        fetch(endpoint + '/' + encodeURIComponent(this.value), {
+            headers: { Accept: 'application/json' }
+        })
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (data) {
+                poblarSelectVehiculos(selectVehiculo, 'Seleccione un vehículo', data);
+            })
+            .catch(function () {
+                poblarSelectVehiculos(selectVehiculo, 'No se pudieron cargar los vehículos', []);
+            });
+    });
+}
+
 function showTyping() {
     var container = document.getElementById('chatMessages');
     if (!container) return;
@@ -810,17 +860,22 @@ function initNotificaciones() {
         }
         lista.innerHTML = items.map(function (n) {
             var clase = n.leida ? 'notif-item leida' : 'notif-item no-leida';
-            var icono = { cita: 'fa-calendar-check', orden: 'fa-screwdriver-wrench', factura: 'fa-file-lines', cotizacion: 'fa-file-invoice-dollar', garantia: 'fa-shield-halved', recordatorio: 'fa-bell', pago: 'fa-credit-card', sistema: 'fa-circle-info' }[n.tipo] || 'fa-circle-info';
-            var badgeTipo = '<span class="badge badge-soft-primary notif-tipo me-2"><i class="fa-solid ' + icono + '"></i></span>';
-            var enlace = n.url ? (' href="' + n.url + '"') : '';
-            return '<a' + enlace + ' class="notif-item d-flex text-decoration-none text-reset" data-id="' + n.id + '"' + (enlace ? '' : ' role="button"') + '>' +
+            var icono = n.tipo_icon || 'fa-circle-info';
+            var badgeTipo = '<span class="badge badge-soft-primary notif-tipo me-2"><i class="fa-solid ' + escapeHtml(icono) + '"></i></span>';
+            // El texto viene de la base de datos y puede contener datos del
+            // cliente o del vehículo: se escapa para no interpretarlo como HTML.
+            // El enlace solo se acepta si es una ruta interna: escapar no basta
+            // para evitar un "javascript:" colado en la columna url.
+            var urlSegura = (typeof n.url === 'string' && n.url.charAt(0) === '/') ? n.url : '';
+            var enlace = urlSegura ? (' href="' + escapeHtml(urlSegura) + '"') : '';
+            return '<a' + enlace + ' class="' + clase + ' d-flex text-decoration-none text-reset" data-id="' + n.id + '"' + (enlace ? '' : ' role="button"') + '>' +
                 badgeTipo +
                 '<div class="flex-grow-1 min-w-0">' +
                 '<div class="d-flex justify-content-between align-items-start gap-2">' +
-                '<span class="small fw-semibold text-truncate">' + n.titulo + '</span>' +
+                '<span class="small fw-semibold text-truncate">' + escapeHtml(n.titulo) + '</span>' +
                 (n.leida ? '' : '<span class="notif-punto"></span>') +
                 '</div>' +
-                (n.mensaje ? '<div class="small text-muted notif-msg">' + n.mensaje + '</div>' : '') +
+                (n.mensaje ? '<div class="small text-muted notif-msg">' + escapeHtml(n.mensaje) + '</div>' : '') +
                 '</div></a>';
         }).join('');
     }
@@ -833,9 +888,14 @@ function initNotificaciones() {
         fetch('/notificaciones/api/listar', { headers: { 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (!data || !data.items) return;
-                renderItems(data.items);
-                actualizarBadge(data.items.filter(function (n) { return !n.leida; }).length);
+                if (!data) return;
+                if (data.items) renderItems(data.items);
+                // El servidor envía el total real de no leídas.
+                if (typeof data.no_leidas === 'number') {
+                    actualizarBadge(data.no_leidas);
+                } else if (data.items) {
+                    actualizarBadge(data.items.filter(function (n) { return !n.leida; }).length);
+                }
             })
             .catch(function () {})
             .then(function () { cargando = false; });

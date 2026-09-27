@@ -8,6 +8,7 @@ TIPOS_NOTIFICACION = [
     "garantia",
     "recordatorio",
     "pago",
+    "asistencia",
     "sistema",
 ]
 
@@ -19,7 +20,21 @@ TIPOS_NOTIFICACION_LABELS = {
     "garantia": "Garantía",
     "recordatorio": "Recordatorio",
     "pago": "Pago",
+    "asistencia": "Asistencia",
     "sistema": "Sistema",
+}
+
+# Iconos por tipo, usados por la campana y la lista de notificaciones.
+TIPOS_NOTIFICACION_ICONS = {
+    "cita": "fa-calendar-check",
+    "orden": "fa-screwdriver-wrench",
+    "factura": "fa-file-invoice-dollar",
+    "cotizacion": "fa-file-lines",
+    "garantia": "fa-shield-halved",
+    "recordatorio": "fa-bell",
+    "pago": "fa-credit-card",
+    "asistencia": "fa-truck-medical",
+    "sistema": "fa-circle-info",
 }
 
 
@@ -40,6 +55,10 @@ class Notificacion(db.Model):
     @property
     def tipo_label(self) -> str:
         return TIPOS_NOTIFICACION_LABELS.get(self.tipo, self.tipo.replace("_", " ").capitalize())
+
+    @property
+    def tipo_icon(self) -> str:
+        return TIPOS_NOTIFICACION_ICONS.get(self.tipo, "fa-bell")
 
     def __repr__(self) -> str:
         return f"<Notificacion {self.id}:{self.titulo} usuario={self.usuario_id} leida={self.leida}>"

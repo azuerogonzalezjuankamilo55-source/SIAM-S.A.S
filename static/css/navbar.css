@@ -30,6 +30,64 @@
     display: none;
 }
 
+/* ---------- Indicador de área (26.2) ----------
+   Distingue visualmente el Área Administrativa del Portal del Cliente.
+   El color es deliberadamente distinto (azul vs verde) para que el usuario
+   sepa en qué área está sin depender de recordar desde qué login entró. */
+
+.area-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.area-indicator:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Área Administrativa — azul */
+.area-indicator-administrativa {
+    background: rgba(30, 64, 175, 0.16);
+    color: var(--primary);
+    border-color: rgba(59, 130, 246, 0.45);
+}
+
+/* Portal del Cliente — verde */
+.area-indicator-portal_cliente {
+    background: rgba(5, 150, 105, 0.16);
+    color: var(--success, #059669);
+    border-color: rgba(16, 185, 129, 0.45);
+}
+
+[data-bs-theme="light"] .area-indicator-administrativa {
+    background: rgba(30, 64, 175, 0.08);
+}
+
+[data-bs-theme="light"] .area-indicator-portal_cliente {
+    background: rgba(5, 150, 105, 0.10);
+}
+
+@media (max-width: 767.98px) {
+    .area-indicator-text {
+        display: none;
+    }
+
+    .area-indicator {
+        padding: 0.4rem 0.55rem;
+    }
+}
+
 /* ---------- Search ---------- */
 
 .navbar-search {

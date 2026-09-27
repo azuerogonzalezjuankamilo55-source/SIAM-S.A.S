@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Asistente IA{% endblock %}
+{% block title %}Asistente virtual{% endblock %}
 {% block extra_head %}
 <style>
 #chatContainer { height: calc(100vh - 200px); min-height: 500px; display: flex; flex-direction: column; }
@@ -29,13 +29,21 @@
                 <i class="fa-solid fa-robot"></i>
             </span>
             <div>
-                <h6 class="mb-0">Asistente SIAM</h6>
-                <small class="text-white-50"><i class="fa-solid fa-circle me-1" style="font-size:.5em;color:#4ADE80;" aria-hidden="true"></i>Online</small>
+                <h6 class="mb-0">Asistente virtual SIAM</h6>
+                <small class="text-white-50"><i class="fa-solid fa-robot me-1"></i>Respuesta automática · no es una persona</small>
             </div>
         </div>
         <button class="btn btn-sm btn-soft" style="background:rgba(255,255,255,.12);color:#fff;" onclick="clearChat()" title="Limpiar conversación">
             <i class="fa-solid fa-trash" aria-hidden="true"></i>
         </button>
+    </div>
+    <div class="card-body bg-dark bg-opacity-25 py-2 border-bottom">
+        <small class="text-secondary d-block">
+            <i class="fa-solid fa-circle-info me-1"></i>
+            Este asistente responde con información automática. Para hablar con una sede o pedir una grúa,
+            usa <a href="{{ url_for('sedes.index') }}" class="link-light">Sedes y Asistencia</a>:
+            las solicitudes que envías ahí sí las recibe el taller.
+        </small>
     </div>
     <div id="chatMessages" class="card-body bg-dark bg-opacity-25">
         {% if historial %}

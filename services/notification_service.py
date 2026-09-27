@@ -75,6 +75,8 @@ class NotificationService:
         """Notifica al usuario del cliente si este tiene cuenta en la plataforma."""
         from models.cliente import Cliente
 
+        if not cliente_id:
+            return None
         cliente = db.session.get(Cliente, cliente_id)
         if cliente and cliente.usuario:
             return NotificationService.notify(
@@ -142,10 +144,12 @@ class NotificationService:
             "id": n.id,
             "tipo": n.tipo,
             "tipo_label": n.tipo_label,
+            "tipo_icon": n.tipo_icon,
             "titulo": n.titulo,
             "mensaje": n.mensaje,
             "url": n.url,
             "leida": n.leida,
+            "leida_at": n.leida_at.isoformat() if n.leida_at else None,
             "created_at": n.created_at.isoformat() if n.created_at else None,
         }
 

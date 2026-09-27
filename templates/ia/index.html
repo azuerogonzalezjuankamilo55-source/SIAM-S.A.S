@@ -36,7 +36,7 @@
                             <option value="">— Sin especificar —</option>
                             {% for v in vehiculos %}
                             <option value="{{ v.id }}" {% if vehiculo_id == v.id %}selected{% endif %}>
-                                {{ v.placa }} · {{ v.marca }} {{ v.modelo }} ({{ v.cliente.nombre }})
+                                {{ v|vehiculo_label }} ({{ v.cliente.nombre }})
                             </option>
                             {% endfor %}
                         </select>
@@ -64,7 +64,7 @@
                         <select class="form-select" id="sel-vehiculo" required>
                             <option value="">— Seleccionar vehículo —</option>
                             {% for v in vehiculos %}
-                            <option value="{{ v.id }}">{{ v.placa }} · {{ v.marca }} {{ v.modelo }}</option>
+                            <option value="{{ v.id }}">{{ v|vehiculo_label }}</option>
                             {% endfor %}
                         </select>
                         <button class="btn btn-success" type="submit"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Ver</button>

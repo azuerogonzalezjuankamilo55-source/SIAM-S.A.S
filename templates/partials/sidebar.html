@@ -3,7 +3,7 @@
         <i class="fa-solid fa-angles-left" id="sidebarCollapseIcon" aria-hidden="true"></i>
     </button>
 
-    <a href="{% if current_user.es_cliente %}{{ url_for('portal.index') }}{% else %}{{ url_for('dashboard.index') }}{% endif %}" class="sidebar-brand">
+    <a href="{{ url_for(area_home) if current_user.is_authenticated else url_for('index') }}" class="sidebar-brand">
         {% if taller_config and taller_config.logo_path %}
         <img src="{{ taller_config.logo_path }}" alt="{{ taller_config.nombre_taller or 'SIAM' }}" class="sidebar-logo-img" style="max-height:34px;">
         {% else %}
@@ -16,7 +16,7 @@
 
     <div class="sidebar-nav">
     {% if current_user.es_cliente %}
-        <span class="sidebar-badge sidebar-badge-client"><i class="fa-solid fa-user me-1" aria-hidden="true"></i>Área del Cliente</span>
+        <span class="sidebar-badge sidebar-badge-client"><i class="fa-solid fa-id-badge me-1" aria-hidden="true"></i>Portal del Cliente</span>
         <ul class="nav nav-pills flex-column gap-1">
             <li class="nav-item">
                 <a href="{{ url_for('portal.index') }}" class="nav-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Mi Portal">
@@ -105,7 +105,7 @@
             </li>
         </ul>
     {% else %}
-        <span class="sidebar-badge sidebar-badge-staff"><i class="fa-solid fa-briefcase me-1" aria-hidden="true"></i>Área Empresarial</span>
+        <span class="sidebar-badge sidebar-badge-staff"><i class="fa-solid fa-screwdriver-wrench me-1" aria-hidden="true"></i>Área Administrativa</span>
         <div class="sidebar-section">General</div>
         <ul class="nav nav-pills flex-column gap-1">
             <li class="nav-item">

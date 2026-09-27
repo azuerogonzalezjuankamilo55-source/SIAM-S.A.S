@@ -4,8 +4,11 @@ from typing import Callable
 from flask import flash, redirect, url_for, jsonify, request
 from flask_login import current_user
 
-# Roles de personal del taller (no clientes).
-STAFF_ROLES: frozenset[str] = frozenset({"admin", "recepcion", "mecanico"})
+from models.usuario import Usuario
+
+# Roles de personal del taller (no clientes). Fuente unica: el modelo Usuario,
+# para que el backend y la interfaz no se desincronicen (fase 26.2).
+STAFF_ROLES: frozenset[str] = frozenset(Usuario.ROLES_STAFF)
 
 MENSAJE_LOGIN: str = "Debes iniciar sesión para acceder."
 MENSAJE_PERMISO: str = "No tienes permisos de administrador."

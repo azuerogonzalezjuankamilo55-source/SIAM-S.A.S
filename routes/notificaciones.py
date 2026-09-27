@@ -67,6 +67,9 @@ def api_listar():
     return jsonify({
         "items": [NotificationService.to_dict(n) for n in items],
         "count": len(items),
+        # El contador de no leídas es el total real, no el de la página cargada:
+        # si no, la campana mentiría cuando haya más de `limite` avisos.
+        "no_leidas": NotificationService.unread_count(current_user.id),
     })
 
 

@@ -21,7 +21,7 @@
                             <option value="">Selecciona un vehículo</option>
                             {% for v in vehiculos %}
                             <option value="{{ v.id }}" {% if form.vehiculo_id.data == v.id %}selected{% endif %}>
-                                {{ v.marca }} {{ v.modelo }} - {{ v.placa }}
+                                {{ v|vehiculo_label }}
                             </option>
                             {% endfor %}
                         </select>

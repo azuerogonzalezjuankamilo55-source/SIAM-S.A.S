@@ -40,7 +40,7 @@
                         <select name="vehiculo_id" class="form-select" required>
                             <option value="">— Vehículo —</option>
                             {% for v in vehiculos %}
-                            <option value="{{ v.id }}">{{ v.placa }} · {{ v.marca }} {{ v.modelo }}</option>
+                            <option value="{{ v.id }}">{{ v|vehiculo_label }}</option>
                             {% endfor %}
                         </select>
                     </div>
