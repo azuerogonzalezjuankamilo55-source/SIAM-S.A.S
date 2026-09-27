@@ -53,12 +53,65 @@ def _mensaje_duplicado(correo: str, documento: str) -> str:
     return "No se pudo completar el registro. Intenta nuevamente."
 
 
+def _cliente_activable(cliente: Cliente) -> bool:
+    """True si un Cliente preexistente todavia no es una cuenta en uso.
+
+    El registro publico se enlaza a un Cliente existente solo cuando ese registro
+    esta "virgin": sin Usuario asociado y sin historial (vehiculos, citas,
+    ordenes, cotizaciones, garantias, asistencias o ubicaciones). Es la unica
+    forma de que el flujo "el taller me creo la ficha y la activo yo" siga
+    funcionando sin que un tercero pueda adoptar la cuenta de un cliente que ya
+    existe: bastaria con conocer su correo.
+    """
+    if Usuario.query.filter_by(cliente_id=cliente.id).first():
+        return False
+    from models.asistencia import AsistenciaEmergencia
+    from models.cita import Cita
+    from models.cotizacion import Cotizacion
+    from models.garantia import Garantia
+    from models.orden_trabajo import OrdenTrabajo
+    from models.ubicacion_cliente import UbicacionCliente
+    from models.vehiculo import Vehiculo
+
+    for modelo in (
+        Vehiculo,
+        Cita,
+        OrdenTrabajo,
+        Cotizacion,
+        Garantia,
+        AsistenciaEmergencia,
+        UbicacionCliente,
+    ):
+        if modelo.query.filter_by(cliente_id=cliente.id).first():
+            return False
+    return True
+
+
+def _destino_tras_autenticar(usuario) -> str:
+    """Endpoint de inicio segun el area del usuario (unica fuente: area_home).
+
+    Un cliente siempre cae en su portal y solo el personal del taller en el area
+    administrativa. No volver a decidirlo con comparaciones sueltas de rol.
+    """
+    return usuario.area_home
+
+
+def _next_valido(destino: str | None) -> str | None:
+    """Destino pedido por el usuario, solo si es una ruta interna segura.
+
+    Evita que `?next=` sea usado para redirigir fuera del sitio (open redirect).
+    """
+    if not destino or not destino.startswith("/"):
+        return None
+    if destino.startswith("//") or destino.startswith("/\\"):
+        return None
+    return destino
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login() -> Any:
     if current_user.is_authenticated:
-        if current_user.es_cliente:
-            return redirect(url_for("portal.index"))
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for(current_user.area_home))
     form = LoginForm()
     area = request.args.get("area") or ""
     if area not in ("admin", "cliente"):
@@ -80,9 +133,8 @@ def login() -> Any:
                 safe_commit()
             except Exception as e:
                 logger.warning("No se pudo registrar último acceso: %s", e)
-            if usuario.es_cliente:
-                return redirect(url_for("portal.index"))
-            return redirect(url_for("dashboard.index"))
+            destino = _next_valido(request.args.get("next") or request.form.get("next"))
+            return redirect(destino or url_for(_destino_tras_autenticar(usuario)))
         logger.warning("Intento de login fallido: %s", correo)
         flash("Credenciales inválidas", "danger")
     return render_template("auth/login.html", form=form, area=area, permite_registrar_admin=permite_registrar_admin)
@@ -98,9 +150,7 @@ def logout() -> Any:
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register() -> Any:
     if current_user.is_authenticated:
-        if current_user.es_cliente:
-            return redirect(url_for("portal.index"))
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for(current_user.area_home))
     form = RegisterForm()
     if form.validate_on_submit():
         correo = form.correo.data.strip().lower()
@@ -110,13 +160,23 @@ def register() -> Any:
                 raise RegistroError("El correo ya está registrado")
             cliente = Cliente.query.filter(db.func.lower(Cliente.correo) == correo).first()
             por_documento = Cliente.query.filter(Cliente.cedula == documento).first() if documento else None
-            # Un documento ya usado solo es válido si pertenece al mismo cliente
-            # (vinculación por correo); nunca permite tomar registros ajenos.
-            if por_documento and (not cliente or por_documento.id != cliente.id):
-                if not cliente and por_documento and not por_documento.correo:
-                    cliente = por_documento
-                elif por_documento:
-                    raise RegistroError("Ese documento ya está registrado")
+            # Vincularse a un Cliente preexistente por correo es el flujo de
+            # "activar la cuenta que me creo el taller", pero solo es seguro si
+            # ese Cliente esta virgin: sin cuenta asociada y sin historial. Si ya
+            # es un cliente con vehiculos u ordenes, enlazarse a el permitiria
+            # que cualquiera que supiera su correo adoptara su cuenta y viera su
+            # informacion. En ese caso el registro se rechaza.
+            if cliente is not None and not _cliente_activable(cliente):
+                raise RegistroError(
+                    "Ese correo ya tiene una ficha de cliente. Inicia sesión con tu cuenta "
+                    "o contacta al taller para recuperarla."
+                )
+            # El documento identifica a un cliente, pero no prueba que quien se
+            # registra sea esa persona: nunca sirve por si solo para vincular una
+            # cuenta. Solo se acepta cuando pertenece al cliente ya vinculado por
+            # correo; en cualquier otro caso el documento está en uso.
+            if por_documento is not None and por_documento is not cliente:
+                raise RegistroError("Ese documento ya está registrado")
             usuario = Usuario(
                 nombre=form.nombre.data.strip(),
                 correo=correo,
@@ -179,7 +239,7 @@ def register() -> Any:
         if request.is_json:
             return jsonify({"success": True, "message": "Registro exitoso."})
         flash("¡Bienvenido/a a SIAM! Tu cuenta fue creada.", "success")
-        return redirect(url_for("portal.index"))
+        return redirect(url_for(_destino_tras_autenticar(usuario)))
     return render_template("auth/register.html", form=form)
 
 

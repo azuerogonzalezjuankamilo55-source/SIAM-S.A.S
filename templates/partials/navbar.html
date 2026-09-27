@@ -13,11 +13,13 @@
                 <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
             {% if current_user.is_authenticated %}
+            {% if current_user.es_staff %}
             <div class="navbar-search d-none d-md-block">
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 <input type="search" id="navbarSearch" placeholder="Buscar..." aria-label="Buscar en el sistema" autocomplete="off" data-staff-search="true">
                 <kbd aria-hidden="true">/</kbd>
             </div>
+            {% endif %}
             {% if current_user.es_cliente %}
             <div class="navbar-brand-mobile d-md-none">
                 <span class="navbar-user-avatar-placeholder">

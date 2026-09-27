@@ -290,18 +290,26 @@
 
 /* ---------- Notifications ---------- */
 
+/* Bootstrap controla la visibilidad con `display: none` en `.dropdown-menu` y
+   `display: block` en `.dropdown-menu.show`. Este selector tiene la misma
+   especificidad (0,1,0) y se carga despues, asi que declarar `display` aqui
+   anulaba el `display: none` y dejaba el menu siempre visible. El menu base solo
+   aporta medidas y chrome; la columna se aplica unicamente con `.show`. */
 .notif-menu {
     width: 360px;
     max-width: calc(100vw - 24px);
     max-height: 70vh;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
     padding: 0;
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
+}
+
+.notif-menu.show {
+    display: flex;
+    flex-direction: column;
 }
 
 .notif-menu-header {

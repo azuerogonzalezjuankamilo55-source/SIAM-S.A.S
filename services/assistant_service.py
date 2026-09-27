@@ -228,6 +228,9 @@ class AssistantService:
         "buscar_cliente", "buscar_vehiculo", "buscar_factura",
         "contar_clientes", "contar_vehiculos", "contar_facturas", "contar_ot",
         "ingresos_hoy", "stock_bajo",
+        # Busca vehiculos por marca/placa sobre toda la tabla, no sobre los del
+        # cliente que pregunta: sin este gate es un oraculo que expone la flota.
+        "recomendar_mantenimiento",
     }
 
     # Intents que un cliente puede usar, pero sin exponer el inventario del taller.

@@ -1,6 +1,6 @@
 /* ============================================================
-   SIAM Design System — SaaS premium (Bootstrap 5.3.3 dark/light)
-   Palette: #0F172A · #2563EB · #FFFFFF · #F8FAFC
+   SIAM Design System â€” SaaS premium (Bootstrap 5.3.3 dark/light)
+   Palette: #0F172A Â· #2563EB Â· #FFFFFF Â· #F8FAFC
    ============================================================ */
 
 :root {
@@ -581,7 +581,7 @@ a {
     border-radius: var(--siam-radius) var(--siam-radius) 0 0;
 }
 
-/* ---------- Galería ---------- */
+/* ---------- GalerÃ­a ---------- */
 
 .galeria {
     display: grid;
@@ -1190,62 +1190,7 @@ html.aos-fallback [data-aos] {
 }
 
 
-/* ---------- Notificaciones ---------- */
-
-.notif-menu {
-    width: 340px;
-    max-width: calc(100vw - 24px);
-    max-height: 70vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    background-color: var(--bs-body-bg);
-}
-
-.notif-lista {
-    overflow-y: auto;
-    max-height: 60vh;
-}
-
-.notif-item {
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
-    padding: .65rem .85rem;
-    border-bottom: 1px solid rgba(148, 163, 184, .12);
-}
-
-.notif-item:last-child {
-    border-bottom: 0;
-}
-
-.notif-item.no-leida {
-    background-color: rgba(37, 99, 235, .06);
-}
-
-.notif-item:hover {
-    background-color: rgba(148, 163, 184, .1);
-}
-
-.notif-tipo {
-    font-size: .9rem;
-    line-height: 1;
-    padding: .45rem .5rem;
-    flex-shrink: 0;
-}
-
-.notif-punto {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #EF4444;
-    flex-shrink: 0;
-    margin-top: .3rem;
-}
-
-.notif-msg {
-    white-space: normal;
-    overflow-wrap: break-word;
-    line-height: 1.35;
-}
+/* Los estilos de la campana de notificaciones viven en navbar.css, que es la
+   unica hoja que acompaÃ±a a base.html. Duplicarlos aqui la hacia SOURCE ORDER
+   depender y ambos declaraban `display: flex` sobre `.notif-menu`, que anula el
+   `display: none` de Bootstrap y dejaba el menu siempre visible. */

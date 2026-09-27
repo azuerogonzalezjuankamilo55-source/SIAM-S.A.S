@@ -36,8 +36,10 @@ def roles_required(*roles: str):
                 if request.is_json or request.accept_mimetypes.best == "application/json":
                     return jsonify(success=False, error=MENSAJE_PERMISO), 403
                 flash(MENSAJE_PERMISO, "danger")
-                target = "portal.index" if current_user.rol == "cliente" else "dashboard.index"
-                return redirect(url_for(target))
+                # area_home es la unica fuente de destino por rol: el area
+                # administrativa solo la alcanza quien es_staff, de modo que un
+                # rol desconocido tampoco cae en el dashboard.
+                return redirect(url_for(current_user.area_home))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -53,7 +55,9 @@ def admin_required(f: Callable) -> Callable:
             return redirect(url_for("auth.login"))
         if current_user.rol != "admin":
             flash(MENSAJE_PERMISO, "danger")
-            return redirect(url_for("dashboard.index"))
+            # Un no-admin nunca vuelve al dashboard: area_home lo lleva a su
+            # portal, igual que staff_blueprint_guard.
+            return redirect(url_for(current_user.area_home))
         return f(*args, **kwargs)
 
     return decorated_function
