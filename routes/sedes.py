@@ -1,12 +1,13 @@
 import logging
 from typing import Any
-from flask import Blueprint, render_template, jsonify, request, url_for
+from flask import Blueprint, flash, redirect, render_template, jsonify, request, url_for
 from flask_login import login_required, current_user
 
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
-from decorators import staff_required
+from decorators import roles_required, staff_required
 from models.asistencia import AsistenciaEmergencia
+from models.solicitud_asesor import SolicitudAsesor
 from services.notification_service import NotificationService
 from services.sede_service import SedeService
 
@@ -136,3 +137,120 @@ def cambiar_estado(asistencia_id: int) -> Any:
         "Asistencia %s marcada como %s por %s", asistencia_id, nuevo_estado, _actor()
     )
     return json_success({"estado": asistencia.estado}, "Estado actualizado.")
+
+
+# ---------------------------------------------------------------- asesorías
+
+AVISOS_ASESOR = {
+    "en_atencion": (
+        "Solicitud en atención",
+        "La administración ya está revisando tu solicitud de asesoría.",
+    ),
+    "atendida": (
+        "Solicitud atendida",
+        "Tu solicitud de asesoría fue atendida por la administración.",
+    ),
+    "cancelada": (
+        "Solicitud cancelada",
+        "La administración canceló tu solicitud de asesoría.",
+    ),
+}
+
+
+@sedes_bp.route("/asesores")
+@login_required
+@roles_required("admin", "recepcion")
+def asesores() -> Any:
+    """Panel del personal: solicitudes de asesoría de los clientes."""
+    estado = request.args.get("estado") or ""
+    query = SolicitudAsesor.query
+    if estado in SolicitudAsesor.ESTADOS:
+        query = query.filter(SolicitudAsesor.estado == estado)
+    solicitudes = query.order_by(
+        SolicitudAsesor.created_at.desc(), SolicitudAsesor.id.desc()
+    ).all()
+    return render_template(
+        "sedes_asesores.html",
+        solicitudes=solicitudes,
+        estado=estado,
+    )
+
+
+@sedes_bp.route("/asesores/<int:solicitud_id>/estado", methods=["POST"])
+@login_required
+@roles_required("admin", "recepcion")
+def cambiar_estado_asesor(solicitud_id: int) -> Any:
+    """El taller mueve la solicitud de asesoría y responde al cliente."""
+    if request.is_json:
+        nuevo_estado = (request.get_json(silent=True) or {}).get("estado", "")
+        respuesta = (request.get_json(silent=True) or {}).get("respuesta", "")
+    else:
+        nuevo_estado = request.form.get("estado", "")
+        respuesta = request.form.get("respuesta", "")
+
+    # Filtro del panel que hizo el submit, para volver a la misma pestaña.
+    estado_filtro = request.values.get("estado_filtro", "").strip()
+    if estado_filtro not in SolicitudAsesor.ESTADOS:
+        estado_filtro = ""
+
+    if nuevo_estado not in SolicitudAsesor.ESTADOS:
+        if request.is_json:
+            return jsonify({"success": False, "error": "Estado no válido."}), 400
+        flash("El estado indicado no es válido.", "danger")
+        return redirect(url_for("sedes.asesores", estado=estado_filtro))
+
+    solicitud = db.get_or_404(SolicitudAsesor, solicitud_id)
+    if not solicitud.esta_abierta:
+        if request.is_json:
+            return jsonify({"success": False, "error": "La solicitud ya está finalizada."}), 400
+        flash("Esa solicitud ya está finalizada.", "warning")
+        return redirect(url_for("sedes.asesores", estado=estado_filtro))
+
+    solicitud.estado = nuevo_estado
+    respuesta = (respuesta or "").strip()[:2000]
+    if respuesta:
+        solicitud.respuesta = respuesta
+    try:
+        safe_commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("No se pudo guardar el estado de la solicitud %s", solicitud_id)
+        if not request.is_json:
+            flash("No se pudo actualizar la solicitud.", "danger")
+            return redirect(url_for("sedes.asesores", estado=estado_filtro))
+        return json_error("No se pudo actualizar la solicitud.", status=500)
+
+    # El estado ya quedo guardado: si el aviso al cliente falla, no se revierte.
+    try:
+        titulo, mensaje = AVISOS_ASESOR[nuevo_estado]
+        if respuesta:
+            mensaje = f"{mensaje} {respuesta}"
+        if not NotificationService.notify_cliente(
+            solicitud.cliente_id, "asesor", titulo, mensaje, url_for("portal.asesor")
+        ):
+            logger.warning(
+                "Solicitud de asesoria %s sin cuenta de cliente para notificar", solicitud_id
+            )
+    except KeyError:
+        # "pendiente" no es un cambio digno de aviso al cliente.
+        pass
+    except Exception:
+        logger.exception(
+            "Solicitud de asesoria %s actualizada a %s pero fallo la notificacion",
+            solicitud_id,
+            nuevo_estado,
+        )
+
+    logger.info(
+        "Solicitud de asesoria %s marcada como %s por %s",
+        solicitud_id,
+        nuevo_estado,
+        _actor(),
+    )
+    if not request.is_json:
+        flash(f"Solicitud #{solicitud.id} actualizada a {solicitud.estado_label}.", "success")
+        return redirect(url_for("sedes.asesores", estado=estado_filtro))
+    return json_success(
+        {"estado": solicitud.estado, "estado_label": solicitud.estado_label},
+        "Solicitud actualizada.",
+    )

@@ -16,6 +16,7 @@ from models.movimiento_inventario import MovimientoInventario
 from models.configuracion_taller import ConfiguracionTaller
 from models.pago_factura import PagoFactura
 from models.asistencia import AsistenciaEmergencia
+from models.solicitud_asesor import SolicitudAsesor
 from models.historial_vehiculo import HistorialVehiculo, TIPOS_HISTORIAL, TIPOS_HISTORIAL_LABELS
 from models.historial_foto import HistorialFoto, TIPOS_FOTO_HISTORIAL, TIPOS_FOTO_HISTORIAL_LABELS
 from models.recordatorio import (

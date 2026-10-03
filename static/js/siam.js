@@ -684,7 +684,13 @@ function addChatMessage(role, text, type, items, acciones) {
             html += '<button class="btn btn-sm btn-outline-info" data-action="share-location"><i class="fa-solid fa-location-dot me-1"></i> Compartir ubicación</button>';
         }
         if (text.includes('asesor') || text.includes('Asesor')) {
-            html += '<button class="btn btn-sm btn-outline-warning" onclick="showToast(\'Conectando con un asesor...\', \'info\')"><i class="fa-solid fa-user me-1"></i> Hablar con asesor</button>';
+            // El botón solo era decorativo: ahora lleva al formulario real de solicitudes.
+            var urlAsesor = container.getAttribute('data-url-asesor') || '';
+            if (urlAsesor) {
+                html += '<a class="btn btn-sm btn-outline-warning" href="' + escapeHtml(urlAsesor) + '"><i class="fa-solid fa-headset me-1"></i> Solicitar asesor</a>';
+            } else {
+                html += '<button class="btn btn-sm btn-outline-warning" disabled title="Disponible solo para clientes"><i class="fa-solid fa-headset me-1"></i> Solicitar asesor</button>';
+            }
         }
         html += '</div>';
     }

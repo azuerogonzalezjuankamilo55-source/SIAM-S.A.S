@@ -73,6 +73,17 @@
         @media (max-width: 768px) { .hero-section { padding: 100px 0 50px; min-height: auto; } }
         .quick-access-card { transition: all .2s ease; border-color: rgba(148,163,184,.2); background: rgba(15,23,42,.6); }
         .quick-access-card:hover { border-color: rgba(37,99,235,.55) !important; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(2,6,23,.4); }
+        /* --- Sección Inversión y Costos --- */
+        .fin-amount { font-size: 2.1rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+        .fin-amount-lg { font-size: 2.9rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+        .fin-total-row td { font-weight: 700; background: var(--siam-primary-soft); }
+        .fin-value { white-space: nowrap; }
+        .fin-chart-wrap { position: relative; height: 430px; }
+        @media (max-width: 768px) {
+            .fin-amount { font-size: 1.6rem; }
+            .fin-amount-lg { font-size: 2rem; }
+            .fin-chart-wrap { height: 620px; }
+        }
         @media (prefers-reduced-motion: reduce) {
             .landing-icon-bubble { animation: none !important; }
             .quick-access-card, .landing-icon-bubble { transition: none !important; }
@@ -103,6 +114,7 @@
                     <li class="nav-item"><a class="nav-link" href="#experiencia">Experiencia</a></li>
                     <li class="nav-item"><a class="nav-link" href="#ventajas">Ventajas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#porque">Por qué SIAM</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#inversion">Inversión</a></li>
                     <li class="nav-item"><a class="nav-link" href="#testimonios">Testimonios</a></li>
                     <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
                     <li class="nav-item ms-lg-2">
@@ -630,6 +642,289 @@
         </div>
     </section>
 
+    <!-- Inversión y Costos -->
+    <section class="py-5" id="inversion">
+        <div class="container">
+
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-eyebrow mb-3">Modelo de negocio</span>
+                <h2 class="fw-bold mt-3">Inversión y <span class="text-primary">Costos</span></h2>
+                <p class="text-secondary">Estructura financiera estimada para iniciar operaciones</p>
+            </div>
+
+            <!-- Tarjetas resumen -->
+            <div class="row g-4 mb-5">
+                <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3"><i class="fa-solid fa-motorcycle fs-1"></i></div>
+                        <h6 class="text-secondary small text-uppercase mb-1">Inversión inicial</h6>
+                        <div class="fin-amount text-primary">$45.000.000</div>
+                        <small class="text-secondary">COP</small>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3"><i class="fa-solid fa-chart-pie fs-1"></i></div>
+                        <h6 class="text-secondary small text-uppercase mb-1">Gastos mensuales</h6>
+                        <div class="fin-amount text-primary">$15.540.000</div>
+                        <small class="text-secondary">COP</small>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3"><i class="fa-solid fa-coins fs-1"></i></div>
+                        <h6 class="text-secondary small text-uppercase mb-1">Capital de operación</h6>
+                        <div class="fin-amount text-primary">$31.000.000</div>
+                        <small class="text-secondary">COP</small>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card h-100 text-center p-4 feature-card">
+                        <div class="benefit-icon mb-3"><i class="fa-solid fa-rocket fs-1"></i></div>
+                        <h6 class="text-secondary small text-uppercase mb-1">Capital recomendado</h6>
+                        <div class="fin-amount text-primary">$76.000.000</div>
+                        <small class="text-secondary">COP</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Introducción -->
+            <div class="row mb-5" data-aos="fade-up">
+                <div class="col-lg-10 mx-auto">
+                    <p class="lead text-secondary text-center mb-0">
+                        Para iniciar operaciones, SIAM S.A.S. requiere una inversión destinada a la
+                        adquisición de vehículos de asistencia, herramientas, equipos tecnológicos,
+                        adecuación del espacio de trabajo, publicidad y capital de operación. Estos
+                        recursos permiten ofrecer un servicio de asistencia mecánica eficiente y
+                        disponible para los usuarios.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Inversión inicial estimada -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Inversión inicial estimada</h3>
+                </div>
+                <div class="card text-center p-4 mb-4" style="background:var(--siam-gradient);border:none;">
+                    <span class="text-uppercase small text-white-50 mb-1">Valor destacado</span>
+                    <div class="fin-amount-lg text-white">$45.000.000 COP</div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <caption class="visually-hidden">Conceptos de la inversión inicial estimada y sus rangos de valor</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Concepto</th>
+                                <th scope="col" class="text-end fin-value">Valor estimado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-secondary">
+                            <tr><td>3 motos de asistencia</td><td class="text-end fin-value">$18.000.000 – $21.000.000</td></tr>
+                            <tr><td>Herramientas y equipos mecánicos</td><td class="text-end fin-value">$2.000.000 – $3.000.000</td></tr>
+                            <tr><td>Repuestos e insumos iniciales</td><td class="text-end fin-value">$1.000.000 – $1.500.000</td></tr>
+                            <tr><td>Equipos de protección</td><td class="text-end fin-value">$1.500.000 – $2.000.000</td></tr>
+                            <tr><td>Página web y sistema de geolocalización</td><td class="text-end fin-value">$3.000.000 – $6.000.000</td></tr>
+                            <tr><td>Desarrollo inicial de APP</td><td class="text-end fin-value">$5.000.000 – $10.000.000</td></tr>
+                            <tr><td>Adecuación del local/taller</td><td class="text-end fin-value">$1.500.000 – $2.500.000</td></tr>
+                            <tr><td>Primer mes + depósito de arriendo</td><td class="text-end fin-value">$2.500.000 – $4.000.000</td></tr>
+                            <tr><td>Muebles y equipos administrativos</td><td class="text-end fin-value">$1.500.000 – $2.500.000</td></tr>
+                            <tr><td>Publicidad y lanzamiento</td><td class="text-end fin-value">$500.000 – $1.000.000</td></tr>
+                            <tr><td>Trámites, papelería y otros gastos</td><td class="text-end fin-value">$500.000 – $1.000.000</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card text-center p-4 mt-4" style="background:var(--siam-gradient);border:none;">
+                    <h5 class="text-white-50 text-uppercase small mb-2">Inversión inicial aproximada</h5>
+                    <div class="fin-amount-lg text-white">$45.000.000 COP</div>
+                    <small class="text-white-50 d-block mt-2">
+                        Valor estimado para el proyecto académico. Puede variar según proveedores,
+                        equipos, motos y desarrollo tecnológico seleccionado.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Costos operativos mensuales -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Costos operativos mensuales</h3>
+                </div>
+                <div class="card text-center p-4 mb-4" style="background:var(--siam-gradient);border:none;">
+                    <span class="text-uppercase small text-white-50 mb-1">Presupuesto mensual</span>
+                    <div class="fin-amount-lg text-white">$15.540.000 COP</div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <caption class="visually-hidden">Presupuesto mensual estimado por concepto</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Gasto</th>
+                                <th scope="col" class="text-end fin-value">Presupuesto mensual</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-secondary">
+                            <tr><td>Personal + cargas laborales</td><td class="text-end fin-value">$8.840.000</td></tr>
+                            <tr><td>Arriendo del taller/local</td><td class="text-end fin-value">$2.000.000</td></tr>
+                            <tr><td>Combustible</td><td class="text-end fin-value">$1.200.000</td></tr>
+                            <tr><td>Mantenimiento de motos</td><td class="text-end fin-value">$400.000</td></tr>
+                            <tr><td>Repuestos e insumos</td><td class="text-end fin-value">$500.000</td></tr>
+                            <tr><td>Servicios públicos + internet</td><td class="text-end fin-value">$600.000</td></tr>
+                            <tr><td>Tecnología y software</td><td class="text-end fin-value">$700.000</td></tr>
+                            <tr><td>Marketing y publicidad</td><td class="text-end fin-value">$600.000</td></tr>
+                            <tr><td>Seguros y seguridad</td><td class="text-end fin-value">$300.000</td></tr>
+                            <tr><td>Papelería, administración e imprevistos</td><td class="text-end fin-value">$400.000</td></tr>
+                            <tr class="fin-total-row">
+                                <td>TOTAL</td>
+                                <td class="text-end fin-value">$15.540.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfica de gastos -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Distribución del gasto mensual</h3>
+                    <p class="text-secondary">Participación de cada concepto sobre los $15.540.000 COP mensuales</p>
+                </div>
+                <div class="card p-4">
+                    <div class="fin-chart-wrap">
+                        <canvas id="chartGastos" role="img"
+                                aria-label="Gráfica circular de la distribución del gasto mensual: personal, arriendo, combustible, tecnología, servicios, marketing, repuestos, mantenimiento, administración y seguros."></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Personal</h3>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4 feature-card">
+                            <div class="benefit-icon mb-3"><i class="fa-solid fa-wrench fs-1"></i></div>
+                            <h5>Mecánico</h5>
+                            <div class="fin-amount text-primary">$2.500.000</div>
+                            <small class="text-secondary">Salario estimado</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4 feature-card">
+                            <div class="benefit-icon mb-3"><i class="fa-solid fa-headset fs-1"></i></div>
+                            <h5>Atención al cliente / operador</h5>
+                            <div class="fin-amount text-primary">$1.800.000</div>
+                            <small class="text-secondary">Salario estimado</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-4 feature-card">
+                            <div class="benefit-icon mb-3"><i class="fa-solid fa-laptop-code fs-1"></i></div>
+                            <h5>Técnico / soporte tecnológico</h5>
+                            <div class="fin-amount text-primary">$2.500.000</div>
+                            <small class="text-secondary">Salario estimado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card text-center p-4" style="background:var(--siam-gradient);border:none;">
+                    <h5 class="text-white-50 text-uppercase small mb-2">Total salarios estimados</h5>
+                    <div class="fin-amount-lg text-white">$6.800.000 COP</div>
+                    <small class="text-white-50 d-block mt-2">
+                        El presupuesto total de personal utilizado para las proyecciones incluye cargas
+                        laborales y prestaciones, estimadas aproximadamente en $8.840.000 mensuales.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Capital de operación -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Capital de operación</h3>
+                </div>
+                <div class="row g-4 align-items-stretch">
+                    <div class="col-lg-6">
+                        <div class="card h-100 text-center p-4 feature-card">
+                            <div class="benefit-icon mb-3"><i class="fa-solid fa-calendar-day fs-1"></i></div>
+                            <h5 class="text-secondary small text-uppercase mb-1">Gastos mensuales</h5>
+                            <div class="fin-amount text-primary">$15.540.000</div>
+                            <small class="text-secondary">COP</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card h-100 text-center p-4 feature-card">
+                            <div class="benefit-icon mb-3"><i class="fa-solid fa-shield-halved fs-1"></i></div>
+                            <h5 class="text-secondary small text-uppercase mb-1">Reserva recomendada para 2 meses</h5>
+                            <div class="fin-amount text-primary">$31.080.000</div>
+                            <small class="text-secondary">COP</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card text-center p-4 mt-4" style="background:var(--siam-gradient);border:none;">
+                    <h5 class="text-white-50 text-uppercase small mb-2">Capital de operación</h5>
+                    <div class="fin-amount-lg text-white">$31.000.000 COP</div>
+                    <small class="text-white-50 d-block mt-2">
+                        Se recomienda contar con un capital de operación aproximado de $31.000.000 COP
+                        para cubrir cerca de dos meses de funcionamiento mientras SIAM S.A.S. comienza a
+                        generar ingresos suficientes.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Capital total recomendado -->
+            <div class="mb-5" data-aos="fade-up">
+                <div class="card text-center p-4 p-md-5" style="background:var(--siam-gradient);border:none;">
+                    <h3 class="text-white-50 text-uppercase small mb-3">Capital recomendado para iniciar</h3>
+                    <div class="row g-3 justify-content-center mb-4">
+                        <div class="col-12 col-md-4">
+                            <div class="small text-white-50">Inversión inicial</div>
+                            <div class="h5 text-white mb-0">$45.000.000</div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="small text-white-50">Capital de operación</div>
+                            <div class="h5 text-white mb-0">$31.000.000</div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="small text-white-50">Total</div>
+                            <div class="h5 text-white mb-0">$76.000.000</div>
+                        </div>
+                    </div>
+                    <div class="fin-amount-lg text-white mb-3">$76.000.000 COP</div>
+                    <p class="text-white-50 mb-0 mx-auto" style="max-width: 46rem;">
+                        Este valor representa una estimación del capital necesario para poner en
+                        funcionamiento SIAM S.A.S., adquirir los recursos iniciales y contar con un
+                        respaldo financiero para los primeros meses de operación.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Texto final -->
+            <div class="mb-4" data-aos="fade-up">
+                <p class="text-secondary text-center mb-0">
+                    La estructura financiera de SIAM S.A.S. está diseñada para iniciar operaciones de
+                    manera organizada, cubriendo tanto las necesidades de inversión como los gastos
+                    necesarios para mantener el servicio. La empresa busca administrar eficientemente sus
+                    recursos, controlar sus costos y generar ingresos mediante la prestación de servicios
+                    de asistencia mecánica.
+                </p>
+            </div>
+
+            <!-- Nota financiera -->
+            <div data-aos="fade-up">
+                <p class="text-center small text-secondary mb-0" style="opacity:.75;">
+                    <i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>
+                    Los valores presentados son estimaciones y pueden variar según proveedores, precios
+                    del mercado, número de trabajadores, nivel de operación y decisiones de inversión de
+                    SIAM S.A.S.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
     <!-- Testimonios -->
     <section class="py-5" id="testimonios">
         <div class="container">
@@ -841,6 +1136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>
     document.documentElement.classList.add('aos-ready');
     AOS.init({ duration: 600, once: true, offset: 50 });
@@ -860,6 +1156,83 @@
         gsap.from('.hero-section .btn', { opacity: 0, y: 20, duration: 0.6, delay: 0.4, stagger: 0.15, ease: 'power3.out' });
         gsap.from('.hero-section .landing-icon-bubble', { opacity: 0, scale: 0.8, duration: 0.5, delay: 0.6, stagger: 0.15, ease: 'back.out(1.7)' });
     }
+    </script>
+    <script>
+    // Gráfica de la sección Inversión y Costos.
+    // Reutiliza Chart.js (misma libreria y version que el dashboard) y la paleta
+    // del sistema de diseño. No altera ninguna gráfica existente.
+    (function () {
+        var canvas = document.getElementById('chartGastos');
+        if (!canvas || typeof Chart === 'undefined') { return; }
+
+        var styles = getComputedStyle(document.documentElement);
+        var token = function (name, fallback) {
+            return (styles.getPropertyValue(name) || '').trim() || fallback;
+        };
+        var texto = token('--siam-text', '#E2E8F0');
+        var textoMuted = token('--siam-text-muted', '#94A3B8');
+        var superficie = token('--siam-surface', '#1E293B');
+        var paleta = ['#2563EB', '#0EA5E9', '#14B8A6', '#10B981', '#6366F1',
+                      '#F59E0B', '#EF4444', '#F97316', '#94A3B8', '#0EA5E9'];
+
+        var fmt = function (valor) {
+            return '$' + valor.toLocaleString('es-CO') + ' COP';
+        };
+
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Personal + cargas laborales', 'Arriendo del taller/local', 'Combustible',
+                    'Tecnología y software', 'Servicios públicos + internet', 'Marketing y publicidad',
+                    'Repuestos e insumos', 'Mantenimiento de motos',
+                    'Papelería, administración e imprevistos', 'Seguros y seguridad'
+                ],
+                datasets: [{
+                    label: 'Gasto mensual estimado',
+                    data: [8840000, 2000000, 1200000, 700000, 600000, 600000, 500000, 400000, 400000, 300000],
+                    backgroundColor: paleta,
+                    borderColor: superficie,
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: texto,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            padding: 12,
+                            font: { size: 12, family: token('--siam-font', 'Inter') }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: superficie,
+                        titleColor: texto,
+                        bodyColor: textoMuted,
+                        borderColor: token('--siam-border', 'rgba(148,163,184,.16)'),
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: function (ctx) {
+                                var total = ctx.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                                var pct = ((ctx.parsed / total) * 100).toFixed(1);
+                                return ctx.label + ': ' + fmt(ctx.parsed) + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
     </script>
 </body>
 </html>

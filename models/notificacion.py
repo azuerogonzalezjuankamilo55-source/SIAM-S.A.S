@@ -9,6 +9,7 @@ TIPOS_NOTIFICACION = [
     "recordatorio",
     "pago",
     "asistencia",
+    "asesor",
     "sistema",
 ]
 
@@ -21,6 +22,7 @@ TIPOS_NOTIFICACION_LABELS = {
     "recordatorio": "Recordatorio",
     "pago": "Pago",
     "asistencia": "Asistencia",
+    "asesor": "Asesoría",
     "sistema": "Sistema",
 }
 
@@ -34,6 +36,7 @@ TIPOS_NOTIFICACION_ICONS = {
     "recordatorio": "fa-bell",
     "pago": "fa-credit-card",
     "asistencia": "fa-truck-medical",
+    "asesor": "fa-headset",
     "sistema": "fa-circle-info",
 }
 

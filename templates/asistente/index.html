@@ -45,7 +45,8 @@
             las solicitudes que envías ahí sí las recibe el taller.
         </small>
     </div>
-    <div id="chatMessages" class="card-body bg-dark bg-opacity-25">
+    <div id="chatMessages" class="card-body bg-dark bg-opacity-25"
+     data-url-asesor="{{ url_for('portal.asesor') if current_user.es_cliente else '' }}">
         {% if historial %}
         {% for msg in historial %}
         <div class="chat-message chat-{{ msg.rol }} mb-3">

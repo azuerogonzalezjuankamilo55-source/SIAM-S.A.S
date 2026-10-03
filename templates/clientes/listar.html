@@ -45,6 +45,12 @@
                     <td data-label="Cédula">{{ c.cedula or "—" }}</td>
                     <td data-label="Acciones">
                         <div class="table-actions justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-info" title="Enviar comunicación"
+                                    data-bs-toggle="modal" data-bs-target="#modalNotificar"
+                                    data-notificar-url="{{ url_for('clientes.notificar', id=c.id) }}"
+                                    data-cliente-nombre="{{ c.nombre }}">
+                                <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+                            </button>
                             <a href="{{ url_for('clientes.editar', id=c.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
                                 <i class="fa-solid fa-pen" aria-hidden="true"></i>
                             </a>
@@ -67,4 +73,75 @@
         </table>
     </div>
 </div>
+
+<!-- Comunicación administración -> cliente -->
+<div class="modal fade" id="modalNotificar" tabindex="-1" aria-labelledby="tituloModalNotificar" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" id="formNotificar">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModalNotificar">
+                    <i class="fa-solid fa-comment-dots me-2 text-info" aria-hidden="true"></i>Comunicar a cliente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary small mb-3">
+                    El aviso aparece en la campana y en el área de comunicaciones de
+                    <strong id="nombreClienteNotificar">este cliente</strong>.
+                </p>
+                <div class="mb-3">
+                    <label for="notifTitulo" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="notifTitulo" name="titulo"
+                           maxlength="200" placeholder="Actualización de tu servicio">
+                </div>
+                <div class="mb-2">
+                    <label for="notifMensaje" class="form-label">Mensaje</label>
+                    <textarea class="form-control" id="notifMensaje" name="mensaje" rows="4"
+                              maxlength="1000" placeholder="Escribe el mensaje para el cliente"></textarea>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="small text-secondary">Avisos rápidos:</span>
+                    {% for aviso in avisos_servicio %}
+                    <button type="button" class="btn btn-soft btn-sm aviso-rapido">{{ aviso }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>Enviar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var modal = document.getElementById('modalNotificar');
+    if (!modal) { return; }
+    var form = document.getElementById('formNotificar');
+    var nombre = document.getElementById('nombreClienteNotificar');
+    var mensaje = document.getElementById('notifMensaje');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        var boton = event.relatedTarget;
+        if (!boton) { return; }
+        form.setAttribute('action', boton.getAttribute('data-notificar-url') || '');
+        nombre.textContent = boton.getAttribute('data-cliente-nombre') || 'este cliente';
+        mensaje.value = '';
+    });
+
+    // Avisos rápidos: rellenan el mensaje sin enviarlo.
+    modal.querySelectorAll('.aviso-rapido').forEach(function (boton) {
+        boton.addEventListener('click', function () {
+            mensaje.value = boton.textContent.trim();
+            mensaje.focus();
+        });
+    });
+})();
+</script>
 {% endblock %}

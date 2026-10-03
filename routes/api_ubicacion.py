@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from flask import Blueprint, request
+from flask import Blueprint, request, url_for
 from flask_login import login_required, current_user
 
 from database.db import db
@@ -10,6 +10,8 @@ from decorators import staff_required
 from services.portal_service import PortalService
 from services.ubicacion_service import UbicacionService, UbicacionError
 from services.routes_service import RoutesService
+from services.notification_service import NotificationService
+from models.ubicacion_cliente import UbicacionCliente
 
 logger = logging.getLogger("siam.routes.api_ubicacion")
 api_ubicacion_bp = Blueprint("api_ubicacion", __name__, url_prefix="/api")
@@ -52,6 +54,15 @@ def actualizar_ubicacion() -> Any:
         return json_error("Coordenadas inválidas. Revisa el permiso de ubicación.", status=400)
 
     lat, lng, acc = coords
+
+    # El portal reenvia la posicion cada ~20 s. Se detecta el INICIO de una
+    # sesion de compartido (no habia registro activo) para avisar al taller una
+    # sola vez, en lugar de generar una notificacion por cada GPS.
+    sesion_nueva = (
+        UbicacionCliente.query.filter_by(cliente_id=cliente.id, sharing_active=True).first()
+        is None
+    )
+
     try:
         registro = UbicacionService.actualizar(
             cliente_id=cliente.id,
@@ -74,6 +85,25 @@ def actualizar_ubicacion() -> Any:
     logger.info(
         "Cliente %s comparte ubicación para cita %s", cliente.id, registro.cita_id
     )
+
+    if sesion_nueva:
+        # La ubicacion ya quedo guardada: si el aviso al taller falla, no se
+        # revierte ni se le reporta un error al cliente.
+        try:
+            # Admin y recepcion son los que atienden la cita en el mapa: el
+            # aviso no se envia a mecanicos porque no gestionan la agenda.
+            NotificationService.notify_roles(
+                ["admin", "recepcion"],
+                "asistencia",
+                "Cliente compartiendo ubicación",
+                f"{cliente.nombre} está compartiendo su ubicación.",
+                url_for("dashboard.index"),
+            )
+        except Exception:
+            logger.exception(
+                "Cliente %s inicio sesion de ubicacion pero fallo el aviso", cliente.id
+            )
+
     return json_success(
         {
             "ubicacion_id": registro.id,

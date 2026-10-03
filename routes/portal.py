@@ -10,6 +10,7 @@ from models.cita import Cita
 from models.vehiculo import Vehiculo
 from models.servicio import Servicio
 from models.adjunto import Adjunto
+from models.solicitud_asesor import SolicitudAsesor
 from models.configuracion_taller import ConfiguracionTaller
 from database.db import db
 from database.commit import safe_commit, json_success, json_error
@@ -357,6 +358,96 @@ def cancelar_cita(cita_id: int) -> Any:
         db.session.rollback()
         flash(str(e), "danger")
     return redirect(url_for("portal.citas"))
+
+
+def _detalle_asesor_para_staff(solicitud: SolicitudAsesor) -> str:
+    """Resumen legible de la solicitud para la notificacion del taller."""
+    partes = [f"{solicitud.solicitante} solicitó asesoría."]
+    if solicitud.vehiculo_label:
+        partes.append(f"Vehículo: {solicitud.vehiculo_label}")
+    if solicitud.placa:
+        partes.append(f"Placa: {solicitud.placa}.")
+    partes.append(f"Tipo: {solicitud.tipo_label}.")
+    if solicitud.asunto:
+        partes.append(f"Asunto: {solicitud.asunto}.")
+    return " ".join(partes)
+
+
+@portal_bp.route("/asesor", methods=["GET", "POST"])
+@login_required
+def asesor() -> Any:
+    """Solicita asesoria a la administracion y consulta el estado de sus solicitudes."""
+    cliente = _cliente_actual()
+    if not cliente:
+        return redirect(url_for("portal.index"))
+
+    vehiculos = Vehiculo.query.filter_by(cliente_id=cliente.id).order_by(Vehiculo.placa.asc()).all()
+    solicitudes = (
+        SolicitudAsesor.query.filter_by(cliente_id=cliente.id)
+        .order_by(SolicitudAsesor.created_at.desc(), SolicitudAsesor.id.desc())
+        .all()
+    )
+    contexto = {"vehiculos": vehiculos, "solicitudes": solicitudes}
+
+    if request.method == "POST":
+        tipo = (request.form.get("tipo") or "").strip()
+        if tipo not in SolicitudAsesor.TIPOS:
+            flash("Selecciona un tipo de solicitud válido.", "danger")
+            return render_template("portal/solicitar_asesor.html", **contexto)
+
+        # El vehiculo solo se acepta si pertenece a este cliente: sin este filtro
+        # un cliente podria asociar la solicitud a un vehiculo ajeno.
+        vehiculo = None
+        vehiculo_id = (request.form.get("vehiculo_id") or "").strip()
+        if vehiculo_id:
+            vehiculo = Vehiculo.query.filter_by(id=vehiculo_id, cliente_id=cliente.id).first()
+            if vehiculo is None:
+                flash("El vehículo seleccionado no pertenece a tu cuenta.", "danger")
+                return render_template("portal/solicitar_asesor.html", **contexto)
+
+        solicitud = SolicitudAsesor(
+            usuario_id=current_user.id,
+            cliente_id=cliente.id,
+            vehiculo_id=vehiculo.id if vehiculo else None,
+            cliente_nombre=cliente.nombre,
+            telefono=cliente.telefono or None,
+            tipo=tipo,
+            asunto=(request.form.get("asunto") or "").strip()[:200] or None,
+            mensaje=(request.form.get("mensaje") or "").strip()[:2000] or None,
+            estado="pendiente",
+        )
+        db.session.add(solicitud)
+        try:
+            safe_commit()
+        except Exception:
+            db.session.rollback()
+            logger.exception("No se pudo crear la solicitud de asesoría")
+            flash("No pudimos registrar tu solicitud. Intenta nuevamente.", "danger")
+            return render_template("portal/solicitar_asesor.html", **contexto)
+
+        # La solicitud ya esta guardada: si el aviso al taller falla, no se
+        # revierte ni se le reporta un error al cliente que haria pensar que
+        # la operacion fallo.
+        try:
+            # Solo admin y recepcion atienden solicitudes: avisarle al
+            # mecanico le llegaria una campana a un panel que no puede abrir.
+            NotificationService.notify_roles(
+                ["admin", "recepcion"],
+                "asesor",
+                "Nueva solicitud de asesor",
+                _detalle_asesor_para_staff(solicitud),
+                url_for("sedes.asesores"),
+            )
+        except Exception:
+            logger.exception(
+                "Solicitud de asesoria %s creada pero fallo el aviso al taller", solicitud.id
+            )
+
+        logger.info("Solicitud de asesoria %s creada por cliente %s", solicitud.id, cliente.id)
+        flash("Solicitud enviada. La administración ya fue notificada.", "success")
+        return redirect(url_for("portal.asesor"))
+
+    return render_template("portal/solicitar_asesor.html", **contexto)
 
 
 @portal_bp.route("/facturas")

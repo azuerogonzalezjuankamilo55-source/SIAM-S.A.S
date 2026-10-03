@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% from "components/status_badge.html" import status_badge %}
+{% block title %}Solicitudes de Asesor{% endblock %}
+{% block extra_head %}
+<style>
+    .asesor-mensaje { max-width: 30rem; white-space: pre-wrap; }
+    .respuesta-input { min-width: 14rem; }
+</style>
+{% endblock %}
+{% block content %}
+{% set mapa_estados = {
+    "pendiente": {"bg": "warning", "texto": "Pendiente"},
+    "en_atencion": {"bg": "info", "texto": "En atención"},
+    "atendida": {"bg": "success", "texto": "Atendida"},
+    "cancelada": {"bg": "secondary", "texto": "Cancelada"}
+} %}
+<div class="page-header mb-3" data-aos="fade-up">
+    <div>
+        <h4><i class="fa-solid fa-headset text-primary" aria-hidden="true"></i>Solicitudes de Asesor</h4>
+        <small class="text-muted">Peticiones de asesoría enviadas desde el portal de los clientes</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('sedes.asistencias') }}" class="btn btn-soft btn-sm">
+            <i class="fa-solid fa-truck-medical me-1"></i>Asistencias
+        </a>
+    </div>
+</div>
+
+<div class="mb-3 d-flex gap-2 flex-wrap" data-aos="fade-up">
+    <a href="{{ url_for('sedes.asesores') }}" class="btn btn-sm {{ 'btn-primary' if not estado else 'btn-soft' }}">Todas</a>
+    <a href="{{ url_for('sedes.asesores', estado='pendiente') }}" class="btn btn-sm {{ 'btn-warning' if estado == 'pendiente' else 'btn-soft' }}">Pendientes</a>
+    <a href="{{ url_for('sedes.asesores', estado='en_atencion') }}" class="btn btn-sm {{ 'btn-info' if estado == 'en_atencion' else 'btn-soft' }}">En atención</a>
+    <a href="{{ url_for('sedes.asesores', estado='atendida') }}" class="btn btn-sm {{ 'btn-success' if estado == 'atendida' else 'btn-soft' }}">Atendidas</a>
+    <a href="{{ url_for('sedes.asesores', estado='cancelada') }}" class="btn btn-sm {{ 'btn-secondary' if estado == 'cancelada' else 'btn-soft' }}">Canceladas</a>
+</div>
+
+<div class="card" data-aos="fade-up">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong><i class="fa-solid fa-inbox text-info me-2" aria-hidden="true"></i>Solicitudes</strong>
+        <span class="badge badge-soft-secondary">{{ solicitudes|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if not solicitudes %}
+        <div class="card-body text-center text-muted py-5">
+            <i class="fa-regular fa-folder-open fs-2 d-block mb-2" aria-hidden="true"></i>
+            No hay solicitudes de asesoría en este filtro.
+        </div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-modern table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Vehículo</th>
+                        <th>Tipo</th>
+                        <th>Asunto / Mensaje</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in solicitudes %}
+                    <tr>
+                        <td class="fw-semibold">{{ s.id }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ s.solicitante }}</div>
+                            {% if s.telefono %}<small class="text-secondary">{{ s.telefono }}</small>{% endif %}
+                        </td>
+                        <td>
+                            {% if s.vehiculo %}
+                            {{ s.vehiculo.placa }}<br><small class="text-secondary">{{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</small>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ s.tipo_label }}</small></td>
+                        <td>
+                            {% if s.asunto %}<div class="fw-semibold">{{ s.asunto }}</div>{% endif %}
+                            {% if s.mensaje %}<small class="text-secondary asesor-mensaje d-block">{{ s.mensaje }}</small>{% endif %}
+                            <small class="text-muted">{{ s.created_at.strftime("%d/%m/%Y %H:%M") if s.created_at else "" }}</small>
+                            {% if s.respuesta %}
+                            <small class="text-success d-block"><i class="fa-solid fa-reply me-1" aria-hidden="true"></i>{{ s.respuesta }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ status_badge(s.estado, mapa_estados) }}</td>
+                        <td>
+                            {% if s.esta_abierta %}
+                            <form method="post" action="{{ url_for('sedes.cambiar_estado_asesor', solicitud_id=s.id) }}" class="d-flex flex-column gap-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="estado_filtro" value="{{ estado or '' }}">
+                                <select class="form-select form-select-sm" name="estado" aria-label="Nuevo estado de la solicitud {{ s.id }}">
+                                    {% for valor, etiqueta in [("en_atencion", "En atención"), ("atendida", "Atendida"), ("cancelada", "Cancelada")] %}
+                                    {% if valor == "en_atencion" %}<option value="{{ valor }}" selected>{{ etiqueta }}</option>
+                                    {% else %}<option value="{{ valor }}">{{ etiqueta }}</option>{% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input type="text" class="form-control form-control-sm respuesta-input"
+                                       name="respuesta" maxlength="2000" placeholder="Respuesta al cliente (opcional)">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa-solid fa-check me-1" aria-hidden="true"></i>Actualizar
+                                </button>
+                            </form>
+                            {% else %}
+                            <small class="text-muted">Finalizada</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% from "components/page_header.html" import page_header %}
+{% from "components/status_badge.html" import status_badge %}
+{% block title %}Solicitar Asesor{% endblock %}
+{% block content %}
+{% set mapa_estados = {
+    "pendiente": {"bg": "warning", "texto": "Pendiente"},
+    "en_atencion": {"bg": "info", "texto": "En atención"},
+    "atendida": {"bg": "success", "texto": "Atendida"},
+    "cancelada": {"bg": "secondary", "texto": "Cancelada"}
+} %}
+{{ page_header(titulo="Solicitar Asesor", icono="fa-headset",
+               subtitulo="Pide orientación a la administración de SIAM y sigue el estado de tus solicitudes") }}
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header">
+                <strong><i class="fa-solid fa-paper-plane text-primary me-2" aria-hidden="true"></i>Nueva solicitud</strong>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo de solicitud</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            {% for valor, etiqueta in [("asesoria", "Asesoría comercial"), ("soporte_tecnico", "Soporte técnico"), ("informacion", "Información")] %}
+                            <option value="{{ valor }}">{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="vehiculo_id" class="form-label">Vehículo <span class="text-muted">(opcional)</span></label>
+                        <select class="form-select" id="vehiculo_id" name="vehiculo_id">
+                            <option value="">Sin vehículo asociado</option>
+                            {% for v in vehiculos %}
+                            <option value="{{ v.id }}">{{ v.placa }} — {{ v.marca }} {{ v.modelo }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if not vehiculos %}
+                        <div class="form-text">Aún no tienes vehículos registrados.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="asunto" class="form-label">Asunto</label>
+                        <input type="text" class="form-control" id="asunto" name="asunto"
+                               maxlength="200" placeholder="Resume en una línea tu consulta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mensaje" class="form-label">Mensaje</label>
+                        <textarea class="form-control" id="mensaje" name="mensaje" rows="5"
+                                  maxlength="2000" placeholder="Cuéntanos qué necesitas"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>Enviar solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card h-100" data-aos="fade-up">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong><i class="fa-solid fa-list-check text-info me-2" aria-hidden="true"></i>Mis solicitudes</strong>
+                <span class="badge badge-soft-secondary">{{ solicitudes|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if not solicitudes %}
+                <div class="card-body text-center text-muted py-5">
+                    <i class="fa-regular fa-folder-open fs-2 d-block mb-2" aria-hidden="true"></i>
+                    Todavía no has enviado ninguna solicitud.
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-modern table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Asunto</th>
+                                <th>Vehículo</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in solicitudes %}
+                            <tr>
+                                <td class="fw-semibold">{{ s.id }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ s.asunto or s.tipo_label }}</div>
+                                    {% if s.mensaje %}
+                                    <small class="text-secondary d-block text-truncate" style="max-width: 26rem;" title="{{ s.mensaje }}">{{ s.mensaje }}</small>
+                                    {% endif %}
+                                    {% if s.respuesta %}
+                                    <small class="text-success d-block"><i class="fa-solid fa-reply me-1" aria-hidden="true"></i>Respuesta: {{ s.respuesta }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if s.vehiculo %}
+                                    {{ s.vehiculo.placa }}<br><small class="text-secondary">{{ s.vehiculo.marca }} {{ s.vehiculo.modelo }}</small>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ status_badge(s.estado, mapa_estados) }}</td>
+                                <td><small class="text-secondary">{{ s.created_at.strftime("%d/%m/%Y %H:%M") if s.created_at else "—" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
